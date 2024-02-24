@@ -77,7 +77,7 @@
         <result column="title_color" property="titleColor"></result>
         <result column="rating" property="rating"></result>
         <result column="total" property="total"></result>
-        <collection property="scoreList" ofType="java.lang.Integer" select="getProblemScore" column="uid">
+        <collection property="overcomingList" ofType="java.lang.String" select="getOvercomingProblem" column="uid">
         </collection>
     </resultMap>
 
@@ -103,7 +103,15 @@
         WHERE uid=#{uid} AND cid=0 AND gid is null AND score IS NOT NULL GROUP BY pid
     </select>
 
-
+    <!-- 子查询-->
+    <select id="getOvercomingProblem" resultType="java.lang.String">
+        SELECT DISTINCT j1.display_pid
+        FROM judge j1
+        LEFT JOIN judge j2 ON j1.pid = j2.pid AND j2.username = j1.username AND j2.status = 0
+        LEFT JOIN problem p ON j1.pid = p.id
+        WHERE j2.pid IS NULL AND j1.cid = 0 AND j1.gid IS NULL AND j1.uid=#{uid} AND p.auth = 1
+    </select>
+    
     <select id="getGroupRankList" resultType="top.hcode.hoj.pojo.vo.OIRankVO" useCache="true">
         SELECT ui.uuid AS uid, ui.nickname, ui.username, ui.avatar,
         ui.title_name,ui.title_color

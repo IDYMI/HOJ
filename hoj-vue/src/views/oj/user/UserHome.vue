@@ -92,9 +92,9 @@
             <el-card shadow="always" class="rating">
               <p>
                 <i class="fa fa-user-secret" aria-hidden="true"></i>
-                {{ $t('m.UserHome_Rating') }}
+                {{ $t("m.UserHome_Failed") }}
               </p>
-              <p class="data-number">{{ profile.rating ? profile.rating : '--' }}</p>
+              <p class="data-number">{{ profile.overcomingList.length }}</p>
             </el-card>
           </el-col>
         </el-row>
@@ -223,6 +223,34 @@
               </template>
               <template v-else>
                 <p>{{ $t('m.UserHome_Not_Contest') }}</p>
+              </template>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane :label="$t('m.UserHome_Overcoming_Problems')">
+            <div id="problems">
+              <template v-if="profile.overcomingList.length">
+                <div>
+                  {{ $t("m.List_Overcoming_Problems") }}
+                  <el-button
+                    type="primary"
+                    icon="el-icon-refresh"
+                    circle
+                    size="mini"
+                    @click="freshContestDisplayID"
+                  ></el-button>
+                </div>
+                <div class="btns">
+                  <div
+                    class="problem-btn"
+                    v-for="problemID of profile.overcomingList"
+                    :key="problemID"
+                  >
+                    <el-button round @click="goProblem(problemID)" size="small">{{ problemID }}</el-button>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <p>{{ $t("m.UserHome_Not_Overcoming") }}</p>
               </template>
             </div>
           </el-tab-pane>

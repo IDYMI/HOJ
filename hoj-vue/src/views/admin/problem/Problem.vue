@@ -842,10 +842,16 @@ export default {
         this.routeName === "admin-edit-contest-problem"
       ) {
         this.mode = "edit";
-      } else {
+      } else if (
+        this.routeName === "admin-create-problem" ||
+        this.routeName === "admin-create-contest-problem"
+      ) {
         this.mode = "add";
+      } else {
+        this.mode = "change";
       }
-      this.$refs.form.resetFields();
+      // 清除表单
+      // this.$refs.form.resetFields();
       this.problem = this.reProblem;
       this.problemTags = []; //指定问题的标签列表
       this.problemLanguages = []; //指定问题的编程语言列表
@@ -976,7 +982,7 @@ export default {
         api.admin_getProblemTags(this.pid).then((res) => {
           this.problemTags = res.data.data;
         });
-      } else {
+      } else if (this.mode === "add") {
         this.addExample();
         this.testCaseUploaded = false;
         this.title = this.$i18n.t("m.Create_Problem");
@@ -1150,7 +1156,9 @@ export default {
 
     // 添加题目样例
     addExample() {
-      this.problem.examples.push({ input: "", output: "", isOpen: true });
+      if (this.problem.examples && this.problem.examples.length === 0) {
+        this.problem.examples.push({ input: "", output: "", isOpen: true });
+      }
     },
     changeExampleVisible(index, isOpen) {
       this.problem.examples[index]["isOpen"] = isOpen;

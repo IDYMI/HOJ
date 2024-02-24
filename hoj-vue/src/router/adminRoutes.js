@@ -97,7 +97,7 @@ const adminRoutes = [
         path: 'problem/create',
         name: 'admin-create-problem',
         component: Problem,
-        meta: { title: 'Create Problem' },
+        meta: { title: 'Create Problem', keepAlive: true }, //需要缓存的路由
       },
       {
         path: 'problem/edit/:problemId',
@@ -127,7 +127,7 @@ const adminRoutes = [
         path: 'training/create',
         name: 'admin-create-training',
         component: Training,
-        meta: { title: 'Create Training' },
+        meta: { title: 'Create Training', keepAlive: true },
       },
       {
         path: 'training',
@@ -157,7 +157,7 @@ const adminRoutes = [
         path: 'contest/create',
         name: 'admin-create-contest',
         component: Contest,
-        meta: { title: 'Create Contest' },
+        meta: { title: 'Create Contest', keepAlive: true },
       },
       {
         path: 'contest',
@@ -187,7 +187,7 @@ const adminRoutes = [
         path: 'contest/:contestId/problem/create',
         name: 'admin-create-contest-problem',
         component: Problem,
-        meta: { title: 'Create Problem' },
+        meta: { title: 'Create Problem', keepAlive: true },
       },
       {
         path: 'contest/:contestId/problem/:problemId/edit',

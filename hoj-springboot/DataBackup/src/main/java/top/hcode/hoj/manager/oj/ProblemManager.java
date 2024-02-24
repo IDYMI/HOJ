@@ -31,6 +31,8 @@ import top.hcode.hoj.validator.GroupValidator;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * @Author: Himit_ZH
@@ -128,6 +130,37 @@ public class ProblemManager {
         RandomProblemVO randomProblemVo = new RandomProblemVO();
         randomProblemVo.setProblemId(list.get(index).getProblemId());
         return randomProblemVo;
+    }
+
+    /**
+     * @MethodName getProblemLastId
+     * @Description 获取最新的题目Id
+     */
+    public ProblemLastIdVO getProblemLastId() throws StatusFailException {
+        QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
+
+        queryWrapper.select("problem_id")
+                .eq("is_remote", false) // 公共题库
+                .orderByDesc("problem_id");
+        List<Problem> list = problemEntityService.list(queryWrapper);
+
+        // TODO 默认纯数字为主题库
+
+        // 刷选选纯数字的 problem_id，防止团队题目影响
+        Pattern pattern = Pattern.compile("^\\d+$");
+        List<Problem> filteredList = new ArrayList<>();
+        for (Problem problem : list) {
+            String problemId = problem.getProblemId();
+            // 使用正则匹配方法判断字符串是否为纯数字
+            Matcher matcher = pattern.matcher(problemId);
+            if (matcher.matches()) {
+                filteredList.add(problem);
+            }
+        }
+
+        ProblemLastIdVO problemLastIdVO = new ProblemLastIdVO();
+        problemLastIdVO.setProblemLastId(filteredList.get(0).getProblemId());
+        return problemLastIdVO;
     }
 
     /**

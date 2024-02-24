@@ -11,7 +11,7 @@
               <el-input
                 :placeholder="$t('m.Problem_Display_ID')"
                 v-model="problem.problemId"
-                :disabled="problem.isRemote"
+                :disabled="true"
               ></el-input>
             </el-form-item>
           </el-col>
@@ -649,6 +649,7 @@ export default {
   },
   data() {
     return {
+      problemLastId: "",
       rules: {
         title: {
           required: true,
@@ -982,7 +983,28 @@ export default {
         for (let item of this.allLanguage) {
           this.problemLanguages.push(item.name);
         }
+        this.getProblemLastId();
       }
+    },
+    getProblemLastId() {
+      api.getProblemLastId().then((res) => {
+        let problemLastId = res.data.data.problemLastId;
+        let numericId;
+        let prefix = "";
+
+        if (problemLastId.includes("-")) {
+          let splitParts = problemLastId.split("-");
+          prefix = splitParts.slice(0, splitParts.length - 1).join("-") + "-";
+          let lastPart = splitParts[splitParts.length - 1];
+          numericId = parseInt(lastPart) + 1;
+        } else {
+          numericId = parseInt(problemLastId) + 1;
+        }
+
+        let newProblemId = String(numericId);
+
+        this.problem.problemId = prefix + newProblemId;
+      });
     },
 
     async getProblemCodeTemplateAndLanguage() {

@@ -83,9 +83,9 @@
             <el-card shadow="always" class="score">
               <p>
                 <i class="fa fa-star" aria-hidden="true"></i>
-                {{ $t('m.UserHome_Score') }}
+                {{ $t("m.UserHome_Contests") }}
               </p>
-              <p class="data-number">{{ getSumScore(profile.scoreList) }}</p>
+              <p class="data-number">{{ profile.contestPidList.length }}</p>
             </el-card>
           </el-col>
           <el-col :md="6" :sm="24">
@@ -110,6 +110,19 @@
             :locale="calendarHeatLocale"
             :range-color="['rgb(218, 226, 239)', '#9be9a8', '#40c463', '#30a14e', '#216e39']"
           ></calendar-heatmap>
+          <div v-if="this.options.series.length">
+            <div class="card-title">
+              <i class="el-icon-data-line" style="color: #409eff"></i>
+              {{ $t("m.Ended_contests_ranking_changes") }}
+            </div>
+            <ECharts
+              class="echarts"
+              :options="options"
+              ref="chart"
+              :autoresize="true"
+              @click="getContestRank"
+            ></ECharts>
+          </div>
         </el-card>
         <el-tabs type="card" style="margin-top:1rem;">
           <el-tab-pane :label="$t('m.Personal_Profile')">
@@ -144,7 +157,8 @@
                     <div class="btns">
                       <div
                         class="problem-btn"
-                        v-for="(value, index) in profile.solvedGroupByDifficulty[key]"
+                        v-for="(value, index) in profile
+                          .solvedGroupByDifficulty[key]"
                         :key="index"
                       >
                         <el-button
@@ -152,11 +166,7 @@
                           :style="getLevelColor(key)"
                           @click="goProblem(value.problemId)"
                           size="small"
-                        >
-                          {{
-                          value.problemId
-                          }}
-                        </el-button>
+                        >{{ value.problemId }}</el-button>
                       </div>
                     </div>
                   </el-collapse-item>
@@ -168,7 +178,7 @@
                   <i class="el-icon-circle-check"></i>
                 </el-divider>
                 <div>
-                  {{ $t('m.List_Solved_Problems') }}
+                  {{ $t("m.List_Solved_Problems") }}
                   <el-button
                     type="primary"
                     icon="el-icon-refresh"
@@ -179,16 +189,40 @@
                 </div>
                 <div class="btns">
                   <div class="problem-btn" v-for="problemID of profile.solvedList" :key="problemID">
-                    <el-button round @click="goProblem(problemID)" size="small">
+                    <el-button round @click="goProblem(problemID)" size="small">{{ problemID }}</el-button>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <p>{{ $t("m.UserHome_Not_Data") }}</p>
+              </template>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane :label="$t('m.UserHome_Participated_Contests')">
+            <div id="problems">
+              <template v-if="profile.contestPidList.length">
+                <div>
+                  {{ $t("m.List_Participated_Contests") }}
+                  <el-button
+                    type="primary"
+                    icon="el-icon-refresh"
+                    circle
+                    size="mini"
+                    @click="freshContestDisplayID"
+                  ></el-button>
+                </div>
+                <div class="btns">
+                  <div class="problem-btn" v-for="pid of profile.contestPidList" :key="pid">
+                    <el-button round @click="goContest(pid)" size="small">
                       {{
-                      problemID
+                      pid
                       }}
                     </el-button>
                   </div>
                 </div>
               </template>
               <template v-else>
-                <p>{{ $t('m.UserHome_Not_Data') }}</p>
+                <p>{{ $t('m.UserHome_Not_Contest') }}</p>
               </template>
             </div>
           </el-tab-pane>
@@ -208,6 +242,8 @@ import { CalendarHeatmap } from "vue-calendar-heatmap";
 import { PROBLEM_LEVEL } from "@/common/constants";
 import utils from "@/common/utils";
 import Markdown from "@/components/oj/common/Markdown";
+import moment from "moment";
+
 export default {
   components: {
     Avatar,
@@ -227,6 +263,8 @@ export default {
         rating: 0,
         score: 0,
         solvedList: [],
+        contestPidList: [],
+        dataList: [], // 日期对应的比赛名次数据列表
         solvedGroupByDifficulty: null,
         calendarHeatLocale: null,
         calendarHeatmapValue: [],
@@ -235,6 +273,66 @@ export default {
         loading: false,
       },
       PROBLEM_LEVEL: {},
+      options: {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "none",
+            axis: "x",
+          },
+          formatter: function (params) {
+            var long_title = params[0].data.title;
+            var title = "";
+            for (var i = 0, s; (s = long_title[i++]); ) {
+              //遍历字符串数组
+              title += s;
+              if (!(i % 16)) title += "<br>"; //按需要求余
+            }
+
+            // console.log(params);
+            return (
+              "Contest：" +
+              long_title +
+              "<br>Rank：" +
+              params[0].data.value +
+              "<br>Time：" +
+              params[0].name
+            );
+          },
+        },
+
+        grid: {
+          x: 80,
+          x2: 100,
+          left: "5%", //设置canvas图距左的距离
+          top: "5%",
+          right: "5%",
+          bottom: "15%",
+        },
+        xAxis: {
+          type: "category",
+          data: [], // 把时间组成的数组接过来，放在x轴上
+          boundaryGap: true,
+          axisTick: {
+            show: false, // 不显示坐标轴刻度线
+          },
+          axisLine: {
+            show: false, // 不显示坐标轴线
+          },
+        },
+        yAxis: {
+          type: "value",
+          inverse: true,
+          minInterval: 1,
+          axisTick: {
+            show: false, // 不显示坐标轴刻度线
+          },
+          axisLine: {
+            show: false, // 不显示坐标轴线
+          },
+        },
+        series: [],
+      },
     };
   },
   created() {
@@ -288,6 +386,32 @@ export default {
         (res) => {
           this.changeDomTitle({ title: res.data.username });
           this.profile = res.data.data;
+          let dataList = this.profile.dataList;
+          let len = dataList.length;
+
+          let [times, ranks, seriesData] = [[], [], []];
+
+          for (let i = 0; i < len; i++) {
+            let contest = dataList[i];
+            let time = moment(contest["date"]).format("yyyy-MM-DD HH:mm");
+            let title = contest["title"];
+            let rank = contest["rank"];
+            let cid = contest["cid"];
+            ranks.push({ value: rank, title: title, cid: cid });
+            times.push(time);
+          }
+          if (ranks.length) {
+            seriesData.push({
+              name: username,
+              type: "line",
+              data: ranks,
+              emphasis: {
+                focus: "series",
+              },
+            });
+            this.options.series = seriesData;
+            this.options.xAxis.data = times;
+          }
           this.$nextTick((_) => {
             addCodeBtn();
           });
@@ -297,6 +421,19 @@ export default {
           this.loading = false;
         }
       );
+    },
+    getContestRank(params) {
+      let cid = params.data.cid;
+      this.$router.push({
+        name: "ContestRank",
+        params: { contestID: cid },
+      });
+    },
+    goContest(cid) {
+      this.$router.push({
+        name: "ContestDetails",
+        params: { contestID: cid },
+      });
     },
     goProblem(problemID) {
       this.$router.push({
@@ -308,14 +445,9 @@ export default {
       this.init();
       myMessage.success(this.$i18n.t("m.Update_Successfully"));
     },
-    getSumScore(scoreList) {
-      if (scoreList) {
-        var sum = 0;
-        for (let i = 0; i < scoreList.length; i++) {
-          sum += scoreList[i];
-        }
-        return sum;
-      }
+    freshContestDisplayID() {
+      this.init();
+      myMessage.success(this.$i18n.t("m.Update_Successfully"));
     },
     nicknameColor(nickname) {
       let typeArr = ["", "success", "info", "danger", "warning"];
@@ -443,6 +575,11 @@ export default {
     text-align: center;
     margin-top: 30px;
   }
+  .echarts {
+    margin: 20px auto;
+    height: 150px;
+    width: 100%;
+  }
 }
 
 @media screen and (min-width: 1080px) {
@@ -466,6 +603,11 @@ export default {
   }
   .home-container .user-info {
     margin-top: 50px;
+  }
+  .echarts {
+    margin: 20px auto;
+    height: 240px;
+    width: 100%;
   }
 }
 .home-container .avatar {

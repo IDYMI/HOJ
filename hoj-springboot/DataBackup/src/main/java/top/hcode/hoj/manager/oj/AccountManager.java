@@ -14,15 +14,19 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.common.exception.StatusSystemErrorException;
+import top.hcode.hoj.dao.contest.ContestEntityService;
+import top.hcode.hoj.dao.contest.ContestRecordEntityService;
 import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.dao.user.*;
 import top.hcode.hoj.manager.email.EmailManager;
 import top.hcode.hoj.pojo.dto.ChangeEmailDTO;
 import top.hcode.hoj.pojo.dto.ChangePasswordDTO;
 import top.hcode.hoj.pojo.dto.CheckUsernameOrEmailDTO;
+import top.hcode.hoj.pojo.entity.contest.ContestRecord;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.user.Role;
+import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.user.Session;
 import top.hcode.hoj.pojo.entity.user.UserAcproblem;
 import top.hcode.hoj.pojo.entity.user.UserInfo;
@@ -34,6 +38,7 @@ import top.hcode.hoj.utils.RedisUtils;
 import top.hcode.hoj.validator.CommonValidator;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,7 +58,7 @@ public class AccountManager {
 
     @Autowired
     private UserPreferencesEntityService userPreferencesEntityService;
-    
+
     @Autowired
     private UserRoleEntityService userRoleEntityService;
 
@@ -64,7 +69,13 @@ public class AccountManager {
     private UserAcproblemEntityService userAcproblemEntityService;
 
     @Autowired
+    private ContestRecordEntityService contestRecordEntityService;
+
+    @Autowired
     private ProblemEntityService problemEntityService;
+
+    @Autowired
+    private ContestEntityService contestEntityService;
 
     @Autowired
     private SessionEntityService sessionEntityService;
@@ -74,6 +85,9 @@ public class AccountManager {
 
     @Autowired
     private EmailManager emailManager;
+
+    @Autowired
+    private ContestRankManager contestRankManager;
 
     /**
      * @MethodName checkUsernameOrEmail
@@ -139,6 +153,7 @@ public class AccountManager {
         if (StringUtils.isEmpty(uid) && StringUtils.isEmpty(username)) {
             if (userRolesVo != null) {
                 uid = userRolesVo.getUid();
+                username = userRolesVo.getUsername();
             } else {
                 throw new StatusFailException("请求参数错误：uid和username不能都为空！");
             }
@@ -148,6 +163,7 @@ public class AccountManager {
         if (userHomeInfo == null) {
             throw new StatusFailException("用户不存在");
         }
+
         QueryWrapper<UserAcproblem> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("uid", userHomeInfo.getUid())
                 .select("distinct pid", "submit_id")
@@ -170,6 +186,14 @@ public class AccountManager {
             disPlayIdList = problems.stream().map(Problem::getProblemId).collect(Collectors.toList());
         }
         userHomeInfo.setSolvedList(disPlayIdList);
+
+        UserContestsRankingVO userContestsRankingVo = getUserContestsRanking(uid, username);
+
+        // 获取用户参加的比赛
+        userHomeInfo.setContestPidList((List<Long>) userContestsRankingVo.getSolvedList());
+        // 获取用户参加比赛的榜单
+        userHomeInfo.setDataList((List<HashMap<String, Object>>) userContestsRankingVo.getDataList());
+
         QueryWrapper<Session> sessionQueryWrapper = new QueryWrapper<>();
         sessionQueryWrapper.eq("uid", userHomeInfo.getUid())
                 .orderByDesc("gmt_create")
@@ -179,6 +203,7 @@ public class AccountManager {
         if (recentSession != null) {
             userHomeInfo.setRecentLoginTime(recentSession.getGmtCreate());
         }
+
         return userHomeInfo;
     }
 
@@ -227,6 +252,57 @@ public class AccountManager {
         }
         userCalendarHeatmapVo.setDataList(dataList);
         return userCalendarHeatmapVo;
+    }
+
+    /**
+     * @param uid
+     * @return
+     * @Description 获取用户参加的比赛
+     */
+    public List<Contest> getUserContests(String uid) throws StatusFailException {
+
+        // 获取已经结束, 不包含赛后提交，可见的ACM比赛的状态, 比赛结束后开榜的比赛
+        QueryWrapper<Contest> contestQueryWrapper = new QueryWrapper<>();
+        contestQueryWrapper
+                .select("id")
+                .eq("status", 1) // 获取已经结束
+                .eq("visible", 1) // 可见
+                .eq("auto_real_rank", 1) // 比赛结束后开榜的比赛
+                .eq("type", 0) // ACM比赛
+                .isNull("gid") // 不为团队的
+                .orderByAsc("end_time"); // 参加的比赛按照结束时间升序排序
+
+        List<Long> pidList = contestEntityService.list(contestQueryWrapper).stream().map(Contest::getId)
+                .collect(Collectors.toList());
+        QueryWrapper<ContestRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("distinct cid")
+                .eq("uid", uid)
+                .in("cid", pidList);
+        List<ContestRecord> userContestList = contestRecordEntityService.list(queryWrapper);
+
+        List<Contest> contestList = new ArrayList<>();
+        if (CollectionUtils.isEmpty(userContestList)) {
+            return contestList;
+        }
+
+        contestList = userContestList.stream()
+                .map(contestRecord -> contestEntityService.getById(contestRecord.getCid()))
+                .collect(Collectors.toList());
+
+        return contestList;
+    }
+
+    /**
+     * @param uid
+     * @param username
+     * @return
+     * @Description 获取用户的比赛名次变化图
+     */
+    public UserContestsRankingVO getUserContestsRanking(String uid, String username) throws StatusFailException {
+
+        List<Contest> contestList = getUserContests(uid);
+
+        return contestRankManager.getContestsRanking(contestList, uid, username);
     }
 
     /**

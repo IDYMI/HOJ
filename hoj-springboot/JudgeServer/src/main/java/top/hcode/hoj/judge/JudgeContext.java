@@ -106,16 +106,15 @@ public class JudgeContext {
             Integer score,
             Integer useTime) {
 
-        if (cid == 0) { // 非比赛提交
-            // 如果是AC,就更新user_acproblem表,
-            if (status.intValue() == Constants.Judge.STATUS_ACCEPTED.getStatus() && gid == null) {
-                userAcproblemEntityService.saveOrUpdate(new UserAcproblem()
-                        .setPid(pid)
-                        .setUid(uid)
-                        .setSubmitId(submitId));
-            }
+        // 如果是AC,就更新user_acproblem表,
+        if (status.intValue() == Constants.Judge.STATUS_ACCEPTED.getStatus() && gid == null) {
+            userAcproblemEntityService.saveOrUpdate(new UserAcproblem()
+                    .setPid(pid)
+                    .setUid(uid)
+                    .setSubmitId(submitId));
+        }
 
-        } else { // 如果是比赛提交
+        if (cid != 0) { // 如果是比赛提交
             contestRecordEntityService.updateContestRecord(score, status, submitId, useTime);
         }
     }

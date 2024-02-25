@@ -5,7 +5,7 @@
         SELECT u.uuid as uid,u.nickname,u.username,left(u.signature,100) as signature,u.avatar,
         u.title_name,u.title_color,
         (SELECT COUNT( DISTINCT pid ) FROM user_acproblem WHERE uid = u.uuid) AS ac,
-        (SELECT COUNT(uid) FROM judge WHERE uid=u.uuid AND cid=0 AND gid is null) AS total
+        (SELECT COUNT(uid) FROM judge WHERE uid=u.uuid) AS total
         FROM user_info u
         <where>
             u.status = 0
@@ -84,7 +84,7 @@
     <select id="getUserHomeInfo" resultMap="map_UserHomeVo">
         SELECT u.uuid as uid,u.username,u.nickname,u.gender,u.signature,u.school,u.github,u.blog,
         u.avatar,u.title_name,u.title_color,ur.rating,
-        (SELECT COUNT(uid) FROM judge WHERE uid=u.uuid AND cid=0 AND gid is null) AS total
+        (SELECT COUNT( pid ) FROM judge WHERE uid = u.uuid) AS total
         FROM user_info u,user_record ur
         <where>
          u.uuid = ur.uid AND u.status = 0
@@ -111,7 +111,7 @@
         LEFT JOIN problem p ON j1.pid = p.id
         WHERE j2.pid IS NULL AND j1.cid = 0 AND j1.gid IS NULL AND j1.uid=#{uid} AND p.auth = 1
     </select>
-    
+
     <select id="getGroupRankList" resultType="top.hcode.hoj.pojo.vo.OIRankVO" useCache="true">
         SELECT ui.uuid AS uid, ui.nickname, ui.username, ui.avatar,
         ui.title_name,ui.title_color

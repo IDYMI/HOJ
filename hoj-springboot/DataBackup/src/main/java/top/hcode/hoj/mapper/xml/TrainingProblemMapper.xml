@@ -68,7 +68,6 @@
                  FROM training_register tr,
                       training t
                  where tr.tid = t.id
-                   and t.auth = 'Private'
                    and tr.uid = #{uid}
              ) tm
                  left join

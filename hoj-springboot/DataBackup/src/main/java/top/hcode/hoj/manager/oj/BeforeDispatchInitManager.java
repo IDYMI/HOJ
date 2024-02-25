@@ -236,9 +236,9 @@ public class BeforeDispatchInitManager {
         judgeEntityService.save(judge);
 
         // 非私有训练不记录
-        if (!training.getAuth().equals(Constants.Training.AUTH_PRIVATE.getValue())) {
-            return;
-        }
+        // if (!training.getAuth().equals(Constants.Training.AUTH_PRIVATE.getValue())) {
+        // return;
+        // }
 
         TrainingRecord trainingRecord = new TrainingRecord();
         trainingRecord.setPid(problem.getId())

@@ -166,7 +166,6 @@
           :name="groupID?'GroupTrainingRank':'TrainingRank'"
           lazy
           :disabled="trainingMenuDisabled"
-          v-if="isPrivateTraining"
         >
           <span slot="label">
             <i class="fa fa-bar-chart" aria-hidden="true"></i>

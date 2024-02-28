@@ -459,6 +459,11 @@ export const m = {
   Contest_Award_Number: 'Number',
   Contest_Award_Proportion: 'Proportion',
   Allow_Submission_After_The_Contest_Ends: 'Allow Submission after the contest ends',
+  Synchronous: 'Synchronous',
+  Synchronous_School: 'Synchronous School',
+  Synchronous_Link: 'Synchronous Link',
+  Synchronous_Username: 'Synchronous Username (used for web scraping)',
+  Synchronous_Password: 'Synchronous Password (used for web scraping)',
 
   // /views/admin/discussion/Discussion.vue
   Discussion_ID: 'Discussion ID',

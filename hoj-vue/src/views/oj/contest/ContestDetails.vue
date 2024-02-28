@@ -102,16 +102,27 @@
               </el-tag>
             </el-col>
           </el-row>
-          <div class="contest-config" v-if="isShowContestSetting">
-            <el-popover trigger="hover" placement="left-start">
-              <el-button round size="small" slot="reference">{{$t('m.Contest_Setting')}}</el-button>
-              <div class="contest-config-switches">
-                <p>
-                  <span>{{ $t('m.Contains_Submission_After_Contest') }}</span>
-                  <el-switch v-model="isContainsAfterContestJudge"></el-switch>
-                </p>
-              </div>
-            </el-popover>
+          <div class="contest-config" style="display: flex;">
+            <div v-if="isShowContestSetting" class="config" style="margin-right: 10px;">
+              <el-popover trigger="hover" placement="left-start">
+                <el-button round size="small" slot="reference">{{$t('m.Contest_Setting')}}</el-button>
+                <div class="contest-config-switches">
+                  <p>
+                    <span>{{ $t('m.Contains_Submission_After_Contest') }}</span>
+                    <el-switch v-model="isContainsAfterContestJudge"></el-switch>
+                  </p>
+                </div>
+              </el-popover>
+            </div>
+            <div class="admin" v-if="contest.gid === null">
+              <el-button
+                v-if="isContestAdmin"
+                round
+                size="small"
+                slot="reference"
+                @click="toAdminContest()"
+              >{{$t('m.To_Admin_Background')}}</el-button>
+            </div>
           </div>
         </el-card>
       </el-col>
@@ -457,6 +468,12 @@ export default {
         params: {
           groupID: gid,
         },
+      });
+    },
+    toAdminContest() {
+      this.$router.push({
+        name: "admin-contest-list",
+        query: { keyword: this.contest.title, auth: this.contest.auth },
       });
     },
   },

@@ -425,9 +425,13 @@ export const m = {
   Public: 'Public',
   Private: 'Private',
   Protected: 'Protected',
+  Public_Synchronous: 'Public Synchronous',
+  Private_Synchronous: 'Private Synchronous',
   Public_Tips: 'Public - Any one can see and submit.',
   Protected_Tips: 'Protected - Any one can see, but only users knowing contest password can submit.',
   Private_Tips: 'Private - Only users knowing contest password can see and submit.',
+  Public_Synchronous_Tips: 'Public Synchronous - Any one can see and submit.',
+  Private_Synchronous_Tips: 'Private Synchronous - Only users knowing contest password can see and submit.',
   Contest_Outside_ScoreBoard: 'OutSide Contest ScoreBoard',
 
   // /views/oj/contest/ContestDetail.vue
@@ -451,6 +455,7 @@ export const m = {
   Go_To_Group_Contest_List: 'Go to Group Contest List',
   Group_Contest_Tag: 'Group Contest',
   Contains_Submission_After_Contest: 'Contains Submission After Contest',
+  To_Admin_Background: 'To Admin Background',
 
   // /views/oj/contest/children/ACMContestRank.vue
   Contest_Rank: 'Contest Rank',

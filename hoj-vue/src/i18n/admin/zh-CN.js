@@ -458,6 +458,11 @@ export const m = {
   Contest_Award_Number: '人数',
   Contest_Award_Proportion: '占比',
   Allow_Submission_After_The_Contest_Ends: '是否允许比赛结束后提交',
+  Synchronous: '同步赛',
+  Synchronous_School: '同步赛的学校',
+  Synchronous_Link: '同步赛的链接',
+  Synchronous_Username: '同步赛的账号 （用于爬取信息）',
+  Synchronous_Password: '同步赛的密码 （用于爬取信息）',
 
   // /views/admin/discussion/Discussion.vue
   Discussion_ID: '讨论ID',

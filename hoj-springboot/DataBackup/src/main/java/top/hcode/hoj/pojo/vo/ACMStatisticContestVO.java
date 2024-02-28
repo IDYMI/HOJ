@@ -7,28 +7,16 @@ import lombok.experimental.Accessors;
 import java.util.HashMap;
 
 /**
- * @Author: Himit_ZH
+ *
  * @Date: 2021/1/18 14:55
  * @Description:
  */
 @Data
 @Accessors(chain = true)
-public class ACMContestRankVO {
+public class ACMStatisticContestVO {
 
     @ApiModelProperty(value = "排名,排名为-1则为打星队伍")
     private Integer rank;
-
-    @ApiModelProperty(value = "是否得奖")
-    private Boolean isWinAward;
-
-    @ApiModelProperty(value = "排名奖项名称")
-    private String awardName;
-
-    @ApiModelProperty(value = "排名背景颜色")
-    private String awardBackground;
-
-    @ApiModelProperty(value = "排名文本颜色")
-    private String awardColor;
 
     @ApiModelProperty(value = "用户id")
     private String uid;
@@ -60,9 +48,7 @@ public class ACMContestRankVO {
     @ApiModelProperty(value = "ac题目数")
     private Integer ac;
 
-    @ApiModelProperty(value = "有提交的题的提交详情")
-    private HashMap<String, HashMap<String, Object>> submissionInfo;
+    @ApiModelProperty(value = "每场比赛对应的AC提交详情")
+    private HashMap<String, HashMap<String, Object>>contestInfo;
 
-    @ApiModelProperty(value = "是否为同步赛数据")
-    private Boolean synchronous;
 }

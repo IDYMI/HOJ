@@ -39,7 +39,7 @@ public class ContestVO implements Serializable {
     @ApiModelProperty(value = "比赛来源，原创为0，克隆赛为比赛id")
     private Integer source;
 
-    @ApiModelProperty(value = "0为公开赛，1为私有赛（有密码），2为保护赛")
+    @ApiModelProperty(value = "0为公开赛，1为私有赛（访问有密码），2为保护赛（提交有密码），4为同步公开赛，5为同步私有赛（访问有密码）")
     private Integer auth;
 
     @ApiModelProperty("当前服务器系统时间，为了前端统一时间")
@@ -83,4 +83,8 @@ public class ContestVO implements Serializable {
 
     @ApiModelProperty(value = "是否开启文件柜")
     private Boolean openFile;
+
+    @ApiModelProperty(value = "是否开启同步赛")
+    private Boolean synchronous;
+
 }

@@ -384,48 +384,58 @@ export default {
     },
     getSubmission() {
       this.loadingTable = true;
-      api.getSubmission(this.$route.params.submitID).then(
-        (res) => {
-          this.loadingTable = false;
-          let data = res.data.data;
-          if (
-            data.submission.memory &&
-            data.submission.score &&
-            !this.isIOProblem
-          ) {
-            // score exist means the submission is OI problem submission
-            if (data.submission.score !== null) {
-              this.isIOProblem = true;
+      api
+        .getSubmission(
+          this.$route.params.submitID,
+          this.$route.params.contestID
+        )
+        .then(
+          (res) => {
+            this.loadingTable = false;
+            let data = res.data.data;
+            if (
+              data.submission.memory &&
+              data.submission.score &&
+              !this.isIOProblem
+            ) {
+              // score exist means the submission is OI problem submission
+              if (data.submission.score !== null) {
+                this.isIOProblem = true;
+              }
             }
-          }
-          // 如果是比赛 需要显示的是比赛题号
-          if (this.$route.params.problemID && data.submission.cid != 0) {
-            data.submission.displayPid = this.$route.params.problemID;
-          }
-          this.submission = data.submission;
-          this.tableData = [data.submission];
-          if (data.submission.cid != 0) {
-            // 比赛的提交不可分享
-            this.codeShare = false;
-          } else {
-            this.codeShare = data.codeShare;
-          }
+            // 如果是比赛 需要显示的是比赛题号
+            if (this.$route.params.problemID && data.submission.cid != 0) {
+              data.submission.displayPid = this.$route.params.problemID;
+            }
+            this.submission = data.submission;
+            this.tableData = [data.submission];
+            if (data.submission.cid != 0) {
+              // 比赛的提交不可分享
+              this.codeShare = false;
+            } else {
+              this.codeShare = data.codeShare;
+            }
 
-          this.$nextTick((_) => {
-            addCodeBtn();
-          });
-        },
-        () => {
-          this.loadingTable = false;
-        }
-      );
+            this.$nextTick((_) => {
+              addCodeBtn();
+            });
+          },
+          () => {
+            this.loadingTable = false;
+          }
+        );
     },
 
     //首先该题必须支持开放测试点结果查看，同时若是比赛题目，只支持IO查看测试点情况，ACM强制禁止查看
     getAllCaseResult() {
-      api.getAllCaseResult(this.$route.params.submitID).then((res) => {
-        this.testCaseResult = res.data.data;
-      });
+      api
+        .getAllCaseResult(
+          this.$route.params.submitID,
+          this.$route.params.contestID
+        )
+        .then((res) => {
+          this.testCaseResult = res.data.data;
+        });
     },
 
     shareSubmission(shared) {

@@ -271,14 +271,16 @@
                 <el-option :label="$t('m.Public')" :value="0"></el-option>
                 <el-option :label="$t('m.Private')" :value="1"></el-option>
                 <el-option :label="$t('m.Protected')" :value="2"></el-option>
+                <el-option :label="$t('m.Public_Synchronous')" :value="4"></el-option>
+                <el-option :label="$t('m.Private_Synchronous')" :value="5"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :md="8" :xs="24">
+          <el-col :md="8" :xs="24" v-if="contest.auth != 0 && contest.auth != 4">
             <el-form-item
               :label="$t('m.Contest_Password')"
-              v-show="contest.auth != 0"
-              :required="contest.auth != 0"
+              v-show="contest.auth != 0 && contest.auth != 4"
+              :required="contest.auth != 0 && contest.auth != 4"
             >
               <el-input v-model="contest.pwd" :placeholder="$t('m.Contest_Password')"></el-input>
             </el-form-item>
@@ -291,6 +293,61 @@
             >
               <el-switch v-model="contest.openAccountLimit"></el-switch>
             </el-form-item>
+          </el-col>
+
+          <!-- 同步赛配置 -->
+          <el-col :span="24" v-if="contest.auth == 4 || contest.auth == 5">
+            <div style="margin-bottom: 10px">
+              <el-button
+                type="primary"
+                icon="el-icon-plus"
+                circle
+                @click="insertEvent2(-1)"
+                size="small"
+              ></el-button>
+              <el-button
+                type="danger"
+                icon="el-icon-delete"
+                circle
+                @click="removeEvent2()"
+                size="small"
+              ></el-button>
+            </div>
+            <vxe-table
+              border
+              ref="xAwardTable2"
+              :data="contest.synchronousConfigList"
+              :edit-config="{ trigger: 'click', mode: 'cell' }"
+              align="center"
+              @edit-closed="editClosedEvent2"
+              style="margin-bottom: 15px"
+            >
+              <vxe-table-column type="checkbox" width="60"></vxe-table-column>
+              <vxe-table-column
+                field="school"
+                min-width="150"
+                :title="$t('m.Synchronous_School')"
+                :edit-render="{ name: 'input', attrs: { type: 'text' } }"
+              ></vxe-table-column>
+              <vxe-table-column
+                field="link"
+                min-width="150"
+                :title="$t('m.Synchronous_Link')"
+                :edit-render="{ name: 'input', attrs: { type: 'text' } }"
+              ></vxe-table-column>
+              <vxe-table-column
+                field="username"
+                min-width="150"
+                :title="$t('m.Synchronous_Username')"
+                :edit-render="{ name: 'input', attrs: { type: 'text' } }"
+              ></vxe-table-column>
+              <vxe-table-column
+                field="password"
+                min-width="150"
+                :title="$t('m.Synchronous_Password')"
+                :edit-render="{ name: 'input', attrs: { type: 'text' } }"
+              ></vxe-table-column>
+            </vxe-table>
           </el-col>
 
           <template v-if="contest.openAccountLimit">
@@ -525,6 +582,14 @@ export default {
         ],
         openFile: false,
         fileConfigList: [],
+        synchronousConfigList: [
+          {
+            school: "",
+            link: "",
+            username: "",
+            password: "",
+          },
+        ],
       },
       formRule: {
         prefix: "",
@@ -646,7 +711,12 @@ export default {
         myMessage.error(this.$i18n.t("m.Contest_Duration_Check"));
         return;
       }
-      if (this.contest.auth != 0 && !this.contest.pwd) {
+
+      if (
+        this.contest.auth != 0 &&
+        this.contest.auth != 4 &&
+        !this.contest.pwd
+      ) {
         myMessage.error(
           this.$i18n.t("m.Contest_Password") +
             " " +
@@ -857,6 +927,54 @@ export default {
         setTimeout(() => {
           // 局部更新单元格为已保存状态
           this.$refs.xAwardTable.reloadRow(row, null, field);
+        }, 300);
+      }
+    },
+
+    async insertEvent2(row) {
+      let record = {
+        school: "school",
+        link: "",
+        authorization: "",
+      };
+      let { row: newRow } = await this.$refs.xAwardTable2.insertAt(record, row);
+      const { insertRecords } = this.$refs.xAwardTable2.getRecordset();
+      this.contest.synchronousConfigList =
+        this.contest.synchronousConfigList.concat(insertRecords);
+      await this.$refs.xAwardTable2.setActiveCell(newRow, "school");
+    },
+    async removeEvent2() {
+      this.$refs.xAwardTable2.removeCheckboxRow();
+      let removeRecords = this.$refs.xAwardTable2.getRemoveRecords();
+      function getDifferenceSetB(arr1, arr2, typeName) {
+        return Object.values(
+          arr1.concat(arr2).reduce((acc, cur) => {
+            if (
+              acc[cur[typeName]] &&
+              acc[cur[typeName]][typeName] === cur[typeName]
+            ) {
+              delete acc[cur[typeName]];
+            } else {
+              acc[cur[typeName]] = cur;
+            }
+            return acc;
+          }, {})
+        );
+      }
+      this.contest.synchronousConfigList = getDifferenceSetB(
+        this.contest.synchronousConfigList,
+        removeRecords,
+        "_XID"
+      );
+    },
+    editClosedEvent2({ row, column }) {
+      let xTable = this.$refs.xAwardTable2;
+      let field = column.property;
+      // 判断单元格值是否被修改
+      if (xTable.isUpdateByRow(row, field)) {
+        setTimeout(() => {
+          // 局部更新单元格为已保存状态
+          this.$refs.xAwardTable2.reloadRow(row, null, field);
         }, 300);
       }
     },

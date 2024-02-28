@@ -45,6 +45,8 @@
               <el-option :label="$t('m.Public')" :value="0"></el-option>
               <el-option :label="$t('m.Private')" :value="1"></el-option>
               <el-option :label="$t('m.Protected')" :value="2"></el-option>
+              <el-option :label="$t('m.Public_Synchronous')" :value="4"></el-option>
+              <el-option :label="$t('m.Private_Synchronous')" :value="5"></el-option>
             </el-select>
           </span>
           <span>
@@ -77,7 +79,7 @@
             <el-tag type="gray">{{ row.type | parseContestType }}</el-tag>
           </template>
         </vxe-table-column>
-        <vxe-table-column :title="$t('m.Auth')" width="100">
+        <vxe-table-column :title="$t('m.Auth')" width="150">
           <template v-slot="{ row }">
             <el-tooltip
               :content="$t('m.' + CONTEST_TYPE_REVERSE[row.auth].tips)"
@@ -248,6 +250,9 @@ export default {
     };
   },
   mounted() {
+    this.keyword = this.$route.query.keyword || "";
+    this.contestAuth = this.$route.query.auth || "All";
+    this.$router.replace({ query: {} }); // 隐藏 query
     this.CONTEST_TYPE_REVERSE = Object.assign({}, CONTEST_TYPE_REVERSE);
     this.CONTEST_STATUS_REVERSE = Object.assign({}, CONTEST_STATUS_REVERSE);
     this.getContestList(this.currentPage);

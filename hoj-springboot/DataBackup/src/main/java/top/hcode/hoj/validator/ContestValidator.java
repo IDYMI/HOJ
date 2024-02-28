@@ -54,8 +54,10 @@ public class ContestValidator {
 
         if (!Objects.equals(Constants.Contest.AUTH_PUBLIC.getCode(), adminContestVO.getAuth())
                 && !Objects.equals(Constants.Contest.AUTH_PRIVATE.getCode(), adminContestVO.getAuth())
-                && !Objects.equals(Constants.Contest.AUTH_PROTECT.getCode(), adminContestVO.getAuth())) {
-            throw new StatusFailException("比赛的权限必须为公开赛(0)、私有赛(1)、保护赛(2)！");
+                && !Objects.equals(Constants.Contest.AUTH_PROTECT.getCode(), adminContestVO.getAuth())
+                && !Objects.equals(Constants.Contest.AUTH_PUBLIC_SYNCHRONOUS.getCode(), adminContestVO.getAuth())
+                && !Objects.equals(Constants.Contest.AUTH_PRIVATE_SYNCHRONOUS.getCode(), adminContestVO.getAuth())) {
+            throw new StatusFailException("比赛的权限必须为公开赛(0)、私有赛(1)、保护赛(2)、同步公开赛(4)、同步私有赛(5)！");
         }
     }
 

@@ -123,6 +123,9 @@ public class Contest implements Serializable {
     @ApiModelProperty(value = "文件柜配置 json")
     private String fileConfig;
 
+    @ApiModelProperty(value = "同步赛配置 json")
+    private String synchronousConfig;
+
     @TableField(fill = FieldFill.INSERT)
     private Date gmtCreate;
 

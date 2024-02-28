@@ -176,6 +176,7 @@ public class GroupContestManager {
         } else {
             adminContestVo.setFileConfigList(new ArrayList<>());
         }
+        adminContestVo.setSynchronousConfigList(new ArrayList<>());
 
         return adminContestVo;
     }
@@ -228,6 +229,8 @@ public class GroupContestManager {
             fileConfigJson.set("config", fileConfigList);
             contest.setFileConfig(fileConfigJson.toString());
         }
+
+        contest.setSynchronousConfig(new JSONObject().toString());
 
         contest.setIsGroup(true);
 
@@ -296,6 +299,8 @@ public class GroupContestManager {
             fileConfigJson.set("config", fileConfigList);
             contest.setFileConfig(fileConfigJson.toString());
         }
+
+        contest.setSynchronousConfig(new JSONObject().toString());
 
         boolean isOk = contestEntityService.saveOrUpdate(contest);
         if (isOk) {

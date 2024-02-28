@@ -763,6 +763,7 @@ import {
   buildIndividualLanguageAndSettingKey,
   RULE_TYPE,
   PROBLEM_LEVEL,
+  CONTEST_TYPE,
 } from "@/common/constants";
 import { pie, largePie } from "./chartData";
 import api from "@/common/api";
@@ -940,25 +941,29 @@ export default {
         }
         params.containsEnd = true;
       }
-      let func = this.contestID
-        ? "getContestSubmissionList"
-        : "getSubmissionList";
       this.loadingTable = true;
+
+      const handleApiResponse = (res) => {
+        let data = res.data.data;
+        this.mySubmissions = data.records;
+        this.mySubmission_total = data.total;
+        this.loadingTable = false;
+      };
+
+      const handleApiError = () => {
+        this.loadingTable = false;
+      };
+
+      const func = this.contestID
+        ? this.contestAuth === CONTEST_TYPE.PUBLIC_SYNCHRONOUS ||
+          this.contestAuth === CONTEST_TYPE.PRIVATE_SYNCHRONOUS
+          ? "getSynchronousSubmissionList"
+          : "getContestSubmissionList"
+        : "getSubmissionList";
+
       api[func](this.mySubmission_limit, utils.filterEmptyValue(params))
-        .then(
-          (res) => {
-            let data = res.data.data;
-            this.mySubmissions = data.records;
-            this.mySubmission_total = data.total;
-            this.loadingTable = false;
-          },
-          (err) => {
-            this.loadingTable = false;
-          }
-        )
-        .catch(() => {
-          this.loadingTable = false;
-        });
+        .then(handleApiResponse)
+        .catch(handleApiError);
     },
     getStatusColor(status) {
       return "el-tag el-tag--medium status-" + JUDGE_STATUS[status].color;
@@ -1698,6 +1703,7 @@ export default {
       "isAuthenticated",
       "canSubmit",
       "websiteConfig",
+      "contestAuth",
     ]),
     contest() {
       return this.$store.state.contest.contest;

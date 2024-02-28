@@ -21,7 +21,7 @@ public interface JudgeService {
 
     public CommonResult<Judge> resubmit(Long submitId);
 
-    public CommonResult<SubmissionInfoVO> getSubmission(Long submitId);
+    public CommonResult<SubmissionInfoVO> getSubmission(Long submitId, Long cid);
 
     public CommonResult<TestJudgeVO> getTestJudgeResult(String testJudgeKey);
 
@@ -40,5 +40,5 @@ public interface JudgeService {
 
     public CommonResult<HashMap<Long, Object>> checkContestJudgeResult(SubmitIdListDTO submitIdListDto);
 
-    public CommonResult<JudgeCaseVO> getALLCaseResult(Long submitId);
+    public CommonResult<JudgeCaseVO> getALLCaseResult(Long submitId, Long cid);
 }

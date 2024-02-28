@@ -292,12 +292,28 @@ export const CONTEST_TYPE_REVERSE = {
     submit: false, //保护赛，可以看但是不能提交，提交需要附带比赛密码
     look: true,
   },
+  4: {
+    name: 'Public_Synchronous',
+    color: 'warning',
+    tips: 'Public_Synchronous_Tips',
+    submit: true, // 同步公开赛 可看可提交
+    look: true,
+  },
+  5: {
+    name: 'Private_Synchronous',
+    color: 'warning',
+    tips: 'Private_Synchronous_Tips',
+    submit: false, // 同步私有赛 必须要密码才能看和提交
+    look: false,
+  },
 };
 
 export const CONTEST_TYPE = {
   PUBLIC: 0,
   PRIVATE: 1,
   PROTECTED: 2,
+  PUBLIC_SYNCHRONOUS: 4,
+  PRIVATE_SYNCHRONOUS: 5,
 };
 
 export const USER_TYPE = {

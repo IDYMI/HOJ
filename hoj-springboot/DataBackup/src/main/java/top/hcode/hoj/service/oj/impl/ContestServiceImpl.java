@@ -93,6 +93,19 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
+    public CommonResult<List<ContestProblemVO>> getSynchronousProblem(Long cid, Boolean isContainsContestEndJudge,
+            Long time) {
+        try {
+            return CommonResult
+                    .successResponse(contestManager.getSynchronousProblem(cid, isContainsContestEndJudge, time));
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
+    }
+
+    @Override
     public CommonResult<ProblemInfoVO> getContestProblemDetails(Long cid, String displayId,
             Boolean isContainsContestEndJudge) {
         try {
@@ -137,9 +150,49 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
+    public CommonResult<IPage<JudgeVO>> getSynchronousSubmissionList(Integer limit,
+            Integer currentPage,
+            Boolean onlyMine,
+            String displayId,
+            Integer searchStatus,
+            String searchUsername,
+            Long searchCid,
+            Boolean beforeContestSubmit,
+            Boolean completeProblemID,
+            Boolean isContainsContestEndJudge) {
+        try {
+            return CommonResult.successResponse(contestManager.getSynchronousSubmissionList(limit,
+                    currentPage,
+                    onlyMine,
+                    displayId,
+                    searchStatus,
+                    searchUsername,
+                    searchCid,
+                    beforeContestSubmit,
+                    completeProblemID,
+                    isContainsContestEndJudge));
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
+    }
+
+    @Override
     public CommonResult<IPage> getContestRank(ContestRankDTO contestRankDto) {
         try {
             return CommonResult.successResponse(contestManager.getContestRank(contestRankDto));
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
+    }
+
+    @Override
+    public CommonResult<IPage> getSynchronousRank(ContestRankDTO contestRankDto) {
+        try {
+            return CommonResult.successResponse(contestManager.getSynchronousRank(contestRankDto));
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
         } catch (StatusForbiddenException e) {

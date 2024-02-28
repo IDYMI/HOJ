@@ -6,6 +6,9 @@ import cn.hutool.json.JSONObject;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
+import org.springframework.util.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,6 +41,8 @@ import top.hcode.hoj.validator.GroupValidator;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
 
 /**
  * @Author: Himit_ZH
@@ -106,6 +111,9 @@ public class ContestManager {
 
     @Autowired
     private GroupValidator groupValidator;
+
+    @Resource
+    private SynchronousManager synchronousManager;
 
     public IPage<ContestVO> getContestList(Integer limit, Integer currentPage, Integer status, Integer type,
             String keyword) {
@@ -328,6 +336,45 @@ public class ContestManager {
                     groupRootUidList,
                     isContainsContestEndJudge,
                     selectedTime_date);
+        }
+
+        return contestProblemList;
+    }
+
+    public List<ContestProblemVO> getSynchronousProblem(Long cid, Boolean isContainsContestEndJudge, Long time)
+            throws StatusFailException, StatusForbiddenException {
+
+        // 获取本场比赛的状态
+        Contest contest = contestEntityService.getById(cid);
+
+        // 同步赛数据
+        List<ContestProblemVO> contestProblemList = getContestProblem(cid, isContainsContestEndJudge, null);
+
+        // 是否开启同步赛
+        if (contest.getAuth().intValue() == Constants.Contest.AUTH_PUBLIC_SYNCHRONOUS.getCode()
+                || contest.getAuth().intValue() == Constants.Contest.AUTH_PRIVATE_SYNCHRONOUS.getCode()) {
+            List<ContestProblemVO> synchronousResultList = synchronousManager.getSynchronousContestProblemList(contest,
+                    isContainsContestEndJudge, time);
+
+            if (!CollectionUtils.isEmpty(synchronousResultList)) {
+                Map<String, Integer> contestProblemAc = new HashMap<>();
+                Map<String, Integer> contestProblemTotal = new HashMap<>();
+
+                synchronousResultList.forEach(contestProblemVO -> {
+                    String displayId = contestProblemVO.getDisplayId();
+
+                    contestProblemAc.merge(displayId, contestProblemVO.getAc(), Integer::sum);
+                    contestProblemTotal.merge(displayId, contestProblemVO.getTotal(), Integer::sum);
+                });
+
+                contestProblemList.forEach(contestProblemVO -> {
+                    String displayId = contestProblemVO.getDisplayId();
+                    Integer local_ac = contestProblemVO.getAc();
+                    Integer local_total = contestProblemVO.getTotal();
+                    contestProblemVO.setAc(local_ac + contestProblemAc.getOrDefault(displayId, 0));
+                    contestProblemVO.setTotal(local_total + contestProblemTotal.getOrDefault(displayId, 0));
+                });
+            }
         }
 
         return contestProblemList;
@@ -600,6 +647,91 @@ public class ContestManager {
         }
     }
 
+    public IPage<JudgeVO> getSynchronousSubmissionList(Integer limit,
+            Integer currentPage,
+            boolean onlyMine,
+            String displayId,
+            Integer searchStatus,
+            String searchUsername,
+            Long searchCid,
+            boolean beforeContestSubmit,
+            boolean completeProblemID,
+            boolean isContainsContestEndJudge) throws StatusFailException, StatusForbiddenException {
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        // 获取本场比赛的状态
+        Contest contest = contestEntityService.getById(searchCid);
+
+        // 是否为超级管理员或者该比赛的创建者，则为比赛管理者
+
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
+
+        IPage<JudgeVO> contestJudgeList = getContestSubmissionList(
+                limit,
+                currentPage,
+                onlyMine,
+                displayId,
+                searchStatus,
+                searchUsername,
+                searchCid,
+                beforeContestSubmit,
+                completeProblemID,
+                isContainsContestEndJudge);
+
+        // 创建新的分页对象
+        IPage<JudgeVO> newContestJudgeList = new Page<>();
+
+        // 是否为同步赛
+        if ((contest.getAuth().intValue() == Constants.Contest.AUTH_PUBLIC_SYNCHRONOUS.getCode()
+                || contest.getAuth().intValue() == Constants.Contest.AUTH_PRIVATE_SYNCHRONOUS.getCode())
+                && !onlyMine) {
+            // 如果不是只有自己的提交
+            List<JudgeVO> synchronousResultList = synchronousManager.getSynchronousSubmissionList(contest,
+                    isContainsContestEndJudge, searchUsername, displayId, searchStatus);
+
+            if (!CollectionUtils.isEmpty(synchronousResultList)) {
+                // 将 contestJudgeList 的记录和总数保存下来
+                List<JudgeVO> existingRecords = contestJudgeList.getRecords();
+
+                // 合并两个列表
+                List<JudgeVO> combinedList = new ArrayList<>(existingRecords);
+                combinedList.addAll(synchronousResultList);
+
+                // 重新排序
+                List<JudgeVO> result = combinedList.stream()
+                        .sorted(Comparator.comparing(JudgeVO::getSubmitTime,
+                                Comparator.reverseOrder()) // 按照提交时间排序
+                        ).collect(Collectors.toList());
+
+                // 重新分页
+                int total = result.size();
+                int fromIndex = (currentPage - 1) * limit;
+                int toIndex = Math.min(fromIndex + limit, total);
+                List<JudgeVO> pagedList = result.subList(fromIndex, toIndex);
+
+                newContestJudgeList.setRecords(pagedList);
+                newContestJudgeList.setTotal(total);
+            }
+            if (newContestJudgeList.getTotal() == 0) { // 未查询到一条数据
+                return contestJudgeList;
+            }
+            // 比赛还是进行阶段，同时不是超级管理员与比赛管理员，需要将除自己之外的提交的时间、空间、长度隐藏
+            if (contest.getStatus().intValue() == Constants.Contest.STATUS_RUNNING.getCode()
+                    && !isRoot && !userRolesVo.getUid().equals(contest.getUid())) {
+                newContestJudgeList.getRecords().forEach(judgeVo -> {
+                    if (!judgeVo.getUid().equals(userRolesVo.getUid())) {
+                        judgeVo.setTime(null);
+                        judgeVo.setMemory(null);
+                        judgeVo.setLength(null);
+                    }
+                });
+            }
+        }
+
+        return newContestJudgeList;
+    }
+
     public IPage getContestRank(ContestRankDTO contestRankDto) throws StatusFailException, StatusForbiddenException {
 
         Long cid = contestRankDto.getCid();
@@ -677,6 +809,70 @@ public class ContestManager {
                     isContainsAfterContestJudge,
                     time);
         }
+        return resultList;
+    }
+
+    public IPage getSynchronousRank(ContestRankDTO contestRankDto)
+            throws StatusFailException, StatusForbiddenException {
+        Long cid = contestRankDto.getCid();
+        List<String> concernedList = contestRankDto.getConcernedList();
+        Integer currentPage = contestRankDto.getCurrentPage();
+        Integer limit = contestRankDto.getLimit();
+        Boolean removeStar = contestRankDto.getRemoveStar();
+        Boolean forceRefresh = contestRankDto.getForceRefresh();
+        Long selectedTime = contestRankDto.getTime();
+
+        if (cid == null) {
+            throw new StatusFailException("错误：cid不能为空");
+        }
+        if (removeStar == null) {
+            removeStar = false;
+        }
+        if (forceRefresh == null) {
+            forceRefresh = false;
+        }
+        // 页数，每页题数若为空，设置默认值
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 50;
+
+        // 获取当前登录的用户
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        // 获取本场比赛的状态
+        Contest contest = contestEntityService.getById(contestRankDto.getCid());
+
+        // 超级管理员或者该比赛的创建者，则为比赛管理者
+
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
+
+        // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
+        contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
+
+        // 校验该比赛是否开启了封榜模式，超级管理员和比赛创建者可以直接看到实际榜单
+        boolean isOpenSealRank = contestValidator.isSealRank(userRolesVo.getUid(), contest, forceRefresh, isRoot);
+        boolean isContainsAfterContestJudge = Objects.equals(contest.getAllowEndSubmit(), true)
+                && Objects.equals(contestRankDto.getContainsEnd(), true);
+
+        IPage<ACMContestRankVO> resultList = new Page<>(currentPage, limit);
+        if (contest.getType().intValue() == Constants.Contest.TYPE_ACM.getCode()) {
+            // 进行排行榜计算以及排名分页
+            resultList = contestRankManager.getSynchronousACMRankPage(isOpenSealRank,
+                    removeStar,
+                    userRolesVo.getUid(),
+                    concernedList,
+                    contestRankDto.getExternalCidList(),
+                    contest,
+                    currentPage,
+                    limit,
+                    contestRankDto.getKeyword(),
+                    isContainsAfterContestJudge,
+                    selectedTime);
+
+        }
+
         return resultList;
     }
 

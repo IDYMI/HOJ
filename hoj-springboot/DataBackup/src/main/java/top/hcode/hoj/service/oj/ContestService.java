@@ -24,7 +24,11 @@ public interface ContestService {
 
     public CommonResult<AccessVO> getContestAccess(Long cid);
 
-    public CommonResult<List<ContestProblemVO>> getContestProblem(Long cid, Boolean isContainsContestEndJudge,  Long selectedTime);
+    public CommonResult<List<ContestProblemVO>> getContestProblem(Long cid, Boolean isContainsContestEndJudge,
+            Long selectedTime);
+
+    public CommonResult<List<ContestProblemVO>> getSynchronousProblem(Long cid, Boolean isContainsContestEndJudge,
+            Long time);
 
     public CommonResult<ProblemInfoVO> getContestProblemDetails(Long cid, String displayId,
             Boolean isContainsContestEndJudge);
@@ -40,7 +44,20 @@ public interface ContestService {
             Boolean completeProblemID,
             Boolean isContainsContestEndJudge);
 
+    public CommonResult<IPage<JudgeVO>> getSynchronousSubmissionList(Integer limit,
+            Integer currentPage,
+            Boolean onlyMine,
+            String displayId,
+            Integer searchStatus,
+            String searchUsername,
+            Long searchCid,
+            Boolean beforeContestSubmit,
+            Boolean completeProblemID,
+            Boolean isContainsContestEndJudge);
+
     public CommonResult<IPage> getContestRank(ContestRankDTO contestRankDto);
+
+    public CommonResult<IPage> getSynchronousRank(ContestRankDTO contestRankDto);
 
     public CommonResult<IPage<AnnouncementVO>> getContestAnnouncement(Long cid, Integer limit, Integer currentPage,
             Long id);

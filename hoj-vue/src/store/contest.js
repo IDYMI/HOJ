@@ -30,11 +30,14 @@ const getters = {
   contestStatus: (state, getters) => {
     return state.contest.status;
   },
+  contestAuth: (state, getters) => {
+    return state.contest.auth;
+  },
   contestRuleType: (state, getters) => {
     return state.contest.type;
   },
   isContestAdmin: (state, getters, _, rootGetters) => {
-    return rootGetters.isAuthenticated && (state.contest.author === rootGetters.userInfo.username || rootGetters.isMainAdminRole  || state.groupContestAuth == 5);
+    return rootGetters.isAuthenticated && (state.contest.author === rootGetters.userInfo.username || rootGetters.isMainAdminRole || state.groupContestAuth == 5);
   },
   isContainsAfterContestJudge: (state, getters) => {
     return state.isContainsAfterContestJudge;
@@ -263,13 +266,24 @@ const actions = {
 
   getContestProblems({ commit, rootState }) {
     return new Promise((resolve, reject) => {
-      api.getContestProblemList(rootState.route.params.contestID, rootState.contest.isContainsAfterContestJudge, rootState.contest.selectedTime).then(
+      api.getContest(rootState.route.params.contestID).then(
         (res) => {
-          resolve(res);
-          commit('changeContestProblems', { contestProblems: res.data.data });
+          let contest = res.data.data;
+          commit('changeContest', { contest: contest });
+
+          let func = contest.auth === CONTEST_TYPE.PUBLIC_SYNCHRONOUS || contest.auth === CONTEST_TYPE.PRIVATE_SYNCHRONOUS ? 'getSynchronousProblemList' : 'getContestProblemList';
+          api[func](rootState.route.params.contestID, rootState.contest.isContainsAfterContestJudge, rootState.contest.selectedTime).then(
+            (res) => {
+              resolve(res);
+              commit('changeContestProblems', { contestProblems: res.data.data });
+            },
+            (err) => {
+              commit('changeContestProblems', { contestProblems: [] });
+              reject(err);
+            }
+          );
         },
         (err) => {
-          commit('changeContestProblems', { contestProblems: [] });
           reject(err);
         }
       );

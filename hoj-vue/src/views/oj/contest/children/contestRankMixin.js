@@ -1,6 +1,6 @@
 import api from '@/common/api';
 import { mapGetters, mapState } from 'vuex';
-import { CONTEST_STATUS, buildContestRankConcernedKey } from '@/common/constants';
+import { CONTEST_STATUS, buildContestRankConcernedKey, CONTEST_TYPE } from '@/common/constants';
 import storage from '@/common/storage';
 export default {
   methods: {
@@ -9,30 +9,38 @@ export default {
       this.concernedList = storage.get(key) || [];
     },
     getContestRankData(page = 1, refresh = false) {
-      if (this.showChart && !refresh) {
-        this.$refs.chart.showLoading({ maskColor: 'rgba(250, 250, 250, 0.8)' });
-      }
-      let data = {
-        currentPage: page,
-        limit: this.limit,
-        cid: this.$route.params.contestID,
-        forceRefresh: this.forceUpdate ? true : false,
-        removeStar: !this.showStarUser,
-        concernedList: this.concernedList,
-        keyword: this.keyword == null ? null : this.keyword.trim(),
-        containsEnd: this.isContainsAfterContestJudge,
-        time: this.selectedTime,
-      };
-      api.getContestRank(data).then((res) => {
+      if (this.$refs.chart) {
         if (this.showChart && !refresh) {
-          this.$refs.chart.hideLoading();
+          this.$refs.chart.showLoading({
+            maskColor: 'rgba(250, 250, 250, 0.8)',
+          });
         }
-        this.total = res.data.data.total;
-        if (page === 1) {
-          this.applyToChart(res.data.data.records);
-        }
-        this.applyToTable(res.data.data.records);
-      });
+        let data = {
+          currentPage: page,
+          limit: this.limit,
+          cid: this.$route.params.contestID,
+          forceRefresh: this.forceUpdate ? true : false,
+          removeStar: !this.showStarUser,
+          concernedList: this.concernedList,
+          keyword: this.keyword == null ? null : this.keyword.trim(),
+          containsEnd: this.isContainsAfterContestJudge,
+          time: this.selectedTime,
+        };
+
+        let func = this.contestAuth ? 'getSynchronousRank' : 'getContestRank';
+        this.loadingTable = true;
+
+        api[func](data).then((res) => {
+          if (this.showChart && !refresh) {
+            this.$refs.chart.hideLoading();
+          }
+          this.total = res.data.data.total;
+          if (page === 1) {
+            this.applyToChart(res.data.data.records);
+          }
+          this.applyToTable(res.data.data.records);
+        });
+      }
     },
     handleAutoRefresh(status) {
       if (status == true) {
@@ -121,6 +129,9 @@ export default {
       } else {
         return true;
       }
+    },
+    contestAuth() {
+      return this.contest.auth === CONTEST_TYPE.PUBLIC_SYNCHRONOUS || this.contest.auth === CONTEST_TYPE.PRIVATE_SYNCHRONOUS;
     },
   },
   beforeDestroy() {

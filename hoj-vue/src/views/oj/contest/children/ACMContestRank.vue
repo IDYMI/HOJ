@@ -136,7 +136,7 @@
                 </span>
               </el-tooltip>
               <span class="contest-rank-user-info">
-                <a @click="getUserHomeByUsername(row.uid, row.username)">
+                <a @click="getUserHomeByUsername(row.uid, row.username, row.synchronous)">
                   <span class="contest-username" :title="row.rankShowName">
                     <span class="contest-rank-flag" v-if="row.uid == userInfo.uid">Own</span>
                     <span class="contest-rank-flag" v-if="row.rank == -1">Star</span>
@@ -188,7 +188,7 @@
                 </span>
               </el-tooltip>
               <span class="contest-rank-user-info">
-                <a @click="getUserHomeByUsername(row.uid, row.username)">
+                <a @click="getUserHomeByUsername(row.uid, row.username, row.synchronous)">
                   <span class="contest-username" :title="row.rankShowName">
                     <span class="contest-rank-flag" v-if="row.uid == userInfo.uid">Own</span>
                     <span class="contest-rank-flag" v-if="row.rank == -1">Star</span>
@@ -459,11 +459,13 @@ export default {
         query: { username: username, status: 0 },
       });
     },
-    getUserHomeByUsername(uid, username) {
-      this.$router.push({
-        name: "UserHome",
-        query: { username: username, uid: uid },
-      });
+    getUserHomeByUsername(uid, username, synchronous) {
+      if (!synchronous) {
+        this.$router.push({
+          name: "UserHome",
+          query: { username: username, uid: uid },
+        });
+      }
     },
     getContestProblemById(pid) {
       this.$router.push({

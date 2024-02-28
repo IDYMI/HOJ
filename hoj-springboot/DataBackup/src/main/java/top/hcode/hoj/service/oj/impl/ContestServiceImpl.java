@@ -69,9 +69,10 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
-    public CommonResult<List<ContestProblemVO>> getContestProblem(Long cid, Boolean isContainsContestEndJudge) {
+    public CommonResult<List<ContestProblemVO>> getContestProblem(Long cid, Boolean isContainsContestEndJudge,
+            Long selectedTime) {
         try {
-            return CommonResult.successResponse(contestManager.getContestProblem(cid, isContainsContestEndJudge));
+            return CommonResult.successResponse(contestManager.getContestProblem(cid, isContainsContestEndJudge, selectedTime));
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
         } catch (StatusForbiddenException e) {

@@ -212,10 +212,14 @@ export default {
       "contestRuleType",
       "ContestRealTimePermission",
       "isContainsAfterContestJudge",
+      "selectedTime",
     ]),
   },
   watch: {
     isContainsAfterContestJudge() {
+      this.getContestProblems();
+    },
+    selectedTime() {
       this.getContestProblems();
     },
   },

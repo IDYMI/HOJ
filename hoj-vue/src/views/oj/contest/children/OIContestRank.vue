@@ -54,7 +54,7 @@
                   v-model="autoRefresh"
                 ></el-switch>
               </p>
-              <template v-if="isContestAdmin">
+              <template v-if="isContestAdmin && selectedTime === null">
                 <p>
                   <span>{{ $t('m.Force_Update') }}</span>
                   <el-switch v-model="forceUpdate" @change="getContestRankData(page)"></el-switch>
@@ -73,7 +73,7 @@
       </el-col>
     </el-row>
     <div v-show="showTable">
-      <vxe-table
+      <vxe-grid
         round
         border
         auto-resize
@@ -81,6 +81,7 @@
         align="center"
         ref="OIContestRank"
         :data="dataRank"
+        :key="contestProblems"
         :cell-class-name="cellClassName"
         @cell-click="getUserProblemSubmission"
       >
@@ -287,7 +288,7 @@
             </div>
           </template>
         </vxe-table-column>
-      </vxe-table>
+      </vxe-grid>
     </div>
     <Pagination
       :total="total"
@@ -302,12 +303,11 @@
 </template>
 <script>
 import Avatar from "vue-avatar";
-import { mapActions } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import ContestRankMixin from "./contestRankMixin";
 import utils from "@/common/utils";
 const Pagination = () => import("@/components/oj/common/Pagination");
 const RankBox = () => import("@/components/oj/common/RankBox");
-import { mapGetters } from "vuex";
 
 export default {
   name: "OIContestRank",
@@ -326,6 +326,8 @@ export default {
       dataRank: [],
       keyword: null,
       autoRefresh: false,
+      showChart: false,
+      showStarUser: false,
       options: {
         title: {
           text: this.$i18n.t("m.Top_10_Teams"),
@@ -406,7 +408,8 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["webTheme"]),
+    ...mapState({ contestProblems: (state) => state.contest.contestProblems }),
+    ...mapGetters(["webTheme", "isContainsAfterContestJudge", "selectedTime"]),
     contest() {
       return this.$store.state.contest.contest;
     },
@@ -416,7 +419,17 @@ export default {
   },
   watch: {
     isContainsAfterContestJudge(newVal, OldVal) {
+      this.$store.dispatch("getContestProblems");
       this.getContestRankData(this.page);
+    },
+    selectedTime(newVal, OldVal) {
+      this.$store.dispatch("getContestProblems");
+      this.getContestRankData(this.page);
+      if (this.selectedTime !== null) {
+        // 禁止自动更新
+        this.autoRefresh = false;
+        this.handleAutoRefresh(false);
+      }
     },
     webTheme(newVal, OldVal) {
       if (this.options.xAxis && this.options.yAxis) {
@@ -428,8 +441,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions(["getContestProblems"]),
-
     cellClassName({ row, rowIndex, column, columnIndex }) {
       if (row.username == this.userInfo.username) {
         if (

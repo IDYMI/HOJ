@@ -45,6 +45,7 @@ public class ContestRankManager {
      * @param limit                       分页大小
      * @param keyword                     搜索关键词：匹配学校或榜单显示名称
      * @param isContainsAfterContestJudge 是否包含比赛结束后的提交
+     * @param time                        距离比赛开始的秒数
      * @desc 获取ACM比赛排行榜
      */
     public IPage<ACMContestRankVO> getContestACMRankPage(Boolean isOpenSealRank,
@@ -56,16 +57,18 @@ public class ContestRankManager {
             int currentPage,
             int limit,
             String keyword,
-            Boolean isContainsAfterContestJudge) {
+            Boolean isContainsAfterContestJudge,
+            Long time) {
 
-        // 进行排序计算
-        List<ACMContestRankVO> orderResultList = contestCalculateRankManager.calcACMRank(isOpenSealRank,
+        List<ACMContestRankVO> orderResultList = getContestACMRankList(
+                isOpenSealRank,
                 removeStar,
-                contest,
                 currentUserId,
                 concernedList,
                 externalCidList,
-                isContainsAfterContestJudge);
+                contest,
+                isContainsAfterContestJudge,
+                time);
 
         if (StrUtil.isNotBlank(keyword)) {
             String finalKeyword = keyword.trim().toLowerCase();
@@ -78,7 +81,6 @@ public class ContestRankManager {
                                     rankVo.getNickname())))
                     .collect(Collectors.toList());
         }
-
         // 计算好排行榜，然后进行分页
         return getPagingRankList(orderResultList, currentPage, limit);
     }
@@ -93,6 +95,7 @@ public class ContestRankManager {
      * @param limit                       分页大小
      * @param keyword                     搜索关键词：匹配学校或榜单显示名称
      * @param isContainsAfterContestJudge 是否包含比赛结束后的提交
+     * @param time                        距离比赛开始的秒数
      * @desc 获取OI比赛排行榜
      */
     public IPage<OIContestRankVO> getContestOIRankPage(Boolean isOpenSealRank,
@@ -104,7 +107,8 @@ public class ContestRankManager {
             int currentPage,
             int limit,
             String keyword,
-            Boolean isContainsAfterContestJudge) {
+            Boolean isContainsAfterContestJudge,
+            Long time) {
 
         List<OIContestRankVO> orderResultList = contestCalculateRankManager.calcOIRank(isOpenSealRank,
                 removeStar,
@@ -112,7 +116,8 @@ public class ContestRankManager {
                 currentUserId,
                 concernedList,
                 externalCidList,
-                isContainsAfterContestJudge);
+                isContainsAfterContestJudge,
+                time);
 
         if (StrUtil.isNotBlank(keyword)) {
             String finalKeyword = keyword.trim().toLowerCase();
@@ -137,7 +142,7 @@ public class ContestRankManager {
      * @param concernedList               关联比赛的id列表
      * @param contest                     比赛信息
      * @param isContainsAfterContestJudge 是否包含比赛结束后的提交
-     * @param selectedTime                比赛跳转榜单的时间
+     * @param time                        距离比赛开始的秒数
      * @desc 获取ACM比赛排行榜
      */
     public List<ACMContestRankVO> getContestACMRankList(
@@ -148,7 +153,7 @@ public class ContestRankManager {
             List<Integer> externalCidList,
             Contest contest,
             Boolean isContainsAfterContestJudge,
-            Long selectedTime) {
+            Long time) {
 
         // 进行排序计算
         List<ACMContestRankVO> orderResultList = contestCalculateRankManager.calcACMRank(
@@ -158,7 +163,8 @@ public class ContestRankManager {
                 currentUserId,
                 concernedList,
                 externalCidList,
-                isContainsAfterContestJudge);
+                isContainsAfterContestJudge,
+                time);
 
         return orderResultList;
     }
@@ -203,7 +209,8 @@ public class ContestRankManager {
                 externalCidList,
                 useCache,
                 cacheTime,
-                isContainsAfterContestJudge);
+                isContainsAfterContestJudge,
+                null);
 
         if (StrUtil.isNotBlank(keyword)) {
             String finalKeyword = keyword.trim().toLowerCase();
@@ -260,7 +267,8 @@ public class ContestRankManager {
                 externalCidList,
                 useCache,
                 cacheTime,
-                isContainsAfterContestJudge);
+                isContainsAfterContestJudge,
+                null);
 
         if (StrUtil.isNotBlank(keyword)) {
             String finalKeyword = keyword.trim().toLowerCase();

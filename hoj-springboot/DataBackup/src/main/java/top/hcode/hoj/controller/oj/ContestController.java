@@ -90,11 +90,13 @@ public class ContestController {
      * @Since 2020/10/28
      */
     @GetMapping("/get-contest-problem")
+    @RequiresAuthentication
     public CommonResult<List<ContestProblemVO>> getContestProblem(
             @RequestParam(value = "cid", required = true) Long cid,
-            @RequestParam(value = "containsEnd", defaultValue = "false") Boolean containsEnd) {
+            @RequestParam(value = "containsEnd", defaultValue = "false") Boolean containsEnd,
+            @RequestParam(value = "time", required = false) Long time) {
 
-        return contestService.getContestProblem(cid, containsEnd);
+        return contestService.getContestProblem(cid, containsEnd, time);
     }
 
     @GetMapping("/get-contest-problem-details")

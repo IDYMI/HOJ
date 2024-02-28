@@ -86,8 +86,13 @@
               </el-col>
             </el-row>
           </div>
-          <div class="slider">
-            <el-slider v-model="progressValue" :format-tooltip="formatTooltip" :step="timeStep"></el-slider>
+          <div style="width: 100%">
+            <Timebar
+              :progressValue="progressValue"
+              :Tooltip="formatTooltip()"
+              @transfer="getStopFlag"
+            />
+            <p></p>
           </div>
           <el-row>
             <el-col :span="24" style="text-align:center">
@@ -311,16 +316,21 @@ import {
 import myMessage from "@/common/message";
 import storage from "@/common/storage";
 import Markdown from "@/components/oj/common/Markdown";
+import Timebar from "@/components/oj/common/Timebar.vue";
 const Announcement = () => import("@/views/oj/about/Switch_Announcement.vue");
+import BoxFile from "@/components/oj/common/BoxFile";
 
 export default {
   name: "ContestDetails",
   components: {
     Markdown,
+    Timebar,
+    BoxFile,
     Announcement,
   },
   data() {
     return {
+      percentage: -1, // 点击点占总长度的距离
       route_name: "contestDetails",
       timer: null,
       CONTEST_STATUS: {},
@@ -396,14 +406,23 @@ export default {
   },
   methods: {
     ...mapActions(["changeDomTitle"]),
+    getStopFlag(percentage) {
+      this.percentage = percentage;
+    },
     formatTooltip(val) {
-      if (this.contest.status == -1) {
-        // 还未开始
-        return "00:00:00";
-      } else if (this.contest.status == 0) {
-        return time.secondFormat(this.BeginToNowDuration); // 格式化时间
+      if (this.percentage !== -1) {
+        const selectedTime = this.contest.duration * this.percentage;
+        this.selectedTime = parseInt(selectedTime);
+        return time.secondFormat(selectedTime); // 格式化时间
       } else {
-        return time.secondFormat(this.contest.duration);
+        if (this.contest.status == -1) {
+          // 还未开始
+          return "00:00:00";
+        } else if (this.contest.status == 0) {
+          return time.secondFormat(this.BeginToNowDuration);
+        } else {
+          return time.secondFormat(this.contest.duration);
+        }
       }
     },
     checkPassword() {
@@ -487,6 +506,14 @@ export default {
       },
       set(value) {
         this.$store.commit("changeContainsAfterContestJudge", { value: value });
+      },
+    },
+    selectedTime: {
+      get() {
+        return this.$store.state.contest.selectedTime;
+      },
+      set(value) {
+        this.$store.commit("changeSelectedTime", { value: value });
       },
     },
   },

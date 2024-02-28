@@ -48,7 +48,7 @@
                   @change="handleAutoRefresh"
                 ></el-switch>
               </p>
-              <template v-if="isContestAdmin">
+              <template v-if="isContestAdmin && selectedTime === null">
                 <p>
                   <span>{{ $t('m.Force_Update') }}</span>
                   <el-switch v-model="forceUpdate" @change="getContestRankData(page)"></el-switch>
@@ -68,7 +68,7 @@
     </el-row>
 
     <div v-show="showTable">
-      <vxe-table
+      <vxe-grid
         round
         border
         auto-resize
@@ -76,6 +76,7 @@
         align="center"
         ref="ACMContestRank"
         :data="dataRank"
+        :key="contestProblems"
         :cell-class-name="cellClassName"
         @cell-click="getUserProblemSubmission"
       >
@@ -316,7 +317,7 @@
             </span>
           </template>
         </vxe-table-column>
-      </vxe-table>
+      </vxe-grid>
     </div>
     <Pagination
       :total="total"
@@ -332,13 +333,12 @@
 <script>
 import Avatar from "vue-avatar";
 import moment from "moment";
-import { mapActions } from "vuex";
+import { mapState, mapGetters } from "vuex";
 const Pagination = () => import("@/components/oj/common/Pagination");
 const RankBox = () => import("@/components/oj/common/RankBox");
 import time from "@/common/time";
 import utils from "@/common/utils";
 import ContestRankMixin from "./contestRankMixin";
-import { mapGetters } from "vuex";
 
 export default {
   name: "ACMContestRank",
@@ -354,6 +354,8 @@ export default {
       page: 1,
       limit: 50,
       autoRefresh: false,
+      showChart: false,
+      showStarUser: false,
       contestID: "",
       dataRank: [],
       keyword: null,
@@ -451,7 +453,6 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["getContestProblems"]),
     getUserACSubmit(username) {
       this.$router.push({
         name: "ContestSubmissionList",
@@ -649,7 +650,17 @@ export default {
       }
     },
     isContainsAfterContestJudge(newVal, OldVal) {
+      this.$store.dispatch("getContestProblems");
       this.getContestRankData(this.page);
+    },
+    selectedTime(newVal, OldVal) {
+      this.$store.dispatch("getContestProblems");
+      this.getContestRankData(this.page);
+      if (this.selectedTime !== null) {
+        // 禁止自动更新
+        this.autoRefresh = false;
+        this.handleAutoRefresh(false);
+      }
     },
     webTheme(newVal, OldVal) {
       if (this.options.xAxis && this.options.yAxis) {
@@ -661,7 +672,8 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["webTheme"]),
+    ...mapState({ contestProblems: (state) => state.contest.contestProblems }),
+    ...mapGetters(["webTheme", "isContainsAfterContestJudge", "selectedTime"]),
     contest() {
       return this.$store.state.contest.contest;
     },

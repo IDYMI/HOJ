@@ -21,6 +21,7 @@ export default {
         concernedList: this.concernedList,
         keyword: this.keyword == null ? null : this.keyword.trim(),
         containsEnd: this.isContainsAfterContestJudge,
+        time: this.selectedTime,
       };
       api.getContestRank(data).then((res) => {
         if (this.showChart && !refresh) {
@@ -96,7 +97,11 @@ export default {
     },
     forceUpdate: {
       get() {
-        return this.$store.state.contest.forceUpdate;
+        if (this.selectedTime === null) {
+          return this.$store.state.contest.forceUpdate;
+        } else {
+          return false;
+        }
       },
       set(value) {
         this.$store.commit('changeRankForceUpdate', { value: value });
@@ -111,7 +116,11 @@ export default {
       },
     },
     refreshDisabled() {
-      return this.contest.status == CONTEST_STATUS.ENDED;
+      if (this.selectedTime === null) {
+        return this.contest.status == CONTEST_STATUS.ENDED;
+      } else {
+        return true;
+      }
     },
   },
   beforeDestroy() {

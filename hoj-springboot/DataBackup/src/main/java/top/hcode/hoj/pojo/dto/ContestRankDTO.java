@@ -36,4 +36,6 @@ public class ContestRankDTO {
     private List<String> concernedList;
 
     private List<Integer> externalCidList;
+
+    private Long time;
 }

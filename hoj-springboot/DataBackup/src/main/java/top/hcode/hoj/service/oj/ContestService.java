@@ -22,7 +22,7 @@ public interface ContestService {
 
     public CommonResult<AccessVO> getContestAccess(Long cid);
 
-    public CommonResult<List<ContestProblemVO>> getContestProblem(Long cid, Boolean isContainsContestEndJudge);
+    public CommonResult<List<ContestProblemVO>> getContestProblem(Long cid, Boolean isContainsContestEndJudge,  Long selectedTime);
 
     public CommonResult<ProblemInfoVO> getContestProblemDetails(Long cid, String displayId,
             Boolean isContainsContestEndJudge);

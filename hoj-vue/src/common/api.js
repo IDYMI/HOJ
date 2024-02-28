@@ -561,9 +561,9 @@ const ojApi = {
     });
   },
   // 获取比赛题目列表
-  getContestProblemList(cid, containsEnd = false) {
+  getContestProblemList(cid, containsEnd = false, time = null) {
     return ajax('/api/get-contest-problem', 'get', {
-      params: { cid, containsEnd },
+      params: { cid, containsEnd, time },
     });
   },
   // 获取比赛题目详情

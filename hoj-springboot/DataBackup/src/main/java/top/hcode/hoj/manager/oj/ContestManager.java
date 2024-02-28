@@ -32,6 +32,7 @@ import top.hcode.hoj.utils.RedisUtils;
 import top.hcode.hoj.validator.ContestValidator;
 import top.hcode.hoj.validator.GroupValidator;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -216,7 +217,7 @@ public class ContestManager {
         return accessVo;
     }
 
-    public List<ContestProblemVO> getContestProblem(Long cid, Boolean isContainsContestEndJudge)
+    public List<ContestProblemVO> getContestProblem(Long cid, Boolean isContainsContestEndJudge, Long selectedTime)
             throws StatusFailException, StatusForbiddenException {
 
         // 获取当前登录的用户
@@ -232,6 +233,12 @@ public class ContestManager {
 
         isContainsContestEndJudge = Objects.equals(contest.getAllowEndSubmit(), true) && isContainsContestEndJudge;
 
+        Date selectedTime_date = null;
+        if (!isContainsContestEndJudge) { // 不包含赛后提交
+            // 将Long time 转化为 Date time
+            selectedTime_date = addSeconds(contest.getStartTime(), selectedTime);
+        }
+
         if (userRolesVo == null) { // 如果访问者没登录
             if (Objects.equals(contest.getOpenRank(), true) // 比賽開放赛外榜单
                     && contest.getStatus().intValue() != Constants.Contest.STATUS_SCHEDULED.getCode()) {
@@ -242,7 +249,8 @@ public class ContestManager {
                         false,
                         contest.getAuthor(),
                         groupRootUidList,
-                        isContainsContestEndJudge);
+                        isContainsContestEndJudge,
+                        selectedTime_date);
             } else {
                 // 比赛没有开启赛外榜单，同时访问者也没登录，则不允许访问比赛题目数据
                 throw new StatusForbiddenException("请您先登录！");
@@ -271,7 +279,8 @@ public class ContestManager {
                     isAdmin,
                     contest.getAuthor(),
                     groupRootUidList,
-                    isContainsContestEndJudge);
+                    isContainsContestEndJudge,
+                    selectedTime_date);
         } else {
             contestProblemList = contestProblemEntityService.getContestProblemList(cid,
                     contest.getStartTime(),
@@ -280,7 +289,8 @@ public class ContestManager {
                     isAdmin,
                     contest.getAuthor(),
                     groupRootUidList,
-                    isContainsContestEndJudge);
+                    isContainsContestEndJudge,
+                    selectedTime_date);
         }
 
         return contestProblemList;
@@ -591,6 +601,11 @@ public class ContestManager {
         boolean isContainsAfterContestJudge = Objects.equals(contest.getAllowEndSubmit(), true)
                 && Objects.equals(contestRankDto.getContainsEnd(), true);
 
+        Long time = null;
+        if (contestRankDto.getContainsEnd() != null && !contestRankDto.getContainsEnd()) {
+            time = contestRankDto.getTime();
+        }
+
         IPage resultList;
         if (contest.getType().intValue() == Constants.Contest.TYPE_ACM.getCode()) {
             // ACM比赛
@@ -604,7 +619,8 @@ public class ContestManager {
                     currentPage,
                     limit,
                     contestRankDto.getKeyword(),
-                    isContainsAfterContestJudge);
+                    isContainsAfterContestJudge,
+                    time);
 
         } else {
             // OI比赛
@@ -617,7 +633,8 @@ public class ContestManager {
                     currentPage,
                     limit,
                     contestRankDto.getKeyword(),
-                    isContainsAfterContestJudge);
+                    isContainsAfterContestJudge,
+                    time);
         }
         return resultList;
     }
@@ -704,4 +721,12 @@ public class ContestManager {
 
     }
 
+    private static Date addSeconds(Date date, Long seconds) {
+        if (seconds != null) {
+            Instant instant = date.toInstant().plusSeconds(seconds);
+            return Date.from(instant);
+        } else {
+            return null;
+        }
+    }
 }

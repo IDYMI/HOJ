@@ -172,6 +172,9 @@ export default {
                   return utils.breakLongWords(value, 14);
                 }
               },
+              textStyle: {
+                color: this.getAxisLabelColor(),
+              },
             },
           },
         ],
@@ -182,6 +185,7 @@ export default {
               rotate: 50,
               textStyle: {
                 fontSize: "12em",
+                color: this.getAxisLabelColor(),
               },
             },
           },
@@ -280,9 +284,22 @@ export default {
       let index = nickname.length % 5;
       return typeArr[index];
     },
+    getAxisLabelColor() {
+      return this.webTheme === "Dark" ? "white" : "black";
+    },
   },
   computed: {
-    ...mapGetters(["isAuthenticated", "userInfo"]),
+    ...mapGetters(["isAuthenticated", "userInfo", "webTheme"]),
+  },
+  watch: {
+    webTheme(newVal, OldVal) {
+      if (this.options.xAxis && this.options.yAxis) {
+        this.options.xAxis[0].axisLabel.textStyle.color =
+          this.getAxisLabelColor();
+        this.options.yAxis[0].axisLabel.textStyle.color =
+          this.getAxisLabelColor();
+      }
+    },
   },
 };
 </script>

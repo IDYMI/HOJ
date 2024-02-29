@@ -307,6 +307,8 @@ import ContestRankMixin from "./contestRankMixin";
 import utils from "@/common/utils";
 const Pagination = () => import("@/components/oj/common/Pagination");
 const RankBox = () => import("@/components/oj/common/RankBox");
+import { mapGetters } from "vuex";
+
 export default {
   name: "OIContestRank",
   components: {
@@ -353,6 +355,9 @@ export default {
               showMinLabel: true,
               showMaxLabel: true,
               align: "center",
+              textStyle: {
+                color: this.getAxisLabelColor(),
+              },
               formatter: (value, index) => {
                 return utils.breakLongWords(value, 14);
               },
@@ -365,6 +370,11 @@ export default {
         yAxis: [
           {
             type: "value",
+            axisLabel: {
+              textStyle: {
+                color: this.getAxisLabelColor(),
+              },
+            },
           },
         ],
         grid: {
@@ -396,6 +406,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(["webTheme"]),
     contest() {
       return this.$store.state.contest.contest;
     },
@@ -406,6 +417,14 @@ export default {
   watch: {
     isContainsAfterContestJudge(newVal, OldVal) {
       this.getContestRankData(this.page);
+    },
+    webTheme(newVal, OldVal) {
+      if (this.options.xAxis && this.options.yAxis) {
+        this.options.xAxis[0].axisLabel.textStyle.color =
+          this.getAxisLabelColor();
+        this.options.yAxis[0].axisLabel.textStyle.color =
+          this.getAxisLabelColor();
+      }
     },
   },
   methods: {
@@ -547,6 +566,9 @@ export default {
           this.isContainsAfterContestJudge
         }`
       );
+    },
+    getAxisLabelColor() {
+      return this.webTheme === "Dark" ? "white" : "black";
     },
   },
 };

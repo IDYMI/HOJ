@@ -338,6 +338,7 @@ const RankBox = () => import("@/components/oj/common/RankBox");
 import time from "@/common/time";
 import utils from "@/common/utils";
 import ContestRankMixin from "./contestRankMixin";
+import { mapGetters } from "vuex";
 
 export default {
   name: "ACMContestRank",
@@ -414,6 +415,11 @@ export default {
               show: true,
               snap: true,
             },
+            axisLabel: {
+              textStyle: {
+                color: this.getAxisLabelColor(),
+              },
+            },
           },
         ],
         yAxis: [
@@ -421,6 +427,11 @@ export default {
             type: "category",
             boundaryGap: false,
             data: [0],
+            axisLabel: {
+              textStyle: {
+                color: this.getAxisLabelColor(),
+              },
+            },
           },
         ],
         series: [],
@@ -627,6 +638,9 @@ export default {
         }`
       );
     },
+    getAxisLabelColor() {
+      return this.webTheme === "Dark" ? "white" : "black";
+    },
   },
   watch: {
     contestProblems(newVal, OldVal) {
@@ -637,8 +651,17 @@ export default {
     isContainsAfterContestJudge(newVal, OldVal) {
       this.getContestRankData(this.page);
     },
+    webTheme(newVal, OldVal) {
+      if (this.options.xAxis && this.options.yAxis) {
+        this.options.xAxis[0].axisLabel.textStyle.color =
+          this.getAxisLabelColor();
+        this.options.yAxis[0].axisLabel.textStyle.color =
+          this.getAxisLabelColor();
+      }
+    },
   },
   computed: {
+    ...mapGetters(["webTheme"]),
     contest() {
       return this.$store.state.contest.contest;
     },

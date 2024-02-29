@@ -260,7 +260,7 @@
   </div>
 </template>
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import api from "@/common/api";
 import myMessage from "@/common/message";
 import { addCodeBtn } from "@/common/codeblock";
@@ -347,6 +347,11 @@ export default {
           axisLine: {
             show: false, // 不显示坐标轴线
           },
+          axisLabel: {
+            textStyle: {
+              color: this.getAxisLabelColor(),
+            },
+          },
         },
         yAxis: {
           type: "value",
@@ -357,6 +362,9 @@ export default {
           },
           axisLine: {
             show: false, // 不显示坐标轴线
+          },
+          textStyle: {
+            color: this.getAxisLabelColor(), // 根据主题获取初始 yAxis axisLabel 文字颜色
           },
         },
         series: [],
@@ -503,11 +511,23 @@ export default {
       }
       return url;
     },
+    getAxisLabelColor() {
+      return this.webTheme === "Dark" ? "white" : "black";
+    },
+  },
+  computed: {
+    ...mapGetters(["webTheme"]),
   },
   watch: {
     $route(newVal, oldVal) {
       if (newVal !== oldVal) {
         this.init();
+      }
+    },
+    webTheme(newVal, OldVal) {
+      if (this.options.xAxis && this.options.yAxis) {
+        this.options.xAxis.axisLabel.textStyle.color = this.getAxisLabelColor();
+        this.options.yAxis.axisLabel.textStyle.color = this.getAxisLabelColor();
       }
     },
     "$store.state.language"(newVal, oldVal) {

@@ -4,7 +4,13 @@
       <div slot="header">
         <span class="panel-title home-title">{{ title }}</span>
       </div>
-      <el-form ref="form" :model="problem" :rules="rules" label-position="top" label-width="70px">
+      <el-form
+        ref="problem"
+        :model="problem"
+        :rules="rules"
+        label-position="top"
+        label-width="70px"
+      >
         <el-row :gutter="20">
           <el-col :span="24">
             <el-form-item prop="problemId" :label="$t('m.Problem_Display_ID')" required>
@@ -103,12 +109,12 @@
 
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-form-item prop="input_description" :label="$t('m.Input')" required>
+            <el-form-item prop="input" :label="$t('m.Input')" required>
               <Editor :value.sync="problem.input"></Editor>
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item prop="output_description" :label="$t('m.Output')" required>
+            <el-form-item prop="output" :label="$t('m.Output')" required>
               <Editor :value.sync="problem.output"></Editor>
             </el-form-item>
           </el-col>
@@ -648,22 +654,42 @@ export default {
     Editor,
   },
   data() {
+    const checkTitleFormat = (rule, value, callback) => {
+      // 使用正则表达式检查是否包含 '$' 字符
+      if (value && value.indexOf("$") !== -1) {
+        callback(
+          new Error(
+            this.$i18n.t("m.Title") + " " + this.$i18n.t("m.The_title_role")
+          )
+        );
+      } else {
+        callback();
+      }
+    };
     return {
       problemLastId: "",
       rules: {
-        title: {
+        title: [
+          {
+            required: true,
+            message: this.$i18n.t("m.Title_Required"),
+            trigger: "blur",
+          },
+          {
+            validator: checkTitleFormat, // 使用自定义验证规则
+            trigger: "blur",
+            message:
+              this.$i18n.t("m.Title") + " " + this.$i18n.t("m.The_title_role"),
+          },
+        ],
+        input: {
           required: true,
-          message: "Title is required",
+          message: this.$i18n.t("m.Input_Description_Required"),
           trigger: "blur",
         },
-        input_description: {
+        output: {
           required: true,
-          message: "Input Description is required",
-          trigger: "blur",
-        },
-        output_description: {
-          required: true,
-          message: "Output Description is required",
+          message: this.$i18n.t("m.Output_Description_Required"),
           trigger: "blur",
         },
       },
@@ -1302,6 +1328,36 @@ export default {
       });
     },
     submit() {
+      if (!this.problem.problemId) {
+        myMessage.error(
+          this.$i18n.t("m.Problem_Display_ID") +
+            " " +
+            this.$i18n.t("m.is_required")
+        );
+        return;
+      }
+
+      // 符合规范
+      if (this.contestID) {
+        if (
+          utils.getValidateField(
+            this.contestProblem.displayId,
+            "Contest_Display_ID"
+          )
+        ) {
+          return;
+        }
+
+        if (
+          utils.getValidateField(
+            this.contestProblem.displayTitle,
+            "Contest_Display_Title"
+          )
+        ) {
+          return;
+        }
+      }
+
       if (!this.problem.problemId) {
         myMessage.error(
           this.$i18n.t("m.Problem_Display_ID") +

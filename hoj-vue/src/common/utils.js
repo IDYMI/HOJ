@@ -4,6 +4,7 @@ import { STORAGE_KEY, PROBLEM_LEVEL, FOCUS_MODE_ROUTE_NAME, PROBLEM_TYPE } from 
 import myMessage from '@/common/message';
 import api from '@/common/api';
 import store from '@/store';
+import i18n from '@/i18n';
 
 // function submissionMemoryFormat (memory) {
 //   if (memory === undefined || memory ===null || memory === '') return '--'
@@ -281,6 +282,19 @@ function getSwitchFoceusModeRouteName(routeName) {
   }
 }
 
+function getValidateField(field, fieldName) {
+  if (!field) {
+    myMessage.error(i18n.t(`m.${fieldName}`) + ' ' + i18n.t('m.is_required'));
+    return true;
+  } else {
+    if (field.indexOf('$') !== -1) {
+      myMessage.error(i18n.t(`m.${fieldName}`) + ' ' + i18n.t('m.The_title_role'));
+      return true;
+    }
+  }
+  return false;
+}
+
 export default {
   submissionMemoryFormat: submissionMemoryFormat,
   submissionTimeFormat: submissionTimeFormat,
@@ -302,4 +316,5 @@ export default {
   getFocusModeOriPage: getFocusModeOriPage,
   supportFocusMode: supportFocusMode,
   getSwitchFoceusModeRouteName: getSwitchFoceusModeRouteName,
+  getValidateField: getValidateField,
 };

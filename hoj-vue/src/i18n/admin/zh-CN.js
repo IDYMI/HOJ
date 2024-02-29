@@ -488,4 +488,12 @@ export const m = {
   Edit_Home_Rotation_Chart: '编辑首页轮播图',
   Edit_Box_File: '编辑文件名称',
   Box_File: '赛供文件',
+
+  // Validator
+  The_title_role: '不合规范（不能含有‘$’）',
+  Title_Required: '标题不能为空',
+  Input_Description_Required: '输入描述不能为空',
+  Output_Description_Required: '输出描述不能为空',
+  Rule_NotDeal: '不符合题目的规范',
+  The_username_role: '用户名不合规范（不能含有‘$’）',
 };

@@ -48,6 +48,8 @@
 <script>
 import api from "@/common/api";
 import myMessage from "@/common/message";
+import utils from "@/common/utils";
+
 export default {
   name: "add-problem-from-public",
   props: ["contestID", "trainingID"],
@@ -111,6 +113,9 @@ export default {
           "Tips"
         ).then(
           ({ value }) => {
+            if (utils.getValidateField(value, "Problem_Display_ID")) {
+              return;
+            }
             let data = {
               pid: id,
               cid: this.contestID,

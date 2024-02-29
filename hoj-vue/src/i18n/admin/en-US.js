@@ -489,4 +489,12 @@ export const m = {
   Edit_Home_Rotation_Chart: 'Edit Home Rotation Chart',
   Edit_Box_File: 'Edit Box FileName',
   Box_File: 'Offered File',
+
+  // Validator
+  The_title_role: 'is not in compliance (cannot contain $).',
+  Title_Required: 'The Title is required',
+  Input_Description_Required: 'Input Description is required',
+  Output_Description_Required: 'Output Description is required',
+  Rule_NotDeal: 'Not Deal Rules',
+  The_username_role: 'The username is not in compliance (cannot contain $).',
 };

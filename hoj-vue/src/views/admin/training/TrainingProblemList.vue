@@ -315,10 +315,10 @@ export default {
       this.currentChange(1);
     },
     addRemoteOJProblem() {
-      if (!this.otherOJProblemId) {
-        myMessage.error(this.$i18n.t("m.Problem_ID_is_required"));
+      if (utils.getValidateField(this.otherOJProblemId, "Problem_ID")) {
         return;
       }
+
       this.addRemoteOJproblemLoading = true;
       api
         .admin_addTrainingRemoteOJProblem(

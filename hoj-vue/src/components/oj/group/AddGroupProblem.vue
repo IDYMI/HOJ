@@ -19,6 +19,8 @@
 <script>
 import api from "@/common/api";
 import mMessage from "@/common/message";
+import utils from "@/common/utils";
+
 export default {
   name: "AddProblemFromGroup",
   props: {
@@ -45,6 +47,9 @@ export default {
           "Tips"
         ).then(
           ({ value }) => {
+            if (utils.getValidateField(value, "Problem_Display_ID")) {
+              return;
+            }
             api
               .addGroupContestProblemFromGroup(
                 this.problemId,

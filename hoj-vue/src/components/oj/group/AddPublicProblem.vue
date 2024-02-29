@@ -50,6 +50,8 @@
 import api from "@/common/api";
 import mMessage from "@/common/message";
 import Pagination from "@/components/oj/common/Pagination";
+import utils from "@/common/utils";
+
 export default {
   name: "AddProblemFromPublic",
   components: {
@@ -131,6 +133,9 @@ export default {
           "Tips"
         ).then(
           ({ value }) => {
+            if (utils.getValidateField(value, "Problem_Display_ID")) {
+              return;
+            }
             let data = {
               pid: id,
               cid: this.contestId,

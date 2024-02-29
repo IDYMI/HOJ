@@ -602,12 +602,10 @@ export default {
         myMessage.error(this.$i18n.t("m.Problem_ID_is_required"));
         return;
       }
-
-      if (!this.displayId && this.query.contestId) {
-        myMessage.error(
-          this.$i18n.t("m.The_Problem_Display_ID_in_the_Contest_is_required")
-        );
-        return;
+      if (this.query.contestId) {
+        if (utils.getValidateField(this.displayId, "Problem_ID")) {
+          return;
+        }
       }
 
       this.addRemoteOJproblemLoading = true;

@@ -155,6 +155,9 @@
           <el-card class="box-card">
             <Markdown :isAvoidXss="contest.gid != null" :content="contest.description"></Markdown>
           </el-card>
+          <div v-if="contest.openFile">
+            <box-file :isAdmin="false" :cid="contest.id"></box-file>
+          </div>
         </el-tab-pane>
 
         <el-tab-pane name="ContestProblemList" lazy :disabled="contestMenuDisabled">

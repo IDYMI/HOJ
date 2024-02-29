@@ -100,6 +100,12 @@ public class AdminContestVO {
     @ApiModelProperty(value = "是否允许比赛结束后继续交题")
     private Boolean allowEndSubmit;
 
+    @ApiModelProperty(value = "是否开启文件柜")
+    private Boolean openFile;
+
+    @ApiModelProperty(value = "文件柜配置 json")
+    private List<ContestFileConfigVO> fileConfigList;
+
     private Date gmtCreate;
 
     private Date gmtModified;

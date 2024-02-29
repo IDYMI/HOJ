@@ -163,6 +163,20 @@ public class GroupContestManager {
             adminContestVo.setAwardConfigList(new ArrayList<>());
         }
 
+        if (contest.getOpenFile() != null && contest.getOpenFile()) {
+            try {
+                JSONObject jsonObject = JSONUtil.parseObj(contest.getFileConfig());
+                List<ContestFileConfigVO> fileConfigList = jsonObject.get("config", List.class);
+
+                adminContestVo.setFileConfigList(fileConfigList);
+
+            } catch (Exception e) {
+                adminContestVo.setFileConfigList(new ArrayList<>());
+            }
+        } else {
+            adminContestVo.setFileConfigList(new ArrayList<>());
+        }
+
         return adminContestVo;
     }
 
@@ -205,6 +219,14 @@ public class GroupContestManager {
             awardConfigList.sort(Comparator.comparingInt(ContestAwardConfigVO::getPriority));
             awardConfigJson.set("config", awardConfigList);
             contest.setAwardConfig(awardConfigJson.toString());
+        }
+
+        // 文件柜
+        if (adminContestVo.getOpenFile() != null && adminContestVo.getOpenFile()) {
+            JSONObject fileConfigJson = new JSONObject();
+            List<ContestFileConfigVO> fileConfigList = adminContestVo.getFileConfigList();
+            fileConfigJson.set("config", fileConfigList);
+            contest.setFileConfig(fileConfigJson.toString());
         }
 
         contest.setIsGroup(true);
@@ -265,6 +287,14 @@ public class GroupContestManager {
             JSONObject awardConfigJson = new JSONObject();
             awardConfigJson.set("config", awardConfigList);
             contest.setAwardConfig(awardConfigJson.toString());
+        }
+
+        // 文件柜
+        if (adminContestVo.getOpenFile() != null && adminContestVo.getOpenFile()) {
+            JSONObject fileConfigJson = new JSONObject();
+            List<ContestFileConfigVO> fileConfigList = adminContestVo.getFileConfigList();
+            fileConfigJson.set("config", fileConfigList);
+            contest.setFileConfig(fileConfigJson.toString());
         }
 
         boolean isOk = contestEntityService.saveOrUpdate(contest);

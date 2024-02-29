@@ -431,6 +431,10 @@ export const m = {
   Print_Func: '打印功能',
   Not_Support_Print: '不支持打印',
   Support_Offline_Print: '支持线下打印',
+  BoxFile_Func: '文件柜功能',
+  Not_Support_BoxFile: '不支持文件柜',
+  Support_BoxFile: '支持文件柜',
+  Edit_BoxFile: '编辑文件柜',
   Open: '开启',
   Add_Star_User_Error: '请不要重复添加已有打星用户！',
   Star_User_UserName: '打星用户（请使用登录用户名）',
@@ -474,4 +478,6 @@ export const m = {
   Url: '链接',
   Hint2: '描述',
   Edit_Home_Rotation_Chart: '编辑首页轮播图',
+  Edit_Box_File: '编辑文件名称',
+  Box_File: '赛供文件',
 };

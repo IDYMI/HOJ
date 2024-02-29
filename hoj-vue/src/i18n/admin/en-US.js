@@ -181,8 +181,8 @@ export const m = {
   Send_Test_Message: 'Send Test Message',
   DataSource_Config: 'DataSource Config',
   Please_input_your_email: 'Please input your email',
-  Related_Title : 'Title',
-  Related_IconClass : 'Icon Class',
+  Related_Title: 'Title',
+  Related_IconClass: 'Icon Class',
 
   // /views/admin/general/SysSwitch.vue
   Judge_Config: 'Judge Config',
@@ -433,6 +433,10 @@ export const m = {
   Open: 'Open',
   Not_Support_Print: 'Not Support Print',
   Support_Offline_Print: 'Support Offline Print',
+  BoxFile_Func: 'File Box',
+  Not_Support_BoxFile: 'Not Support File Box',
+  Support_BoxFile: 'Support File Box',
+  Edit_BoxFile: 'Edit File Box',
   Add_Star_User_Error: 'Please do not add existing star user repeatedly!',
   Star_User_UserName: 'Star User (Please use login username)',
   Rank_Show_Name: 'The Name Showed in The Rank',
@@ -475,4 +479,6 @@ export const m = {
   Url: 'Add Url',
   Hint2: 'Add Hint',
   Edit_Home_Rotation_Chart: 'Edit Home Rotation Chart',
+  Edit_Box_File: 'Edit Box FileName',
+  Box_File: 'Offered File',
 };

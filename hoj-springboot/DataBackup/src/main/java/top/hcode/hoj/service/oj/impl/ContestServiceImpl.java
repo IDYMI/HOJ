@@ -48,6 +48,17 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
+    public CommonResult<List<ContestFileConfigVO>> getContestFileList(Long cid) {
+        try {
+            return CommonResult.successResponse(contestManager.getContestFileList(cid));
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
+    }
+
+    @Override
     public CommonResult<Void> toRegisterContest(RegisterContestDTO registerContestDto) {
         try {
             contestManager.toRegisterContest(registerContestDto);
@@ -72,7 +83,8 @@ public class ContestServiceImpl implements ContestService {
     public CommonResult<List<ContestProblemVO>> getContestProblem(Long cid, Boolean isContainsContestEndJudge,
             Long selectedTime) {
         try {
-            return CommonResult.successResponse(contestManager.getContestProblem(cid, isContainsContestEndJudge, selectedTime));
+            return CommonResult
+                    .successResponse(contestManager.getContestProblem(cid, isContainsContestEndJudge, selectedTime));
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
         } catch (StatusForbiddenException e) {

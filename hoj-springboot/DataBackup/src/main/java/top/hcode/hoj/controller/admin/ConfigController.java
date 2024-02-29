@@ -69,6 +69,15 @@ public class ConfigController {
         return configService.editHomeCarousel(id, addLink, addHint);
     }
 
+    @RequiresRoles(value = { "root", "admin" }, logical = Logical.OR)
+    @RequestMapping(value = "/update-file-hint", method = RequestMethod.POST)
+    public CommonResult<Void> editFileHint(
+            @RequestParam("id") Long id,
+            @RequestParam("hint") String hint) {
+
+        return configService.editFileHint(id, hint);
+    }
+
     @RequiresPermissions("system_info_admin")
     @RequestMapping(value = "/set-web-config", method = RequestMethod.PUT)
     public CommonResult<Void> setWebConfig(@RequestBody WebConfigDTO config) {

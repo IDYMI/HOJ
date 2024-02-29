@@ -169,6 +169,47 @@
           </el-col>
         </el-row>
 
+        <!-- 文件柜 -->
+        <el-row :gutter="20">
+          <el-col :md="8" :xs="24">
+            <el-form-item :label="$t('m.BoxFile_Func')" required>
+              <el-switch
+                v-model="contest.openFile"
+                active-color="#13ce66"
+                :active-text="$t('m.Support_BoxFile')"
+                :inactive-text="$t('m.Not_Support_BoxFile')"
+              ></el-switch>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24" v-show="contest.openFile">
+            <el-tag
+              :key="index"
+              v-for="(file, index) in contest.fileConfigList"
+              closable
+              :color="'#409eff'"
+              effect="dark"
+              :disable-transitions="false"
+              @close="removeBoxFile(file)"
+              size="medium"
+              class="filter-item"
+            >{{ file.hint }}</el-tag>
+            <el-tag
+              v-if="contest.fileConfigList"
+              :key="contest.fileConfigList.length"
+              :color="'#409eff'"
+              effect="dark"
+              :disable-transitions="false"
+              size="medium"
+              class="filter-item"
+              @close="switchToAdmin"
+            >
+              <el-tooltip :content="$t('m.Edit_BoxFile')" placement="top">
+                <i class="el-icon-plus" @click="switchToAdmin"></i>
+              </el-tooltip>
+            </el-tag>
+          </el-col>
+        </el-row>
+
         <el-row :gutter="20">
           <el-col :span="24">
             <el-form-item :label="$t('m.Rank_Show_Name')" required>
@@ -438,6 +479,7 @@ export default {
       disableRuleType: false,
       durationText: "", // 比赛时长文本表示
       seal_rank_time: 1, // 当开启封榜模式，即实时榜单关闭时，可选择前半小时，前一小时，全程封榜,默认全程封榜
+      boxFileList: [], // 文件柜的默认文件
       contest: {
         title: "",
         description: "",
@@ -481,6 +523,8 @@ export default {
             num: 7,
           },
         ],
+        openFile: false,
+        fileConfigList: [],
       },
       formRule: {
         prefix: "",
@@ -494,6 +538,7 @@ export default {
     };
   },
   mounted() {
+    this.getBoxFileList();
     if (this.$route.name === "admin-edit-contest") {
       this.title = this.$i18n.t("m.Edit_Contest");
       this.disableRuleType = true;
@@ -513,6 +558,12 @@ export default {
         this.title = this.$i18n.t("m.Create_Contest");
         this.disableRuleType = false;
         // this.contest = {};
+      }
+    },
+    // 如果未开启文件柜
+    "contest.openFile": function (newVal, oldVal) {
+      if (newVal && this.contest.fileConfigList.length === 0) {
+        this.getBoxFileList();
       }
     },
   },
@@ -809,6 +860,24 @@ export default {
         }, 300);
       }
     },
+
+    getBoxFileList() {
+      api.getBoxFileList().then((res) => {
+        let fileList = res.data.data;
+        this.boxFileList = fileList;
+        this.contest.fileConfigList = fileList;
+      });
+    },
+    removeBoxFile(file) {
+      this.contest.fileConfigList.splice(
+        this.contest.fileConfigList.indexOf(file),
+        1
+      );
+    },
+    switchToAdmin() {
+      // 管理文件柜详情页
+      this.$router.push({ name: "admin-file" });
+    },
   },
 };
 </script>
@@ -823,5 +892,13 @@ export default {
 }
 .input-new-star-user {
   width: 200px;
+}
+.filter-item {
+  margin-right: 1em;
+  margin-top: 0.5em;
+  font-size: 13px;
+}
+.filter-item:hover {
+  cursor: pointer;
 }
 </style>

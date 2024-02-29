@@ -176,6 +176,9 @@ const ojApi = {
   getHomeCarousel() {
     return ajax('/api/home-carousel', 'get', {});
   },
+  getBoxFileList() {
+    return ajax('/api/box-file', 'get', {});
+  },
   getRecentContests() {
     return ajax('/api/get-recent-contest', 'get', {});
   },
@@ -530,6 +533,12 @@ const ojApi = {
   // 比赛详情的请求
   getContest(cid) {
     return ajax('/api/get-contest-info', 'get', {
+      params: { cid },
+    });
+  },
+  // 比赛获取文件柜
+  getContestFile(cid) {
+    return ajax('/api/get-contest-file', 'get', {
       params: { cid },
     });
   },
@@ -1472,6 +1481,14 @@ const adminApi = {
         id,
         addLink,
         addHint,
+      },
+    });
+  },
+  admin_editFileHint(id, hint) {
+    return ajax('/api/admin/config/update-file-hint', 'post', {
+      params: {
+        id,
+        hint,
       },
     });
   },

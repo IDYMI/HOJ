@@ -229,6 +229,8 @@ public class Constants {
 
         TESTCASE_TMP_FOLDER("/hoj/file/zip"),
 
+        BOXFILE_BASE_FOLDER("/hoj/file/file"),
+        
         TESTCASE_BASE_FOLDER("/hoj/testcase"),
 
         FILE_DOWNLOAD_TMP_FOLDER("/hoj/file/zip/download"),

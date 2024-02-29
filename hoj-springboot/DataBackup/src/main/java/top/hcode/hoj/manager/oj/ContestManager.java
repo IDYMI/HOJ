@@ -1,6 +1,9 @@
 package top.hcode.hoj.manager.oj;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.shiro.SecurityUtils;
@@ -137,6 +140,37 @@ public class ContestManager {
         contestInfo.setNow(new Date());
 
         return contestInfo;
+    }
+
+    public List<ContestFileConfigVO> getContestFileList(Long cid) throws StatusFailException, StatusForbiddenException {
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
+
+        ContestVO contestInfo = contestEntityService.getContestInfoById(cid);
+        if (contestInfo == null) {
+            throw new StatusFailException("对不起，该比赛不存在!");
+        }
+
+        Contest contest = contestEntityService.getById(cid);
+
+        if (contest.getIsGroup()) {
+            if (!groupValidator.isGroupMember(userRolesVo.getUid(), contest.getGid()) && !isRoot) {
+                throw new StatusForbiddenException("对不起，您无权限操作！");
+            }
+        }
+
+        List<ContestFileConfigVO> fileConfigList = new ArrayList<>();
+        if (contest.getOpenFile() != null && contest.getOpenFile()) {
+            try {
+                JSONObject jsonObject = JSONUtil.parseObj(contest.getFileConfig());
+                fileConfigList = jsonObject.get("config", List.class);
+            } catch (Exception e) {
+                throw new StatusFailException("对不起，该比赛文件信息不存在!");
+            }
+        }
+        return fileConfigList;
     }
 
     public void toRegisterContest(RegisterContestDTO registerContestDto)

@@ -117,6 +117,12 @@ public class Contest implements Serializable {
     @ApiModelProperty(value = "是否允许比赛结束后继续交题")
     private Boolean allowEndSubmit;
 
+    @ApiModelProperty(value = "是否开启文件柜")
+    private Boolean openFile;
+
+    @ApiModelProperty(value = "文件柜配置 json")
+    private String fileConfig;
+
     @TableField(fill = FieldFill.INSERT)
     private Date gmtCreate;
 

@@ -109,6 +109,20 @@ public class AdminContestManager {
             adminContestVo.setAwardConfigList(new ArrayList<>());
         }
 
+        // 文件柜功能
+        if (contest.getOpenFile() != null && contest.getOpenFile()) {
+            try {
+                JSONObject jsonObject = JSONUtil.parseObj(contest.getFileConfig());
+                List<ContestFileConfigVO> fileConfigList = jsonObject.get("config", List.class);
+
+                adminContestVo.setFileConfigList(fileConfigList);
+
+            } catch (Exception e) {
+                adminContestVo.setFileConfigList(new ArrayList<>());
+            }
+        } else {
+            adminContestVo.setFileConfigList(new ArrayList<>());
+        }
         return adminContestVo;
     }
 
@@ -159,6 +173,14 @@ public class AdminContestManager {
             contest.setAwardConfig(awardConfigJson.toString());
         }
 
+        // 文件柜
+        if (adminContestVo.getOpenFile() != null && adminContestVo.getOpenFile()) {
+            JSONObject fileConfigJson = new JSONObject();
+            List<ContestFileConfigVO> fileConfigList = adminContestVo.getFileConfigList();
+            fileConfigJson.set("config", fileConfigList);
+            contest.setFileConfig(fileConfigJson.toString());
+        }
+
         boolean isOk = contestEntityService.save(contest);
         if (!isOk) { // 删除成功
             throw new StatusFailException("添加失败");
@@ -207,6 +229,14 @@ public class AdminContestManager {
             JSONObject awardConfigJson = new JSONObject();
             awardConfigJson.set("config", awardConfigList);
             contest.setAwardConfig(awardConfigJson.toString());
+        }
+
+        // 文件柜
+        if (adminContestVo.getOpenFile() != null && adminContestVo.getOpenFile()) {
+            JSONObject fileConfigJson = new JSONObject();
+            List<ContestFileConfigVO> fileConfigList = adminContestVo.getFileConfigList();
+            fileConfigJson.set("config", fileConfigList);
+            contest.setFileConfig(fileConfigJson.toString());
         }
 
         Contest oldContest = contestEntityService.getById(contest.getId());

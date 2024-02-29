@@ -58,7 +58,7 @@ public class AdminContestProblemManager {
     private ContestEntityService contestEntityService;
 
     public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword,
-            Long cid, Integer problemType, String oj)
+            Long cid, Integer problemType, String oj, Integer difficulty, Integer type)
             throws StatusForbiddenException {
 
         // 获取当前登录的用户
@@ -120,6 +120,14 @@ public class AdminContestProblemManager {
             } else {
                 problemQueryWrapper.eq("is_remote", true).likeRight("problem_id", oj);
             }
+        }
+
+        if (difficulty != null) {
+            problemQueryWrapper.eq("difficulty", difficulty);
+        }
+
+        if (type != null) {
+            problemQueryWrapper.eq("type", type);
         }
 
         if (!StringUtils.isEmpty(keyword)) {

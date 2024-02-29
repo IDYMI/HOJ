@@ -5,6 +5,14 @@
         <span class="panel-title home-title">{{ $t('m.Training_List') }}</span>
         <div class="filter-row">
           <span>
+            <el-button
+              type="primary"
+              size="small"
+              @click="goCreateTraining"
+              icon="el-icon-plus"
+            >{{ $t("m.Create") }}</el-button>
+          </span>
+          <span>
             <vxe-input
               v-model="keyword"
               :placeholder="$t('m.Enter_keyword')"
@@ -15,12 +23,32 @@
             ></vxe-input>
           </span>
           <span>
-            <el-button
-              type="primary"
+            <el-select
+              v-model="traningCategory"
+              @change="TraningListChangeFilter"
               size="small"
-              @click="goCreateTraining"
-              icon="el-icon-plus"
-            >{{ $t('m.Create') }}</el-button>
+              style="width: 180px"
+            >
+              <el-option :label="$t('m.All_Traning')" :value="0"></el-option>
+              <el-option
+                :label="category.name"
+                :key="index"
+                :value="index + 1"
+                v-for="(category, index) in categoryList"
+              ></el-option>
+            </el-select>
+          </span>
+          <span>
+            <el-select
+              v-model="traingAuth"
+              @change="TraningListChangeFilter"
+              size="small"
+              style="width: 180px"
+            >
+              <el-option :label="$t('m.All_Traning')" :value="'All'"></el-option>
+              <el-option :label="$t('m.Training_Public')" :value="'Public'"></el-option>
+              <el-option :label="$t('m.Training_Private')" :value="'Private'"></el-option>
+            </el-select>
           </span>
         </div>
       </div>
@@ -123,6 +151,9 @@ export default {
       pageSize: 10,
       total: 0,
       trainingList: [],
+      categoryList: [],
+      traningCategory: 0,
+      traingAuth: "All",
       keyword: "",
       loading: false,
       excludeAdmin: true,
@@ -135,6 +166,7 @@ export default {
   mounted() {
     this.getTrainingList(this.currentPage);
     this.TRAINING_TYPE = Object.assign({}, TRAINING_TYPE);
+    this.getTrainingCategoryList();
   },
   watch: {
     $route() {
@@ -155,16 +187,24 @@ export default {
     },
     getTrainingList(page) {
       this.loading = true;
-      api.admin_getTrainingList(page, this.pageSize, this.keyword).then(
-        (res) => {
-          this.loading = false;
-          this.total = res.data.data.total;
-          this.trainingList = res.data.data.records;
-        },
-        (res) => {
-          this.loading = false;
-        }
-      );
+      api
+        .admin_getTrainingList(
+          page,
+          this.pageSize,
+          this.keyword,
+          this.traningCategory,
+          this.traingAuth
+        )
+        .then(
+          (res) => {
+            this.loading = false;
+            this.total = res.data.data.total;
+            this.trainingList = res.data.data.records;
+          },
+          (res) => {
+            this.loading = false;
+          }
+        );
     },
     goEdit(trainingId) {
       this.$router.push({
@@ -200,6 +240,22 @@ export default {
     },
     goCreateTraining() {
       this.$router.push({ name: "admin-create-training" });
+    },
+    getTrainingCategoryList() {
+      this.getCategoryListLoading = true;
+      api.getTrainingCategoryList().then(
+        (res) => {
+          this.categoryList = res.data.data;
+          this.getCategoryListLoading = false;
+        },
+        (err) => {
+          this.getCategoryListLoading = false;
+        }
+      );
+    },
+    TraningListChangeFilter() {
+      this.currentPage = 1;
+      this.getTrainingList();
     },
   },
 };

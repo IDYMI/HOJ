@@ -12,7 +12,7 @@ import java.util.Map;
 public interface AdminContestProblemService {
 
     public CommonResult<HashMap<String, Object>> getProblemList(Integer limit, Integer currentPage, String keyword,
-            Long cid, Integer problemType, String oj);
+            Long cid, Integer problemType, String oj, Integer difficulty, Integer type);
 
     public CommonResult<Problem> getProblem(Long pid);
 

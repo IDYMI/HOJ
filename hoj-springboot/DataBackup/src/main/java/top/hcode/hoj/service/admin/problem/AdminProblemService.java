@@ -12,7 +12,7 @@ import java.util.List;
 public interface AdminProblemService {
 
     public CommonResult<IPage<Problem>> getProblemList(Integer limit, Integer currentPage, String keyword, Integer auth,
-            String oj);
+            String oj, Integer difficulty, Integer type);
 
     public CommonResult<Problem> getProblem(Long pid);
 

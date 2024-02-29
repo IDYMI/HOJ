@@ -345,6 +345,7 @@ export const m = {
   Examine: 'Examine',
 
   // /views/admin/training/TrainingList.vue
+  All_Traning: 'All Traning',
   Update_Time: 'Update Time',
   Order_Number: 'Order Number',
   View_Training_Problem_List: 'View Training Problem List',
@@ -390,6 +391,7 @@ export const m = {
   Upload_Problem_Failed: 'Upload Problem Failed',
 
   // /views/admin/contest/ContestList.vue
+  All_Contest: 'All Contest',
   Start_Time: 'Start Time',
   End_Time: 'End Time',
   Creator: 'Creator',

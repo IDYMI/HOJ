@@ -49,9 +49,12 @@ public class AdminContestController {
     @RequiresAuthentication
     public CommonResult<IPage<Contest>> getContestList(@RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "type", required = false) Integer type,
+            @RequestParam(value = "auth", required = false) Integer auth,
+            @RequestParam(value = "status", required = false) Integer status,
             @RequestParam(value = "keyword", required = false) String keyword) {
 
-        return adminContestService.getContestList(limit, currentPage, keyword);
+        return adminContestService.getContestList(limit, currentPage, type, auth, status, keyword);
     }
 
     @GetMapping("")
@@ -111,9 +114,12 @@ public class AdminContestController {
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "cid", required = true) Long cid,
             @RequestParam(value = "problemType", required = false) Integer problemType,
-            @RequestParam(value = "oj", required = false) String oj) {
+            @RequestParam(value = "oj", required = false) String oj,
+            @RequestParam(value = "difficulty", required = false) Integer difficulty,
+            @RequestParam(value = "type", required = false) Integer type) {
 
-        return adminContestProblemService.getProblemList(limit, currentPage, keyword, cid, problemType, oj);
+        return adminContestProblemService.getProblemList(limit, currentPage, keyword, cid, problemType, oj, difficulty,
+                type);
     }
 
     @GetMapping("/problem")

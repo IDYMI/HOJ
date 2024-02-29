@@ -25,8 +25,10 @@ public class AdminContestServiceImpl implements AdminContestService {
     private AdminContestManager adminContestManager;
 
     @Override
-    public CommonResult<IPage<Contest>> getContestList(Integer limit, Integer currentPage, String keyword) {
-        IPage<Contest> contestList = adminContestManager.getContestList(limit, currentPage, keyword);
+    public CommonResult<IPage<Contest>> getContestList(Integer limit, Integer currentPage, Integer type,
+            Integer auth, Integer status, String keyword) {
+        IPage<Contest> contestList = adminContestManager.getContestList(limit, currentPage, type, auth, status,
+                keyword);
         return CommonResult.successResponse(contestList);
     }
 

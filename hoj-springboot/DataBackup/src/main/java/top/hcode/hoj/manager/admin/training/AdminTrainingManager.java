@@ -15,6 +15,7 @@ import top.hcode.hoj.dao.training.MappingTrainingCategoryEntityService;
 import top.hcode.hoj.dao.training.TrainingCategoryEntityService;
 import top.hcode.hoj.dao.training.TrainingEntityService;
 import top.hcode.hoj.dao.training.TrainingRegisterEntityService;
+import top.hcode.hoj.mapper.TrainingMapper;
 import top.hcode.hoj.pojo.dto.TrainingDTO;
 import top.hcode.hoj.pojo.entity.training.MappingTrainingCategory;
 import top.hcode.hoj.pojo.entity.training.Training;
@@ -26,6 +27,7 @@ import top.hcode.hoj.validator.TrainingValidator;
 
 import javax.annotation.Resource;
 import java.util.Objects;
+import java.util.List;
 
 /**
  * @Author: Himit_ZH
@@ -54,28 +56,27 @@ public class AdminTrainingManager {
 
     @Resource
     private TrainingValidator trainingValidator;
+    
+    @Resource
+    private TrainingMapper trainingMapper;
 
-    public IPage<Training> getTrainingList(Integer limit, Integer currentPage, String keyword) {
+    public IPage<Training> getTrainingList(Integer limit, Integer currentPage, String keyword, Long categoryId,
+            String auth) {
 
         if (currentPage == null || currentPage < 1)
             currentPage = 1;
         if (limit == null || limit < 1)
             limit = 10;
-        IPage<Training> iPage = new Page<>(currentPage, limit);
-        QueryWrapper<Training> queryWrapper = new QueryWrapper<>();
-        // 过滤密码
-        queryWrapper.select(Training.class, info -> !info.getColumn().equals("private_pwd"));
-        if (!StringUtils.isEmpty(keyword)) {
-            keyword = keyword.trim();
-            queryWrapper
-                    .like("title", keyword).or()
-                    .like("id", keyword).or()
-                    .like("`rank`", keyword);
-        }
 
-        queryWrapper.eq("is_group", false).orderByAsc("`rank`");
+        // 新建分页
+        Page<Training> page = new Page<>(currentPage, limit);
 
-        return trainingEntityService.page(iPage, queryWrapper);
+        List<Training> trainingList = trainingMapper.getAdminTrainingList(page, categoryId, auth, keyword);
+
+        page.setRecords(trainingList);
+
+        return page;
+
     }
 
     public TrainingDTO getTraining(Long tid) throws StatusFailException, StatusForbiddenException {

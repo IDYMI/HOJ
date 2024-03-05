@@ -29,6 +29,9 @@ public class Judge implements Serializable {
     @TableId(value = "submit_id", type = IdType.AUTO)
     private Long submitId;
 
+    @ApiModelProperty(value = "排序后的 Id")
+    private Long sortedId;
+    
     @ApiModelProperty(value = "题目id")
     private Long pid;
 

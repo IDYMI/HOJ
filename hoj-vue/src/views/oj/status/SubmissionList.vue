@@ -103,7 +103,7 @@
           :data="submissions"
           :loading="loadingTable"
         >
-          <vxe-table-column field="submitId" :title="$t('m.Run_ID')" width="80"></vxe-table-column>
+          <vxe-table-column field="sortedId" :title="$t('m.Run_ID')" width="80"></vxe-table-column>
           <vxe-table-column field="pid" :title="$t('m.Problem')" min-width="150" show-overflow>
             <template v-slot="{ row }">
               <span
@@ -336,14 +336,25 @@
           </vxe-table-column>
         </vxe-table>
       </el-card>
-      <Pagination
-        :total="total"
-        :page-size="limit"
-        @on-change="changeRoute"
-        :current.sync="currentPage"
-        @on-page-size-change="onPageSizeChange"
-        :layout="'prev, pager, next, sizes'"
-      ></Pagination>
+      <template v-if="contestID">
+        <Pagination
+          :total="total"
+          :page-size="limit"
+          @on-change="changeRoute"
+          :current.sync="currentPage"
+          @on-page-size-change="onPageSizeChange"
+          :layout="'prev, pager, next, sizes'"
+        ></Pagination>
+      </template>
+      <template v-else>
+        <Pagination
+          :page-size="limit"
+          @on-change="changeRoute"
+          :current.sync="currentPage"
+          @on-page-size-change="onPageSizeChange"
+          :layout="'jumper, prev, pager, next, sizes'"
+        ></Pagination>
+      </template>
     </div>
     <el-dialog
       :title="$t('m.Manually_Jugde')+'(Run ID：'+changeJudgeStatus.submitId+')'"
@@ -583,7 +594,9 @@ export default {
 
         this.loadingTable = false;
         this.submissions = data.records;
-        this.total = data.total;
+        if (func !== "getSubmissionList") {
+          this.total = data.total;
+        }
 
         if (Object.keys(this.needCheckSubmitIds).length > 0) {
           this.checkSubmissionsStatus();

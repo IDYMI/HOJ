@@ -106,13 +106,12 @@
       </vxe-table>
 
       <Pagination
-        :total="total"
         :page-size.sync="limit"
         :current.sync="page"
         @on-change="getRankData"
         show-sizer
         @on-page-size-change="getRankData(1)"
-        :layout="'prev, pager, next, sizes'"
+        :layout="'jumper, prev, pager, next, sizes'"
       ></Pagination>
     </el-col>
   </el-row>
@@ -135,7 +134,6 @@ export default {
     return {
       page: 1,
       limit: 30,
-      total: 0,
       searchUser: null,
       isNew: false,
       loadingTable: false,
@@ -258,7 +256,6 @@ export default {
           if (page === 1) {
             this.changeCharts(res.data.data.records.slice(0, 10));
           }
-          this.total = res.data.data.total;
           this.dataRank = res.data.data.records;
           bar.hideLoading();
         })

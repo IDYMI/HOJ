@@ -1685,20 +1685,22 @@ const adminApi = {
     });
   },
 
-  admin_addRemoteOJProblem(name, problemId) {
+  admin_addRemoteOJProblem(name, problemId, gid) {
     return ajax('/api/admin/problem/import-remote-oj-problem', 'get', {
       params: {
         name,
         problemId,
+        gid,
       },
     });
   },
 
-  admin_addContestRemoteOJProblem(name, problemId, cid, displayId) {
+  admin_addContestRemoteOJProblem(name, problemId, gid, cid, displayId) {
     return ajax('/api/admin/contest/import-remote-oj-problem', 'get', {
       params: {
         name,
         problemId,
+        gid,
         cid,
         displayId,
       },
@@ -1876,12 +1878,23 @@ const adminApi = {
     });
   },
 
-  admin_addTrainingRemoteOJProblem(name, problemId, tid) {
+  admin_addTrainingRemoteOJProblem(name, problemId, tid, gid) {
     return ajax('/api/admin/training/import-remote-oj-problem', 'get', {
       params: {
         name,
         problemId,
         tid,
+        gid,
+      },
+    });
+  },
+
+  admin_addGroupRemoteOJProblem(name, problemId, gid) {
+    return ajax('/api/admin/group/import-remote-oj-problem', 'get', {
+      params: {
+        name,
+        problemId,
+        gid,
       },
     });
   },

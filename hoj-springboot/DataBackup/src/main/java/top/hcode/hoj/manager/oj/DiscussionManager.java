@@ -210,6 +210,12 @@ public class DiscussionManager {
         if (problemId != null) {
             QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
             problemQueryWrapper.eq("problem_id", problemId);
+            Long gid = discussion.getGid();
+            if (gid == null) {
+                problemQueryWrapper.isNull("gid");
+            } else {
+                problemQueryWrapper.eq("gid", gid);
+            }
             int problemCount = problemEntityService.count(problemQueryWrapper);
             if (problemCount == 0) {
                 throw new StatusNotFoundException("对不起，该题目不存在，无法发布题解!");

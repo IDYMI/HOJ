@@ -324,7 +324,8 @@ export default {
         .admin_addTrainingRemoteOJProblem(
           this.otherOJName,
           this.otherOJProblemId,
-          this.trainingId
+          this.trainingId,
+          null
         )
         .then(
           (res) => {

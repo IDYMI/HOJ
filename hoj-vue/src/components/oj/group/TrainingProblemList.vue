@@ -33,7 +33,7 @@
           >
             <el-option :label="$t('m.Public_Problem')" :value="1"></el-option>
             <el-option :label="$t('m.Private_Problem')" :value="2"></el-option>
-            <el-option :label="$t('m.Contest_Problem')" :value="3" :disabled="true"></el-option>
+            <el-option :label="$t('m.Contest_Problem')" :value="3"></el-option>
           </el-select>
         </template>
       </vxe-table-column>

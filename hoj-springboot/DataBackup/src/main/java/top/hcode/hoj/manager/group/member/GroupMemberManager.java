@@ -188,7 +188,7 @@ public class GroupMemberManager {
 
         GroupMember currentGroupMember = groupMemberEntityService.getOne(groupMemberQueryWrapper);
 
-        if (!isRoot && currentGroupMember == null) {
+        if (currentGroupMember == null) {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
 

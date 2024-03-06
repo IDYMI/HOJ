@@ -17,5 +17,5 @@ public interface AdminTrainingProblemService {
 
     public CommonResult<Void> addProblemFromPublic(TrainingProblemDTO trainingProblemDto);
 
-    public CommonResult<Void> importTrainingRemoteOJProblem(String name, String problemId, Long tid);
+    public CommonResult<Void> importTrainingRemoteOJProblem(String name, String problemId, Long tid, Long gid);
 }

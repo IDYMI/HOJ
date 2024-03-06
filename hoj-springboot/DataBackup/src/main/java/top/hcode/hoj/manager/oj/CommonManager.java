@@ -7,6 +7,7 @@ import com.wf.captcha.base.Captcha;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
 import top.hcode.hoj.dao.problem.*;
 import top.hcode.hoj.dao.training.TrainingCategoryEntityService;
 import top.hcode.hoj.pojo.entity.problem.*;

@@ -676,7 +676,7 @@ IF NOT EXISTS (
 	  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
 	  `avatar` varchar(255) DEFAULT NULL COMMENT '头像地址',
 	  `name` varchar(25) DEFAULT NULL COMMENT '团队名称',
-	  `short_name` varchar(10) DEFAULT NULL COMMENT '团队简称，创建题目时题号自动添加的前缀',
+	  `short_name` varchar(10) DEFAULT NULL COMMENT '团队简称',
 	  `brief` varchar(50) COMMENT '团队简介',
 	  `description` longtext COMMENT '团队介绍',
 	  `owner` varchar(255) NOT NULL COMMENT '团队拥有者用户名',

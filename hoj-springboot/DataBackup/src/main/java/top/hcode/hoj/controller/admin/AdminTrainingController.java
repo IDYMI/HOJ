@@ -33,15 +33,13 @@ public class AdminTrainingController {
     @Resource
     private AdminTrainingProblemService adminTrainingProblemService;
 
-
     @GetMapping("/get-training-list")
     @RequiresAuthentication
     public CommonResult<IPage<Training>> getTrainingList(@RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "categoryId", required = false) Long categoryId,
-            @RequestParam(value = "auth", required = false) String auth
-            ) {
+            @RequestParam(value = "auth", required = false) String auth) {
         return adminTrainingService.getTrainingList(limit, currentPage, keyword, categoryId, auth);
     }
 
@@ -113,8 +111,9 @@ public class AdminTrainingController {
     @Transactional(rollbackFor = Exception.class)
     public CommonResult<Void> importTrainingRemoteOJProblem(@RequestParam("name") String name,
             @RequestParam("problemId") String problemId,
-            @RequestParam("tid") Long tid) {
-        return adminTrainingProblemService.importTrainingRemoteOJProblem(name, problemId, tid);
+            @RequestParam("tid") Long tid,
+            @RequestParam(value = "gid", required = false) Long gid) {
+        return adminTrainingProblemService.importTrainingRemoteOJProblem(name, problemId, tid, gid);
     }
 
 }

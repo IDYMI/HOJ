@@ -18,6 +18,7 @@ import top.hcode.hoj.common.exception.StatusForbiddenException;
 import top.hcode.hoj.common.exception.StatusNotFoundException;
 import top.hcode.hoj.dao.common.AnnouncementEntityService;
 import top.hcode.hoj.dao.contest.*;
+import top.hcode.hoj.dao.group.GroupEntityService;
 import top.hcode.hoj.dao.group.GroupMemberEntityService;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.problem.*;
@@ -31,6 +32,7 @@ import top.hcode.hoj.pojo.dto.RegisterContestDTO;
 import top.hcode.hoj.pojo.dto.UserReadContestAnnouncementDTO;
 import top.hcode.hoj.pojo.entity.common.Announcement;
 import top.hcode.hoj.pojo.entity.contest.*;
+import top.hcode.hoj.pojo.entity.group.Group;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.entity.problem.*;
 import top.hcode.hoj.pojo.vo.*;
@@ -120,6 +122,9 @@ public class ContestManager {
 
     @Autowired
     private GroupManager groupManager;
+
+    @Autowired
+    private GroupEntityService groupEntityService;
 
     public IPage<ContestVO> getContestList(Integer limit, Integer currentPage, Integer status, Integer type,
             String keyword) {
@@ -285,6 +290,15 @@ public class ContestManager {
             selectedTime_date = addSeconds(contest.getStartTime(), selectedTime);
         }
 
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
+
+        if (contest.getGid() != null) {
+            Group group = groupEntityService.getById(contest.getGid());
+
+            if (group.getAuth().intValue() == Constants.Group.PROPOSITION.getAuth())
+                contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
+        }
+
         if (userRolesVo == null) { // 如果访问者没登录
             if (Objects.equals(contest.getOpenRank(), true) // 比賽開放赛外榜单
                     && contest.getStatus().intValue() != Constants.Contest.STATUS_SCHEDULED.getCode()) {
@@ -302,8 +316,6 @@ public class ContestManager {
                 throw new StatusForbiddenException("请您先登录！");
             }
         }
-
-        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         if (!Objects.equals(contest.getOpenRank(), true)) { // 当比賽没有開放赛外榜单，需要鉴权
             // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目列表，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）

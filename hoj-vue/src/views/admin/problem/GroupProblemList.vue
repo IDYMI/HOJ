@@ -81,7 +81,7 @@
           <template v-slot="{ row }">
             <el-select
               v-model="row.applyPublicProgress"
-              @change="changeProblemProgress(row.id,row.applyPublicProgress)"
+              @change="changeProblemProgress(row.id,row.title,row.applyPublicProgress)"
               size="small"
             >
               <el-option :label="$t('m.Applying')" :value="1"></el-option>
@@ -175,9 +175,10 @@ export default {
         query: this.query,
       });
     },
-    changeProblemProgress(pid, progress) {
+    changeProblemProgress(pid, problemId, progress) {
       let data = {
         pid,
+        problemId,
         progress,
       };
       api.admin_changeGroupProblemApplyProgress(data).then((res) => {

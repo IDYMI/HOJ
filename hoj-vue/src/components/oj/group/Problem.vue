@@ -13,9 +13,7 @@
                   :placeholder="$t('m.Problem_Display_ID')"
                   v-model="problem.problemId"
                   :disabled="problem.isRemote"
-                >
-                  <template slot="prepend">{{ group.shortName.toUpperCase() }}</template>
-                </el-input>
+                ></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -854,7 +852,7 @@ export default {
         }
       })
       .catch(() => {});
-    api.getLanguages(this.$route.params.problemId, false).then((res) => {
+    api.getLanguages(this.pid, false).then((res) => {
       let allLanguage = res.data.data;
       this.allLanguage = allLanguage;
       for (let i = 0; i < allLanguage.length; i++) {

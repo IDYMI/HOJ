@@ -63,6 +63,12 @@
           <el-button
             type="success"
             size="small"
+            @click="remotePage = true"
+            icon="el-icon-plus"
+          >{{ $t('m.Add_Rmote_OJ_Problem') }}</el-button>
+          <el-button
+            type="success"
+            size="small"
             @click="handleGroupPage"
             icon="el-icon-plus"
           >{{ $t('m.Add_From_Group_Problem') }}</el-button>
@@ -301,6 +307,19 @@
         @handleGroupPage="handleGroupPage"
       ></AddGroupProblem>
     </el-dialog>
+    <el-dialog
+      :title="$t('m.Add_Rmote_OJ_Problem')"
+      width="350px"
+      :visible.sync="remotePage"
+      :close-on-click-modal="false"
+    >
+      <AddRemteProblem
+        v-if="remotePage"
+        :contestId="contestId"
+        @currentChangeProblem="currentChangeProblem"
+        @handleRemotePage="handleRemotePage"
+      ></AddRemteProblem>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -313,6 +332,7 @@ import Problem from "@/components/oj/group/Problem";
 import ProblemList from "@/components/oj/group/ProblemList";
 import AddPublicProblem from "@/components/oj/group/AddPublicProblem.vue";
 import AddGroupProblem from "@/components/oj/group/AddGroupProblem.vue";
+import AddRemteProblem from "@/components/oj/group/AddRemoteProblem.vue";
 import AnnouncementList from "@/components/oj/group/AnnouncementList";
 import api from "@/common/api";
 import time from "@/common/time";
@@ -332,6 +352,7 @@ export default {
     ProblemList,
     AddPublicProblem,
     AddGroupProblem,
+    AddRemteProblem,
     AnnouncementList,
   },
   data() {
@@ -347,6 +368,7 @@ export default {
       problemPage: false,
       publicPage: false,
       groupPage: false,
+      remotePage: false,
       editProblemPage: false,
       createProblemPage: false,
       announcementPage: false,
@@ -448,6 +470,9 @@ export default {
     },
     handleGroupPage() {
       this.groupPage = !this.groupPage;
+    },
+    handleRemotePage() {
+      this.remotePage = !this.remotePage;
     },
     handleEditProblemPage() {
       this.editProblemPage = !this.editProblemPage;

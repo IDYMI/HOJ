@@ -292,7 +292,13 @@ public class ProblemManager {
      */
     public ProblemInfoVO getProblemInfo(String problemId, Long gid)
             throws StatusNotFoundException, StatusForbiddenException {
-        QueryWrapper<Problem> wrapper = new QueryWrapper<Problem>().eq("problem_id", problemId);
+        QueryWrapper<Problem> wrapper = new QueryWrapper<Problem>()
+                .eq("problem_id", problemId);
+        if (gid == null) {
+            wrapper.isNull("gid");
+        } else {
+            wrapper.eq("gid", gid);
+        }
         // 查询题目详情，题目标签，题目语言，题目做题情况
         Problem problem = problemEntityService.getOne(wrapper, false);
         if (problem == null) {

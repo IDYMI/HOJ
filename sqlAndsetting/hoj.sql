@@ -1022,7 +1022,7 @@ CREATE TABLE `group` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `avatar` varchar(255) DEFAULT NULL COMMENT '头像地址',
   `name` varchar(25) DEFAULT NULL COMMENT '团队名称',
-  `short_name` varchar(10) DEFAULT NULL COMMENT '团队简称，创建题目时题号自动添加的前缀',
+  `short_name` varchar(10) DEFAULT NULL COMMENT '团队简称',
   `brief` varchar(50) COMMENT '团队简介',
   `description` longtext COMMENT '团队介绍',
   `owner` varchar(255) NOT NULL COMMENT '团队拥有者用户名',
@@ -1068,8 +1068,8 @@ DELIMITER $$
 
 /*!50003 CREATE */ /*!50017 DEFINER = 'root'@'localhost' */ /*!50003 TRIGGER `contest_trigger` BEFORE INSERT ON `contest` FOR EACH ROW BEGIN
 set new.status=(
-	CASE 
-	  WHEN NOW() < new.start_time THEN -1 
+	CASE
+	  WHEN NOW() < new.start_time THEN -1
 	  WHEN NOW() >= new.start_time AND NOW()<new.end_time THEN  0
 	  WHEN NOW() >= new.end_time THEN 1
 	END);
@@ -1097,10 +1097,10 @@ DELIMITER $$
 
 /*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `contest_status`()
 BEGIN
-      UPDATE contest 
+      UPDATE contest
 	SET STATUS = (
-	CASE 
-	  WHEN NOW() < start_time THEN -1 
+	CASE
+	  WHEN NOW() < start_time THEN -1
 	  WHEN NOW() >= start_time AND NOW()<end_time THEN  0
 	  WHEN NOW() >= end_time THEN 1
 	END);

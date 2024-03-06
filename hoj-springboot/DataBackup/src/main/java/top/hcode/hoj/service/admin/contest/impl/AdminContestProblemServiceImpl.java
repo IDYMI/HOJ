@@ -114,9 +114,9 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
     }
 
     @Override
-    public CommonResult<Void> importContestRemoteOJProblem(String name, String problemId, Long cid, String displayId) {
+    public CommonResult<Void> importContestRemoteOJProblem(String name, String problemId, Long cid, String displayId, Long gid) {
         try {
-            adminContestProblemManager.importContestRemoteOJProblem(name, problemId, cid, displayId);
+            adminContestProblemManager.importContestRemoteOJProblem(name, problemId, cid, displayId, gid);
             return CommonResult.successResponse();
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());

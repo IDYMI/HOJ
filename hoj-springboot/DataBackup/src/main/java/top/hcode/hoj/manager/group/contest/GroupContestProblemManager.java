@@ -127,10 +127,8 @@ public class GroupContestProblemManager {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
 
-        problemDto.getProblem().setProblemId(group.getShortName() + problemDto.getProblem().getProblemId());
-
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("problem_id", problemDto.getProblem().getProblemId().toUpperCase());
+        queryWrapper.eq("problem_id", problemDto.getProblem().getProblemId().toUpperCase()).eq("gid", gid);
 
         Problem problem = problemEntityService.getOne(queryWrapper);
         if (problem != null) {

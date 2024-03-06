@@ -185,10 +185,8 @@ public class GroupProblemManager {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
 
-        problemDto.getProblem().setProblemId(group.getShortName() + problemDto.getProblem().getProblemId());
-
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
-        problemQueryWrapper.eq("problem_id", problemDto.getProblem().getProblemId().toUpperCase());
+        problemQueryWrapper.eq("problem_id", problemDto.getProblem().getProblemId().toUpperCase()).eq("gid", gid);
         int sameProblemIDCount = problemEntityService.count(problemQueryWrapper);
         if (sameProblemIDCount > 0) {
             throw new StatusFailException("该题目的Problem ID已存在，请更换！");
@@ -254,11 +252,8 @@ public class GroupProblemManager {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
 
-        problemDto.getProblem().setProblemId(group.getShortName() + problemDto.getProblem().getProblemId());
-        String problemId = problemDto.getProblem().getProblemId().toUpperCase();
-
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
-        problemQueryWrapper.eq("problem_id", problemId);
+        problemQueryWrapper.eq("problem_id", problemDto.getProblem().getProblemId().toUpperCase()).eq("gid", gid);
 
         Problem existedProblem = problemEntityService.getOne(problemQueryWrapper);
 
@@ -292,7 +287,7 @@ public class GroupProblemManager {
             if (existedProblem == null) {
                 UpdateWrapper<Judge> judgeUpdateWrapper = new UpdateWrapper<>();
                 judgeUpdateWrapper.eq("pid", problemDto.getProblem().getId())
-                        .set("display_pid", problemId);
+                        .set("display_pid", problemDto.getProblem().getProblemId().toUpperCase());
                 judgeEntityService.update(judgeUpdateWrapper);
             }
         } else {

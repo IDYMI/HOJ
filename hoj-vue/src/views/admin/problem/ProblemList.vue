@@ -618,6 +618,7 @@ export default {
       api[funcName](
         this.otherOJName,
         this.otherOJProblemId,
+        null,
         this.query.contestId,
         this.displayId
       ).then(

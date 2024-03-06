@@ -15,6 +15,11 @@ public class ChangeGroupProblemProgressDTO {
     private Long pid;
 
     /**
+     * 展示id
+     */
+    private String problemId;
+
+    /**
      * 1为申请中，2为申请通过，3为申请拒绝
      */
     private Integer progress;

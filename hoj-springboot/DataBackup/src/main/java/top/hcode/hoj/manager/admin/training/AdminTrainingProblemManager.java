@@ -271,7 +271,7 @@ public class AdminTrainingProblemManager {
         }
     }
 
-    public void importTrainingRemoteOJProblem(String name, String problemId, Long tid)
+    public void importTrainingRemoteOJProblem(String name, String problemId, Long tid, Long gid)
             throws StatusFailException, StatusForbiddenException {
 
         // 获取本场训练的信息
@@ -292,7 +292,8 @@ public class AdminTrainingProblemManager {
         }
 
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("problem_id", name.toUpperCase() + "-" + problemId);
+        queryWrapper.eq("problem_id", name.toUpperCase() + "-" + problemId.toUpperCase());
+
         Problem problem = problemEntityService.getOne(queryWrapper, false);
 
         // 如果该题目不存在，需要先导入
@@ -301,7 +302,7 @@ public class AdminTrainingProblemManager {
                 ProblemStrategy.RemoteProblemInfo otherOJProblemInfo = remoteProblemManager
                         .getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
                 if (otherOJProblemInfo != null) {
-                    problem = remoteProblemManager.adminAddOtherOJProblem(otherOJProblemInfo, name);
+                    problem = remoteProblemManager.adminAddOtherOJProblem(otherOJProblemInfo, name, gid);
                     if (problem == null) {
                         throw new StatusFailException("导入新题目失败！请重新尝试！");
                     }

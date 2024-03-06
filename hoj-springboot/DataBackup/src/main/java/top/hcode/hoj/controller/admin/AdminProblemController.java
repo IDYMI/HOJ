@@ -86,9 +86,10 @@ public class AdminProblemController {
 
     @GetMapping("/import-remote-oj-problem")
     @RequiresAuthentication
-    public CommonResult<Void> importRemoteOJProblem(@RequestParam("name") String name,
-            @RequestParam("problemId") String problemId) {
-        return adminProblemService.importRemoteOJProblem(name, problemId);
+    public CommonResult<Void> importRemoteOJProblem(@RequestParam(value = "name", required = true) String name,
+            @RequestParam(value = "problemId", required = true) String problemId,
+            @RequestParam(value = "gid", required = false) Long gid) {
+        return adminProblemService.importRemoteOJProblem(name, problemId, gid);
     }
 
     @PutMapping("/change-problem-auth")

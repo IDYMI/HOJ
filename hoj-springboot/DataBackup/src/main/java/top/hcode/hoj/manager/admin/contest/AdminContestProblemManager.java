@@ -232,6 +232,13 @@ public class AdminContestProblemManager {
 
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("problem_id", problemDto.getProblem().getProblemId().toUpperCase());
+
+        Long gid = problemDto.getProblem().getGid();
+        if (gid == null) {
+            queryWrapper.isNull("gid");
+        } else {
+            queryWrapper.eq("gid", gid);
+        }
         Problem problem = problemEntityService.getOne(queryWrapper);
         if (problem != null) {
             throw new StatusFailException("该题目的Problem ID已存在，请更换！");
@@ -260,6 +267,12 @@ public class AdminContestProblemManager {
 
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("problem_id", problemDto.getProblem().getProblemId().toUpperCase());
+        Long gid = problemDto.getProblem().getGid();
+        if (gid == null) {
+            queryWrapper.isNull("gid");
+        } else {
+            queryWrapper.eq("gid", gid);
+        }
         Problem problem = problemEntityService.getOne(queryWrapper);
 
         // 如果problem_id不是原来的且已存在该problem_id，则修改失败！
@@ -338,10 +351,16 @@ public class AdminContestProblemManager {
                 "Admin_Contest", "Add_Public_Problem", cid, pid, userRolesVo.getUid(), userRolesVo.getUsername());
     }
 
-    public void importContestRemoteOJProblem(String name, String problemId, Long cid, String displayId)
+    public void importContestRemoteOJProblem(String name, String problemId, Long cid, String displayId, Long gid)
             throws StatusFailException {
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
+
         queryWrapper.eq("problem_id", name.toUpperCase() + "-" + problemId);
+        if (gid == null) {
+            queryWrapper.isNull("gid");
+        } else {
+            queryWrapper.eq("gid", gid);
+        }
         Problem problem = problemEntityService.getOne(queryWrapper, false);
 
         // 如果该题目不存在，需要先导入
@@ -351,7 +370,7 @@ public class AdminContestProblemManager {
                 ProblemStrategy.RemoteProblemInfo otherOJProblemInfo = remoteProblemManager
                         .getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
                 if (otherOJProblemInfo != null) {
-                    problem = remoteProblemManager.adminAddOtherOJProblem(otherOJProblemInfo, name);
+                    problem = remoteProblemManager.adminAddOtherOJProblem(otherOJProblemInfo, name, gid);
                     if (problem == null) {
                         throw new StatusFailException("导入新题目失败！请重新尝试！");
                     }

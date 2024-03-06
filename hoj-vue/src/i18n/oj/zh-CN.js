@@ -701,7 +701,7 @@ export const m = {
   My_Group: '我的团队',
   No_Groups: '暂无团队',
   Group_Name: '团队名称',
-  Group_Short_Name: '团队简称（团队题目展示ID前缀）',
+  Group_Short_Name: '团队简称',
   Group_Brief: '团队简介',
   Group_Description: '团队描述',
   Group_Public: '公开团队',

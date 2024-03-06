@@ -14,6 +14,13 @@
             :icon="createPage ? 'el-icon-back' : 'el-icon-plus'"
           >{{ createPage ? $t('m.Back_To_Problem_List') : $t('m.Create') }}</el-button>
           <el-button
+            v-if="!createPage"
+            type="success"
+            size="small"
+            @click="remotePage = true"
+            icon="el-icon-plus"
+          >{{ $t('m.Add_Rmote_OJ_Problem') }}</el-button>
+          <el-button
             v-if="editPage && adminPage"
             type="primary"
             size="small"
@@ -133,6 +140,19 @@
       @handleCreatePage="handleCreatePage"
       @currentChange="currentChange"
     ></Problem>
+    <el-dialog
+      :title="$t('m.Add_Rmote_OJ_Problem')"
+      width="350px"
+      :visible.sync="remotePage"
+      :close-on-click-modal="false"
+    >
+      <AddRemteProblem
+        v-if="remotePage"
+        :contestId="contestId"
+        @handleRemotePage="handleRemotePage"
+        @currentChange="currentChange"
+      ></AddRemteProblem>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -144,12 +164,15 @@ import Pagination from "@/components/oj/common/Pagination";
 import ProblemList from "@/components/oj/group/ProblemList";
 import Problem from "@/components/oj/group/Problem";
 import api from "@/common/api";
+import AddRemteProblem from "@/components/oj/group/AddRemoteProblem.vue";
+
 export default {
   name: "GroupProblemList",
   components: {
     Pagination,
     ProblemList,
     Problem,
+    AddRemteProblem,
   },
   data() {
     return {
@@ -170,6 +193,7 @@ export default {
       adminPage: false,
       createPage: false,
       editPage: false,
+      remotePage: false,
     };
   },
   mounted() {
@@ -253,6 +277,9 @@ export default {
     },
     handleCreatePage() {
       this.createPage = !this.createPage;
+    },
+    handleRemotePage() {
+      this.remotePage = !this.remotePage;
     },
     handleEditPage() {
       this.editPage = !this.editPage;

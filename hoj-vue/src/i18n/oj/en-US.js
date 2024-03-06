@@ -701,7 +701,7 @@ export const m = {
   My_Group: 'My Group',
   No_Groups: 'No Groups',
   Group_Name: 'Group Name',
-  Group_Short_Name: 'Group Short Name(display ID prefix for group problems)',
+  Group_Short_Name: 'Group Short Name',
   Group_Brief: 'Group Brief',
   Group_Description: 'Group Description',
   Group_Public: 'Public',

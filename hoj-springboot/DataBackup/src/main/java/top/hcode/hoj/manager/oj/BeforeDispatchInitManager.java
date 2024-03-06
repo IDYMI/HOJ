@@ -86,6 +86,11 @@ public class BeforeDispatchInitManager {
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
         problemQueryWrapper.select("id", "problem_id", "auth", "is_group", "gid");
         problemQueryWrapper.eq("problem_id", problemId);
+        if (gid == null) {
+            problemQueryWrapper.isNull("gid");
+        } else {
+            problemQueryWrapper.eq("gid", gid);
+        }
         Problem problem = problemEntityService.getOne(problemQueryWrapper, false);
 
         if (problem == null) {
@@ -177,6 +182,7 @@ public class BeforeDispatchInitManager {
         }
 
         judge.setDisplayPid(problem.getProblemId());
+
         // 将新提交数据插入数据库
         judgeEntityService.save(judge);
 

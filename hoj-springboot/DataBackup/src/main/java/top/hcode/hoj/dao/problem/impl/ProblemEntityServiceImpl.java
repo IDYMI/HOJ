@@ -119,6 +119,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         }
 
         String ojName = "ME";
+
         if (problem.getIsRemote()) {
             String problemId = problem.getProblemId();
             ojName = problemId.split("-")[0];
@@ -130,8 +131,14 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         String problemId = problem.getProblemId().toUpperCase();
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
         problemQueryWrapper.eq("problem_id", problemId);
-        Problem existedProblem = problemMapper.selectOne(problemQueryWrapper);
+        Long gid = problem.getGid();
+        if (gid == null) {
+            problemQueryWrapper.isNull("gid");
+        } else {
+            problemQueryWrapper.eq("gid", gid);
+        }
 
+        Problem existedProblem = problemMapper.selectOne(problemQueryWrapper);
         problem.setProblemId(problem.getProblemId().toUpperCase());
         if (problem.getIsGroup() == null) {
             problem.setIsGroup(false);
@@ -421,6 +428,12 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             String problemId = problem.getProblemId().toUpperCase();
             QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
             problemQueryWrapper.eq("problem_id", problemId);
+            Long gid = problem.getGid();
+            if (gid == null) {
+                problemQueryWrapper.isNull("gid");
+            } else {
+                problemQueryWrapper.eq("gid", gid);
+            }
             int existedProblem = problemMapper.selectCount(problemQueryWrapper);
             if (existedProblem > 0) {
                 throw new ProblemIDRepeatException(

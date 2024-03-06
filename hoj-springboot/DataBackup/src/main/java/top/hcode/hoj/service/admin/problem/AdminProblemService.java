@@ -28,7 +28,7 @@ public interface AdminProblemService {
 
     public CommonResult compileInteractive(CompileDTO compileDTO);
 
-    public CommonResult<Void> importRemoteOJProblem(String name, String problemId);
+    public CommonResult<Void> importRemoteOJProblem(String name, String problemId, Long gid);
 
     public CommonResult<Void> changeProblemAuth(Problem problem);
 }

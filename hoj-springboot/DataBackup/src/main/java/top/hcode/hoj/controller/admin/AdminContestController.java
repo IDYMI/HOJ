@@ -177,12 +177,14 @@ public class AdminContestController {
     @GetMapping("/import-remote-oj-problem")
     @RequiresAuthentication
     @Transactional(rollbackFor = Exception.class)
-    public CommonResult<Void> importContestRemoteOJProblem(@RequestParam("name") String name,
-            @RequestParam("problemId") String problemId,
-            @RequestParam("cid") Long cid,
-            @RequestParam("displayId") String displayId) {
+    public CommonResult<Void> importContestRemoteOJProblem(
+            @RequestParam(value = "name", required = true) String name,
+            @RequestParam(value = "problemId", required = true) String problemId,
+            @RequestParam(value = "cid", required = true) Long cid,
+            @RequestParam(value = "displayId", required = true) String displayId,
+            @RequestParam(value = "gid", required = false) Long gid) {
 
-        return adminContestProblemService.importContestRemoteOJProblem(name, problemId, cid, displayId);
+        return adminContestProblemService.importContestRemoteOJProblem(name, problemId, cid, displayId, gid);
     }
 
     /**

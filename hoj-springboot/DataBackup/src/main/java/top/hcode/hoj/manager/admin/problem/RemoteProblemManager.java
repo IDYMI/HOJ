@@ -111,9 +111,16 @@ public class RemoteProblemManager {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Problem adminAddOtherOJProblem(ProblemStrategy.RemoteProblemInfo remoteProblemInfo, String OJName) {
+    public Problem adminAddOtherOJProblem(ProblemStrategy.RemoteProblemInfo remoteProblemInfo, String OJName,
+            Long gid) {
 
         Problem problem = remoteProblemInfo.getProblem();
+        problem.setGid(gid);
+
+        if (gid != null) {
+            problem.setIsGroup(true);
+        }
+
         boolean addProblemResult = problemEntityService.save(problem);
         // 为新的其它oj题目添加对应的language
         QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();

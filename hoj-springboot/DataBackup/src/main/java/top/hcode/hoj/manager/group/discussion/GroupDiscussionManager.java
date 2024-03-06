@@ -153,7 +153,7 @@ public class GroupDiscussionManager {
         String problemId = discussion.getPid();
         if (problemId != null) {
             QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
-            problemQueryWrapper.eq("problem_id", problemId);
+            problemQueryWrapper.eq("problem_id", problemId).eq("gid", gid);
             Problem problem = problemEntityService.getOne(problemQueryWrapper);
 
             if (problem == null) {

@@ -3,6 +3,7 @@ package top.hcode.hoj.manager.admin.rejudge;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.apache.shiro.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -14,6 +15,7 @@ import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.dao.user.UserAcproblemEntityService;
 import top.hcode.hoj.judge.remote.RemoteJudgeDispatcher;
 import top.hcode.hoj.judge.self.JudgeDispatcher;
+import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.pojo.entity.contest.ContestRecord;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.entity.judge.JudgeCase;
@@ -54,6 +56,9 @@ public class RejudgeManager {
     @Resource
     private RemoteJudgeDispatcher remoteJudgeDispatcher;
 
+    @Autowired
+    private GroupManager groupManager;
+
     private static List<Integer> penaltyStatus = Arrays.asList(
             Constants.Judge.STATUS_PRESENTATION_ERROR.getStatus(),
             Constants.Judge.STATUS_WRONG_ANSWER.getStatus(),
@@ -66,10 +71,16 @@ public class RejudgeManager {
 
         boolean isContestSubmission = judge.getCid() != 0;
 
+        Boolean isGroupRoot = groupManager.getGroupAuthAdmin(judge.getGid());
+
+        if (!isGroupRoot) {
+            throw new StatusFailException("您不是团队管理员，不可重判！");
+        }
+
         boolean hasSubmitIdRemoteRejudge = checkAndUpdateJudge(isContestSubmission, judge, submitId);
         // 调用判题服务
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
-        problemQueryWrapper.select("id", "is_remote", "problem_id")
+        problemQueryWrapper.select("id", "is_remote", "problem_id", "gid")
                 .eq("id", judge.getPid());
         Problem problem = problemEntityService.getOne(problemQueryWrapper);
         if (problem.getIsRemote()) { // 如果是远程oj判题
@@ -83,6 +94,13 @@ public class RejudgeManager {
 
     @Transactional(rollbackFor = Exception.class)
     public void rejudgeContestProblem(Long cid, Long pid) throws StatusFailException {
+
+        Boolean isGroupRoot = groupManager.getGroupAuthAdmin(pid);
+
+        if (!isGroupRoot) {
+            throw new StatusFailException("您不是团队管理员，不可重判！");
+        }
+
         QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("cid", cid).eq("pid", pid);
         List<Judge> rejudgeList = judgeEntityService.list(queryWrapper);
@@ -94,7 +112,7 @@ public class RejudgeManager {
         // 全部设置默认值
         checkAndUpdateJudgeBatch(rejudgeList, idMapStatus);
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
-        problemQueryWrapper.select("id", "is_remote", "problem_id")
+        problemQueryWrapper.select("id", "is_remote", "problem_id", "gid")
                 .eq("id", pid);
         Problem problem = problemEntityService.getOne(problemQueryWrapper);
         // 调用重判服务
@@ -211,12 +229,19 @@ public class RejudgeManager {
     public Judge manualJudge(Long submitId, Integer status, Integer score) throws StatusFailException {
         QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
         judgeQueryWrapper
-                .select("submit_id", "status", "judger", "cid", "pid", "uid")
+                .select("submit_id", "status", "judger", "cid", "pid", "uid", "gid")
                 .eq("submit_id", submitId);
         Judge judge = judgeEntityService.getOne(judgeQueryWrapper);
         if (judge == null) {
             throw new StatusFailException("错误：该提交数据已不存在！");
         }
+
+        Boolean isGroupRoot = groupManager.getGroupAuthAdmin(judge.getGid());
+
+        if (!isGroupRoot) {
+            throw new StatusFailException("您不是团队管理员，不可修改！");
+        }
+
         if (judge.getStatus().equals(Constants.Judge.STATUS_JUDGING.getStatus())
                 || judge.getStatus().equals(Constants.Judge.STATUS_COMPILING.getStatus())
                 || judge.getStatus().equals(Constants.Judge.STATUS_PENDING.getStatus())) {
@@ -300,13 +325,20 @@ public class RejudgeManager {
     public Judge cancelJudge(Long submitId) throws StatusFailException {
         QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
         judgeQueryWrapper
-                .select("submit_id", "status", "judger", "cid")
+                .select("submit_id", "status", "judger", "cid", "gid")
                 .eq("submit_id", submitId)
                 .last("for update");
         Judge judge = judgeEntityService.getOne(judgeQueryWrapper);
         if (judge == null) {
             throw new StatusFailException("错误：该提交数据已不存在！");
         }
+
+        Boolean isGroupRoot = groupManager.getGroupAuthAdmin(judge.getGid());
+
+        if (!isGroupRoot) {
+            throw new StatusFailException("您不是管理员，不可取消！");
+        }
+
         if (judge.getStatus().equals(Constants.Judge.STATUS_JUDGING.getStatus())
                 || judge.getStatus().equals(Constants.Judge.STATUS_COMPILING.getStatus())
                 || (judge.getStatus().equals(Constants.Judge.STATUS_PENDING.getStatus())

@@ -517,6 +517,7 @@ export const m = {
   Plagiarism_Language: 'Language',
   Plagiarism_Time: 'Time',
   Plagiarism_LanguageList: 'Language List',
+  Plagiarism_ProblemList: 'Problem List',
   Add_Moss: 'Add Moss',
   Enter_Mosskeyword: 'Enter keyword (Username)',
   Moss_View: 'View',

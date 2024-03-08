@@ -705,6 +705,12 @@ const ojApi = {
       params,
     });
   },
+  // 获取比赛题目列表
+  getContestProblemListByPid(params) {
+    return ajax('/api/get-contest-problem-list', 'get', {
+      params,
+    });
+  },
   // 获取moss查重的结果列表
   getMossList(params) {
     return ajax('/api/get-moss-list', 'get', {

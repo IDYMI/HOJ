@@ -184,6 +184,7 @@ public class MossManager {
 
         Long cid = contestMossImportDTO.getCid();
         List<String> modeList = contestMossImportDTO.getModeList();
+        List<Long> problemList = contestMossImportDTO.getProblemList();
 
         Boolean excludeAdmin = contestMossImportDTO.getExcludeAdmin();
 
@@ -235,7 +236,8 @@ public class MossManager {
             // 如果是ACM模式，则所有提交代码都要生成，如果同一题多次提交AC，加上提交Id ---> A_(666666).c
             // 如果是OI模式就生成最近一次提交即可，且带上分数 ---> A_(666666)_100.c
             List<Judge> userSubmissionList = judgeList.stream()
-                    .filter(judge -> judge.getUsername().equals(username)) // 过滤出对应用户的提交
+                    .filter(judge -> judge.getUsername().equals(username) && problemList.contains(judge.getPid())) // 过滤出对应用户的提交
+                    .filter(judge -> CollectionUtils.isEmpty(problemList) || problemList.contains(judge.getPid())) // 如果problemList不为空，则过滤出pid在problemList中的提交
                     .sorted(Comparator.comparing(Judge::getSubmitTime).reversed()) // 根据提交时间进行降序
                     .collect(Collectors.toList());
 

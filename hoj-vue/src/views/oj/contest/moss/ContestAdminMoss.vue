@@ -38,7 +38,8 @@
               ></el-switch>
             </el-form-item>
             <el-form-item :label="$t('m.Plagiarism_LanguageList')">
-              <template v-if="languageList.length > 0">
+              <br />
+              <template v-if="addMossContains.modeList.length > 0">
                 <el-row>
                   <el-tag
                     :key="index"
@@ -51,6 +52,30 @@
                     size="medium"
                     class="filter-item"
                   >{{ tag }}</el-tag>
+                </el-row>
+              </template>
+            </el-form-item>
+            <el-form-item :label="$t('m.Plagiarism_ProblemList')">
+              <br />
+              <template v-if="addMossContains.problemList.length > 0">
+                <el-row>
+                  <el-tooltip
+                    v-for="item in problemList"
+                    :key="item.pid"
+                    :content="item.displayId + ' : ' + item.displayTitle + ' ( ' + item.ac + '/' + item.total + ' )'"
+                    placement="top"
+                  >
+                    <el-tag
+                      :key="item.pid"
+                      :closable="true"
+                      :color="'#1A952D'"
+                      effect="dark"
+                      :disable-transitions="false"
+                      @close="removeProblem(item.pid)"
+                      size="medium"
+                      class="filter-item"
+                    >{{ item.pid }}</el-tag>
+                  </el-tooltip>
                 </el-row>
               </template>
             </el-form-item>
@@ -187,11 +212,12 @@ export default {
       mossVisible: false,
       mossLoading: false,
       getMossLoading: false,
-      languageList: [],
+      problemList: [],
       mossResultList: [],
       addMossContains: {
         cid: null,
         modeList: [],
+        problemList: [],
         excludeAdmin: true,
       },
     };
@@ -245,7 +271,7 @@ export default {
         this.total = res.data.data.total;
       });
     },
-    getContestLanguage() {
+    getContestMossInfo() {
       let params = {
         cid: this.contestID,
         excludeAdmin: this.addMossContains.isExcludeAdmin,
@@ -253,9 +279,17 @@ export default {
       this.mossLoading = true;
       api.getContestLanguage(params).then(
         (res) => {
-          this.languageList = res.data.data;
-          this.addMossContains.modeList = this.languageList;
-          this.mossLoading = false;
+          this.addMossContains.modeList = res.data.data;
+          api.getContestProblemList(this.contestID).then(
+            (res) => {
+              this.problemList = res.data.data;
+              this.addMossContains.problemList = this.problemPidList;
+              this.mossLoading = false;
+            },
+            () => {
+              this.mossLoading = false;
+            }
+          );
         },
         () => {
           this.mossLoading = false;
@@ -300,12 +334,21 @@ export default {
     },
     addMoss() {
       this.mossVisible = true;
-      this.getContestLanguage();
+      this.getContestMossInfo();
     },
     removeLanguage(language) {
       this.addMossContains.modeList.splice(
         this.addMossContains.modeList.indexOf(language),
         1
+      );
+    },
+    removeProblem(problem) {
+      this.addMossContains.problemList.splice(
+        this.addMossContains.problemList.indexOf(problem),
+        1
+      );
+      this.problemList = this.problemList.filter(
+        (item) => item.pid !== problem
       );
     },
   },
@@ -319,6 +362,9 @@ export default {
       });
       // Convert Set back to an array
       return Array.from(languageSet);
+    },
+    problemPidList() {
+      return this.problemList.map((item) => item.pid);
     },
   },
   beforeDestroy() {

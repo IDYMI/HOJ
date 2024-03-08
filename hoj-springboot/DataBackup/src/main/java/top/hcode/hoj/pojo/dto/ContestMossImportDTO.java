@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import java.util.List;
 
-
 /**
  *
  * @Description:
@@ -19,6 +18,8 @@ public class ContestMossImportDTO {
     private Long cid;
 
     private List<String> modeList;
+
+    private List<Long> problemList;
 
     private Boolean excludeAdmin;
 }

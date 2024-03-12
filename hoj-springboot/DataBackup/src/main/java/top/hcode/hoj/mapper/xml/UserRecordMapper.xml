@@ -62,6 +62,31 @@
         ORDER BY score DESC
     </select>
 
+    <select id="getOJRankList" resultType="top.hcode.hoj.pojo.vo.OJRankVO" useCache="true">
+        SELECT u.uuid as uid,u.nickname,u.username,left(u.signature,100) as signature,u.avatar,
+        u.title_name,u.title_color,
+        ur.*,
+        (COALESCE(ur.codeforces_ac, 0) + COALESCE(ur.nowcoder_ac, 0) + COALESCE(ur.vjudge_ac, 0) + COALESCE(ur.poj_ac, 0) + COALESCE(ur.atcode_ac, 0) + COALESCE(ur.leetcode_ac, 0)) as sum
+        FROM user_info u
+        LEFT JOIN user_record ur ON u.uuid = ur.uid
+        <where>
+            u.status = 0 AND ur.see = 1
+            <if test="isNew">
+                AND (
+                    (MONTH(NOW()) <![CDATA[<]]> 6 AND u.gmt_create >= CONCAT(YEAR(NOW()) - 1, '-06-01'))
+                    OR (MONTH(NOW()) >= 6 AND u.gmt_create >= CONCAT(YEAR(NOW()), '-06-01'))
+                )
+            </if>
+            <if test="uidList!=null">
+                AND u.uuid in
+                <foreach collection="uidList" item="uid" open="(" separator="," close=")">
+                    #{uid}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY sum DESC, codeforces_rating DESC, nowcoder_rating DESC
+    </select>
+
     <resultMap id="map_UserHomeVo" type="top.hcode.hoj.pojo.vo.UserHomeVO">
         <id column="uid" property="uid"></id>
         <result column="username" property="username"></result>
@@ -73,7 +98,6 @@
         <result column="avatar" property="avatar"></result>
         <result column="title_name" property="titleName"></result>
         <result column="title_color" property="titleColor"></result>
-        <result column="rating" property="rating"></result>
         <result column="total" property="total"></result>
         <collection property="overcomingList" ofType="java.lang.String" select="getOvercomingProblem" column="uid">
         </collection>
@@ -81,7 +105,7 @@
 
     <select id="getUserHomeInfo" resultMap="map_UserHomeVo">
         SELECT u.uuid as uid,u.username,u.nickname,u.gender,u.signature,us.school,u.github,u.blog,
-        u.avatar,u.title_name,u.title_color,ur.rating,
+        u.avatar,u.title_name,u.title_color,
         (SELECT COUNT( pid ) FROM judge WHERE uid = u.uuid) AS total
         FROM user_info u,user_record ur,user_sign us
         <where>

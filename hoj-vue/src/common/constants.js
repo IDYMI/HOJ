@@ -307,6 +307,8 @@ export const RULE_TYPE = {
   OI: 1,
   NewACM: 2,
   NewOI: 3,
+  OJ: 4,
+  NewOJ: 5,
 };
 
 export const CONTEST_TYPE_REVERSE = {

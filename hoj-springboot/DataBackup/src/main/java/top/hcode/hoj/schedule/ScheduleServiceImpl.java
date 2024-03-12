@@ -21,18 +21,21 @@ import top.hcode.hoj.dao.common.FileEntityService;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.msg.AdminSysNoticeEntityService;
 import top.hcode.hoj.dao.msg.UserSysNoticeEntityService;
+import top.hcode.hoj.dao.multiOj.UserMultiOjEntityService;
 import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.dao.user.SessionEntityService;
 import top.hcode.hoj.dao.user.UserInfoEntityService;
 import top.hcode.hoj.dao.user.UserRecordEntityService;
+import top.hcode.hoj.manager.admin.multiOj.MultiOjInfoManager;
 import top.hcode.hoj.manager.msg.AdminNoticeManager;
+import top.hcode.hoj.pojo.dto.MultiOjDto;
 import top.hcode.hoj.pojo.entity.common.File;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.entity.msg.AdminSysNotice;
 import top.hcode.hoj.pojo.entity.msg.UserSysNotice;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.user.Session;
-import top.hcode.hoj.pojo.entity.user.UserInfo;
+import top.hcode.hoj.pojo.entity.user.UserMultiOj;
 import top.hcode.hoj.pojo.entity.user.UserRecord;
 import top.hcode.hoj.service.admin.rejudge.RejudgeService;
 import top.hcode.hoj.utils.Constants;
@@ -107,6 +110,12 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Resource
     private ApplicationContext applicationContext;
 
+    @Resource
+    private MultiOjInfoManager multiOjInfoManager;
+
+    @Autowired
+    private UserMultiOjEntityService userMultiOjEntityService;
+
     /**
      * @MethodName deleteAvatar
      * @Params * @param null
@@ -180,7 +189,7 @@ public class ScheduleServiceImpl implements ScheduleService {
      * endTime: "2020-11-08T08:00:00Z",
      */
     // @Scheduled(cron = "0 0 0/2 * * *")
-    // // @Scheduled(cron = "0/5 * * * * *")
+    // @Scheduled(cron = "0/5 * * * * *")
     // @Override
     // public void getOjContestsList() {
     //     // 待格式化的API，需要填充年月查询
@@ -198,7 +207,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     //         try {
     //             // 连接api，获取json格式对象
     //             JSONObject resultObject = JsoupUtils
-    //                     .getJsonFromConnection(JsoupUtils.getConnectionFromUrl(contestAPI, null, null));
+    //                     .getJsonFromConnection(JsoupUtils.getConnectionFromUrl(contestAPI, null, null, false));
     //             // 比赛列表存放在data字段中
     //             JSONArray contestsArray = resultObject.getJSONArray("data");
     //             // 牛客比赛列表按时间顺序排序，所以从后向前取可以减少不必要的遍历
@@ -238,61 +247,257 @@ public class ScheduleServiceImpl implements ScheduleService {
     // }
 
     /**
-     * 每天3点获取codeforces的rating分数
+     * 每天3点获取codeforces的信息
      */
-    // @Scheduled(cron = "0 0 3 * * *")
-    // // @Scheduled(cron = "0/5 * * * * *")
-    // @Override
-    // public void getCodeforcesRating() {
-    //     String codeforcesUserInfoAPI = "https://codeforces.com/api/user.info?handles=%s";
-    //     QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
-    //     // 查询cf_username不为空的数据
-    //     userInfoQueryWrapper.isNotNull("cf_username");
-    //     List<UserInfo> userInfoList = userInfoEntityService.list(userInfoQueryWrapper);
-    //     for (UserInfo userInfo : userInfoList) {
-    //         // 获取cf名字
-    //         String cfUsername = userInfo.getCfUsername();
-    //         // 获取uuid
-    //         String uuid = userInfo.getUuid();
-    //         // 格式化api
-    //         String ratingAPI = String.format(codeforcesUserInfoAPI, cfUsername);
-    //         try {
-    //             // 连接api，获取json格式对象
-    //             ScheduleServiceImpl service = applicationContext.getBean(ScheduleServiceImpl.class);
-    //             JSONObject resultObject = service.getCFUserInfo(ratingAPI);
-    //             // 获取状态码
-    //             String status = resultObject.getStr("status");
-    //             // 如果查无此用户，则跳过
-    //             if ("FAILED".equals(status)) {
-    //                 continue;
-    //             }
-    //             // 用户信息存放在result列表中的第0个
-    //             JSONObject cfUserInfo = resultObject.getJSONArray("result").getJSONObject(0);
-    //             // 获取cf的分数
-    //             Integer cfRating = cfUserInfo.getInt("rating", null);
-    //             UpdateWrapper<UserRecord> userRecordUpdateWrapper = new UpdateWrapper<>();
-    //             // 将对应的cf分数修改
-    //             userRecordUpdateWrapper.eq("uid", uuid).set("rating", cfRating);
-    //             boolean result = userRecordEntityService.update(userRecordUpdateWrapper);
-    //             if (!result) {
-    //                 log.error("插入UserRecord表失败------------------------------->");
-    //             }
+    @Scheduled(cron = "0 0 3 * * *")
+    // @Scheduled(cron = "0 * * * * *")
+    @Override
+    public void getCodeforcesInfo() {
+        QueryWrapper<UserMultiOj> userMultiOjQueryWrapper = new QueryWrapper<>();
+        // 查询不为空的数据
+        userMultiOjQueryWrapper.isNotNull("codeforces");
+        List<UserMultiOj> userInfoList = userMultiOjEntityService.list(userMultiOjQueryWrapper);
+        for (UserMultiOj userInfo : userInfoList) {
+            String multiOjUsername = userInfo.getCodeforces();
+            // 获取uid
+            String uid = userInfo.getUid();
+            // 获取username
+            String username = userInfo.getUsername();
+            try {
+                MultiOjDto multiOjDto = multiOjInfoManager.getMultiOjProblemInfo(username, "CF", multiOjUsername);
 
-    //         } catch (Exception e) {
-    //             log.error("爬虫爬取Codeforces Rating分数异常----------------------->{}", e.getMessage());
-    //         }
-    //         try {
-    //             TimeUnit.SECONDS.sleep(2);
-    //         } catch (InterruptedException e) {
-    //             e.printStackTrace();
-    //         }
-    //     }
-    //     log.info("获取Codeforces Rating成功！");
-    // }
+                UpdateWrapper<UserRecord> userRecordUpdateWrapper = new UpdateWrapper<>();
+
+                userRecordUpdateWrapper.eq("uid", uid)
+                        .set("codeforces_rating", multiOjDto.getRanking())
+                        .set("codeforces_max_rating", multiOjDto.getMaxRanking())
+                        .set("codeforces_ac", multiOjDto.getResolved());
+
+                boolean result = userRecordEntityService.update(userRecordUpdateWrapper);
+                if (!result) {
+                    log.error("插入UserRecord表失败------------------------------->");
+                }
+            } catch (Exception e) {
+                log.error("爬虫爬取Codeforces异常----------------------->{}", e.getMessage());
+            }
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        log.info("获取Codeforces成功！");
+    }
+
+    /**
+     * 每天3点获取nowcoder的信息
+     */
+    @Scheduled(cron = "0 0 3 * * *")
+    // @Scheduled(cron = "0 * * * * *")
+    @Override
+    public void getNowcoderInfo() {
+        QueryWrapper<UserMultiOj> userMultiOjQueryWrapper = new QueryWrapper<>();
+        // 查询不为空的数据
+        userMultiOjQueryWrapper.isNotNull("nowcoder");
+        List<UserMultiOj> userInfoList = userMultiOjEntityService.list(userMultiOjQueryWrapper);
+        for (UserMultiOj userInfo : userInfoList) {
+            String multiOjUsername = userInfo.getNowcoder();
+            // 获取uid
+            String uid = userInfo.getUid();
+            // 获取username
+            String username = userInfo.getUsername();
+            try {
+                MultiOjDto multiOjDto = multiOjInfoManager.getMultiOjProblemInfo(username, "NC", multiOjUsername);
+
+                UpdateWrapper<UserRecord> userRecordUpdateWrapper = new UpdateWrapper<>();
+
+                userRecordUpdateWrapper.eq("uid", uid)
+                        .set("nowcoder_rating", multiOjDto.getRanking())
+                        .set("nowcoder_ac", multiOjDto.getResolved());
+
+                boolean result = userRecordEntityService.update(userRecordUpdateWrapper);
+                if (!result) {
+                    log.error("插入UserRecord表失败------------------------------->");
+                }
+            } catch (Exception e) {
+                log.error("爬虫爬取Nowcoder异常----------------------->{}", e.getMessage());
+            }
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        log.info("获取Nowcoder成功！");
+    }
+
+    /**
+     * 每天3点获取vjudge的信息
+     */
+    @Scheduled(cron = "0 0 3 * * *")
+    // @Scheduled(cron = "0 * * * * *")
+    @Override
+    public void getVjudgeInfo() {
+        QueryWrapper<UserMultiOj> userMultiOjQueryWrapper = new QueryWrapper<>();
+        // 查询不为空的数据
+        userMultiOjQueryWrapper.isNotNull("vjudge");
+        List<UserMultiOj> userInfoList = userMultiOjEntityService.list(userMultiOjQueryWrapper);
+        for (UserMultiOj userInfo : userInfoList) {
+            String multiOjUsername = userInfo.getVjudge();
+            // 获取uid
+            String uid = userInfo.getUid();
+            // 获取username
+            String username = userInfo.getUsername();
+            try {
+                MultiOjDto multiOjDto = multiOjInfoManager.getMultiOjProblemInfo(username, "VJ", multiOjUsername);
+
+                UpdateWrapper<UserRecord> userRecordUpdateWrapper = new UpdateWrapper<>();
+
+                userRecordUpdateWrapper.eq("uid", uid)
+                        .set("vjudge_ac", multiOjDto.getResolved());
+
+                boolean result = userRecordEntityService.update(userRecordUpdateWrapper);
+                if (!result) {
+                    log.error("插入UserRecord表失败------------------------------->");
+                }
+            } catch (Exception e) {
+                log.error("爬虫爬取Vjudge异常----------------------->{}", e.getMessage());
+            }
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        log.info("获取Vjudge成功！");
+    }
+
+    /**
+     * 每天3点获取poj的信息
+     */
+    @Scheduled(cron = "0 0 3 * * *")
+    // @Scheduled(cron = "0 * * * * *")
+    @Override
+    public void getPojInfo() {
+        QueryWrapper<UserMultiOj> userMultiOjQueryWrapper = new QueryWrapper<>();
+        // 查询不为空的数据
+        userMultiOjQueryWrapper.isNotNull("poj");
+        List<UserMultiOj> userInfoList = userMultiOjEntityService.list(userMultiOjQueryWrapper);
+        for (UserMultiOj userInfo : userInfoList) {
+            String multiOjUsername = userInfo.getPoj();
+            // 获取uid
+            String uid = userInfo.getUid();
+            // 获取username
+            String username = userInfo.getUsername();
+            try {
+                MultiOjDto multiOjDto = multiOjInfoManager.getMultiOjProblemInfo(username, "PK", multiOjUsername);
+
+                UpdateWrapper<UserRecord> userRecordUpdateWrapper = new UpdateWrapper<>();
+
+                userRecordUpdateWrapper.eq("uid", uid)
+                        .set("poj_ac", multiOjDto.getResolved());
+
+                boolean result = userRecordEntityService.update(userRecordUpdateWrapper);
+                if (!result) {
+                    log.error("插入UserRecord表失败------------------------------->");
+                }
+            } catch (Exception e) {
+                log.error("爬虫爬取Poj异常----------------------->{}", e.getMessage());
+            }
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        log.info("获取Poj成功！");
+    }
+
+    /**
+     * 每天3点获取atcode的信息
+     */
+    @Scheduled(cron = "0 0 3 * * *")
+    // @Scheduled(cron = "0 * * * * *")
+    @Override
+    public void getAtcodeInfo() {
+        QueryWrapper<UserMultiOj> userMultiOjQueryWrapper = new QueryWrapper<>();
+        // 查询不为空的数据
+        userMultiOjQueryWrapper.isNotNull("atcode");
+        List<UserMultiOj> userInfoList = userMultiOjEntityService.list(userMultiOjQueryWrapper);
+        for (UserMultiOj userInfo : userInfoList) {
+            String multiOjUsername = userInfo.getAtcode();
+            // 获取uid
+            String uid = userInfo.getUid();
+            // 获取username
+            String username = userInfo.getUsername();
+            try {
+                MultiOjDto multiOjDto = multiOjInfoManager.getMultiOjProblemInfo(username, "AT", multiOjUsername);
+
+                UpdateWrapper<UserRecord> userRecordUpdateWrapper = new UpdateWrapper<>();
+
+                userRecordUpdateWrapper.eq("uid", uid)
+                        .set("atcode_ac", multiOjDto.getResolved());
+
+                boolean result = userRecordEntityService.update(userRecordUpdateWrapper);
+                if (!result) {
+                    log.error("插入UserRecord表失败------------------------------->");
+                }
+            } catch (Exception e) {
+                log.error("爬虫爬取Atcode异常----------------------->{}", e.getMessage());
+            }
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        log.info("获取Atcode成功！");
+    }
+
+    /**
+     * 每天3点获取leetcode的信息
+     */
+    @Scheduled(cron = "0 0 3 * * *")
+    // @Scheduled(cron = "0 * * * * *")
+    @Override
+    public void getLeetcodeInfo() {
+        QueryWrapper<UserMultiOj> userMultiOjQueryWrapper = new QueryWrapper<>();
+        // 查询不为空的数据
+        userMultiOjQueryWrapper.isNotNull("leetcode");
+        List<UserMultiOj> userInfoList = userMultiOjEntityService.list(userMultiOjQueryWrapper);
+        for (UserMultiOj userInfo : userInfoList) {
+            String multiOjUsername = userInfo.getLeetcode();
+            // 获取uid
+            String uid = userInfo.getUid();
+            // 获取username
+            String username = userInfo.getUsername();
+            try {
+                MultiOjDto multiOjDto = multiOjInfoManager.getMultiOjProblemInfo(username, "LC", multiOjUsername);
+
+                UpdateWrapper<UserRecord> userRecordUpdateWrapper = new UpdateWrapper<>();
+
+                userRecordUpdateWrapper.eq("uid", uid)
+                        .set("leetcode_ac", multiOjDto.getResolved());
+
+                boolean result = userRecordEntityService.update(userRecordUpdateWrapper);
+                if (!result) {
+                    log.error("插入UserRecord表失败------------------------------->");
+                }
+            } catch (Exception e) {
+                log.error("爬虫爬取Leetcode异常----------------------->{}", e.getMessage());
+            }
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        log.info("获取Leetcode成功！");
+    }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 1.4))
     public JSONObject getCFUserInfo(String url) throws Exception {
-        return JsoupUtils.getJsonFromConnection(JsoupUtils.getConnectionFromUrl(url, null, null));
+        return JsoupUtils.getJsonFromConnection(JsoupUtils.getConnectionFromUrl(url, null, null, false));
     }
 
     /**

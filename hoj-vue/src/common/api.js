@@ -792,6 +792,11 @@ const ojApi = {
       data,
     });
   },
+  changeUserMultiOj(data) {
+    return ajax('/api/change-userMultiOj', 'post', {
+      data,
+    });
+  },
   // 讨论页相关请求
   getCategoryList() {
     return ajax('/api/discussion-category', 'get');

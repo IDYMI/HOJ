@@ -21,7 +21,10 @@ public class JsoupUtils {
      * @return 返回一个object
      * @throws IOException
      */
-    public static Connection getConnectionFromUrl(String url, Map<String, String> params, Map<String, String> headers)
+    public static Connection getConnectionFromUrl(
+            String url, Map<String, String> params,
+            Map<String, String> headers,
+            Boolean isPost)
             throws IOException {
         // 给url添加参数
         if (params != null) {
@@ -33,14 +36,22 @@ public class JsoupUtils {
             for (Map.Entry<String, String> entry : params.entrySet()) {
                 sb.append(entry.getKey()).append("=").append(entry.getValue()).append('&');
             }
-            // 检查字符串是否以&结尾
-            if (url.endsWith("&")) {
-                // 使用substring去除末尾的&
-                url = url.substring(0, url.length() - 1);
-            }
             url = sb.toString();
         }
+        
+        // 检查字符串是否以&结尾
+        if (url.endsWith("&")) {
+            // 使用substring去除末尾的&
+            url = url.substring(0, url.length() - 1);
+        }
+
         Connection connection = Jsoup.connect(url);
+
+        // 是否为 Post 请求
+        if (isPost) {
+            connection.method(org.jsoup.Connection.Method.POST);
+        }
+
         // 设置用户代理
         connection.userAgent(
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36");

@@ -54,9 +54,6 @@ public class UserHomeVO {
     @ApiModelProperty(value = "总提交数")
     private Integer total;
 
-    @ApiModelProperty(value = "cf得分")
-    private Integer rating;
-
     @ApiModelProperty(value = "正在攻克列表")
     private List<String> overcomingList;
 

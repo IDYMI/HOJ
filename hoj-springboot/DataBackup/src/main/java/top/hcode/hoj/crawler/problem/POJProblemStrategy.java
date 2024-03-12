@@ -26,7 +26,7 @@ public class POJProblemStrategy extends ProblemStrategy {
                 Assert.isTrue(problemId.matches("[1-9]\\d*"), "POJ题号格式错误！");
                 Problem info = new Problem();
                 String url = HOST + String.format(PROBLEM_URL, problemId);
-                Connection connection = JsoupUtils.getConnectionFromUrl(url, null, null);
+                Connection connection = JsoupUtils.getConnectionFromUrl(url, null, null, false);
                 Document document = JsoupUtils.getDocument(connection, null);
                 String html = document.html();
                 html = html.replaceAll("<br>", "\n");

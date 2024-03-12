@@ -19,6 +19,7 @@ export const m = {
   NavBar_Rank: '排名',
   NavBar_ACM_Rank: 'ACM 排名',
   NavBar_OI_Rank: 'OI 排名',
+  NavBar_MultiOj_Rank: 'OJ 排行',
   NavBar_Discussion: '讨论',
   NavBar_Group: '团队',
   NavBar_About: '关于',
@@ -130,7 +131,6 @@ export const m = {
   // /components/oj/setting/UserInfo.vue
   Avatar_Setting: '头像设置',
   Upload_avatar_hint: '将头像拖放到此处，或单击此处',
-  CF_Username: 'Codeforces 用户名',
   School: '学校',
   Student_Number: '学号',
   Blog: '博客',
@@ -214,6 +214,7 @@ export const m = {
   UserInfo_Setting: '资料设置',
   Preferences_Setting: '偏好设置',
   Race_Setting: '竞赛设置',
+  Multi_Setting: '多OJ设置',
 
   // App.vue 底部文案
   Service: '服务',
@@ -248,7 +249,7 @@ export const m = {
   Recent_Contest: '近期比赛',
   Problem_ID: '题目ID',
   Total: '总数',
-  AC_Rate: 'AC 通过率',
+  AC_Rate: 'AC \n通过率',
   AC: '通过',
   Score: '分数',
 
@@ -374,6 +375,9 @@ export const m = {
 
   // /views/oj/rank/OIRank.vue
   OI_Ranklist: 'OI 排行榜',
+
+  // /views/oj/rank/OJRank.vue
+  OJ_Ranklist: 'OJ 排行榜',
 
   // /views/oj/discussion/discussionList.vue
   Go_to_problem: '前往原题',
@@ -903,6 +907,28 @@ export const m = {
   ClothesSize_Check_Required: '衣服尺寸不能为空',
   StudentNumber_Check_OnlyDigits: '学号必须全是数字',
   StudentNumber_Check_length: '长度在 6 到 15 的数字',
+
+  // /components/oj/setting/MultiOj.vue
+  Home_Multi_Oj: '国内 OJ',
+  Abroad_Multi_Oj: '国外 OJ',
+  CF_Username: 'Codeforces 用户名',
+  NC_Username: 'Nowcoder 用户名',
+  VJ_Username: 'Vjudge 用户名',
+  PK_Username: 'Poj 用户名',
+  AT_Username: 'Atcode 用户名',
+  LT_Username: 'Leetcode 用户名',
+  See_Status: '是否显示',
+  See: '显示',
+  Hide: '隐藏',
+  codeforcesAc: 'codeforces\n通过',
+  nowcoderAc: 'nowcoder\n通过',
+  vjudgeAc: 'vjudge\n通过',
+  pojAc: 'poj\n通过',
+  atcodeAc: 'atcode \n通过',
+  leetcodeAc: 'leetcode \n通过',
+  sum: '全部 \n通过',
+  codeforcesRating: 'codeforces\nnow&max 分数',
+  nowcoderRating: 'nowcoder\n分数',
 
   // TestCase
   TestCase_Copied_failed: '复制失败，内容过多，请前往下载！',

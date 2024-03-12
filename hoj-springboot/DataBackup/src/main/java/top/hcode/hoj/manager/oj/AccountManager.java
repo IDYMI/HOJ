@@ -16,6 +16,7 @@ import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.common.exception.StatusSystemErrorException;
 import top.hcode.hoj.dao.contest.ContestEntityService;
 import top.hcode.hoj.dao.contest.ContestRecordEntityService;
+import top.hcode.hoj.dao.multiOj.UserMultiOjEntityService;
 import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.dao.user.*;
 import top.hcode.hoj.manager.email.EmailManager;
@@ -24,13 +25,16 @@ import top.hcode.hoj.pojo.dto.ChangePasswordDTO;
 import top.hcode.hoj.pojo.dto.CheckUsernameOrEmailDTO;
 import top.hcode.hoj.pojo.entity.contest.ContestRecord;
 import top.hcode.hoj.pojo.entity.judge.Judge;
+import top.hcode.hoj.pojo.entity.judge.RemoteJudgeAccount;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.user.Role;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.user.Session;
 import top.hcode.hoj.pojo.entity.user.UserAcproblem;
 import top.hcode.hoj.pojo.entity.user.UserInfo;
+import top.hcode.hoj.pojo.entity.user.UserMultiOj;
 import top.hcode.hoj.pojo.entity.user.UserPreferences;
+import top.hcode.hoj.pojo.entity.user.UserRecord;
 import top.hcode.hoj.pojo.entity.user.UserSign;
 import top.hcode.hoj.pojo.vo.*;
 import top.hcode.hoj.shiro.AccountProfile;
@@ -92,6 +96,9 @@ public class AccountManager {
 
     @Autowired
     private UserSignEntityService userSignEntityService;
+
+    @Autowired
+    private UserMultiOjEntityService userMultiOjEntityService;
 
     /**
      * @MethodName checkUsernameOrEmail
@@ -643,6 +650,45 @@ public class AccountManager {
                 .setPhoneNumber(userSignVO.getPhoneNumber()));
 
         if (isOk) {
+            UserRolesVO userRoles = userRoleEntityService.getUserRoles(userRolesVo.getUid(), null);
+            // 更新session
+            BeanUtil.copyProperties(userRoles, userRolesVo);
+            UserInfoVO userInfoVO = new UserInfoVO();
+            BeanUtil.copyProperties(userRoles, userInfoVO, "roles");
+            userInfoVO.setRoleList(userRoles.getRoles().stream().map(Role::getRole).collect(Collectors.toList()));
+            return userInfoVO;
+        } else {
+            throw new StatusFailException("更新个人信息失败！");
+        }
+    }
+
+    public UserInfoVO changeUserMultiOj(UserMultiOjVO UserMultiOjVo) throws StatusFailException {
+        commonValidator.validateContentLength(UserMultiOjVo.getCodeforces(), "codeforces 用户名", 100);
+        commonValidator.validateContentLength(UserMultiOjVo.getNowcoder(), "nowcoder 用户名", 100);
+        commonValidator.validateContentLength(UserMultiOjVo.getVjudge(), "vjudge 用户名", 100);
+        commonValidator.validateContentLength(UserMultiOjVo.getPoj(), "poj 用户名", 100);
+        commonValidator.validateContentLength(UserMultiOjVo.getAtcode(), "atcode 用户名", 100);
+        commonValidator.validateContentLength(UserMultiOjVo.getLeetcode(), "leetcode 用户名", 100);
+
+        // 获取当前登录的用户
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        boolean isOk = userMultiOjEntityService.saveOrUpdate(new UserMultiOj()
+                .setUid(userRolesVo.getUid())
+                .setUsername(userRolesVo.getUsername())
+                .setCodeforces(UserMultiOjVo.getCodeforces())
+                .setNowcoder(UserMultiOjVo.getNowcoder())
+                .setVjudge(UserMultiOjVo.getVjudge())
+                .setPoj(UserMultiOjVo.getPoj())
+                .setAtcode(UserMultiOjVo.getAtcode())
+                .setLeetcode(UserMultiOjVo.getLeetcode()));
+
+        UpdateWrapper<UserRecord> userRecordUpdateWrapper = new UpdateWrapper<>();
+        userRecordUpdateWrapper.set("see", UserMultiOjVo.getSee())
+                .eq("uid", userRolesVo.getUid());
+        boolean isOk2 = userRecordEntityService.update(userRecordUpdateWrapper);
+
+        if (isOk && isOk2) {
             UserRolesVO userRoles = userRoleEntityService.getUserRoles(userRolesVo.getUid(), null);
             // 更新session
             BeanUtil.copyProperties(userRoles, userRolesVo);

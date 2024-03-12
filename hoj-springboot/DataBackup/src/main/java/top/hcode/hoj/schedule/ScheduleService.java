@@ -9,7 +9,17 @@ public interface ScheduleService {
 
     // void getOjContestsList();
 
-    // void getCodeforcesRating();
+    void getCodeforcesInfo();
+
+    void getNowcoderInfo();
+
+    void getVjudgeInfo();
+
+    void getPojInfo();
+
+    void getAtcodeInfo();
+
+    void getLeetcodeInfo();
 
     void deleteUserSession();
 

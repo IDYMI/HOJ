@@ -9,6 +9,7 @@ import top.hcode.hoj.pojo.vo.ACMRankVO;
 import top.hcode.hoj.pojo.entity.user.UserRecord;
 import top.hcode.hoj.mapper.UserRecordMapper;
 import top.hcode.hoj.pojo.vo.OIRankVO;
+import top.hcode.hoj.pojo.vo.OJRankVO;
 import top.hcode.hoj.pojo.vo.UserHomeVO;
 import top.hcode.hoj.dao.user.UserRecordEntityService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -60,6 +61,11 @@ public class UserRecordEntityServiceImpl extends ServiceImpl<UserRecordMapper, U
     @Override
     public IPage<OIRankVO> getOIRankList(Page<OIRankVO> page, List<String> uidList, Boolean isNew) {
         return userRecordMapper.getOIRankList(page, uidList, isNew);
+    }
+
+    @Override
+    public IPage<OJRankVO> getOJRankList(Page<OJRankVO> page, List<String> uidList, Boolean isNew) {
+        return userRecordMapper.getOJRankList(page, uidList, isNew);
     }
 
     @Override

@@ -37,7 +37,7 @@ public class AccountController {
     /**
      * @param uid
      * @MethodName getUserHomeInfo
-     * @Description 前端userHome用户个人主页的数据请求，主要是返回解决题目数，AC的题目列表，提交总数，AC总数，Rating分，
+     * @Description 前端userHome用户个人主页的数据请求，主要是返回解决题目数，AC的题目列表，提交总数，AC总数
      * @Return CommonResult
      * @Since 2021/01/07
      */
@@ -116,6 +116,12 @@ public class AccountController {
     @RequiresAuthentication
     public CommonResult<UserInfoVO> changeUserRace(@RequestBody UserSignVO UserSignVo) {
         return accountService.changeUserRace(UserSignVo);
+    }
+
+    @PostMapping("/change-userMultiOj")
+    @RequiresAuthentication
+    public CommonResult<UserInfoVO> changeUserMultiOj(@RequestBody UserMultiOjVO UserMultiOjVo) {
+        return accountService.changeUserMultiOj(UserMultiOjVo);
     }
 
     @GetMapping("/get-user-auth-info")

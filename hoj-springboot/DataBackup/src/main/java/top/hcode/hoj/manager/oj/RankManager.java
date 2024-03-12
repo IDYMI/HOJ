@@ -12,6 +12,7 @@ import top.hcode.hoj.pojo.entity.user.UserInfo;
 import top.hcode.hoj.pojo.entity.user.UserSign;
 import top.hcode.hoj.pojo.vo.ACMRankVO;
 import top.hcode.hoj.pojo.vo.OIRankVO;
+import top.hcode.hoj.pojo.vo.OJRankVO;
 import top.hcode.hoj.dao.user.UserInfoEntityService;
 import top.hcode.hoj.dao.user.UserRecordEntityService;
 import top.hcode.hoj.dao.user.UserSignEntityService;
@@ -103,8 +104,12 @@ public class RankManager {
             rankList = getACMRankList(limit, currentPage, uidList, true);
         } else if (type.intValue() == Constants.Contest.TYPE_NEWOI.getCode()) {
             rankList = getOIRankList(limit, currentPage, uidList, true);
+        } else if (type.intValue() == Constants.Contest.TYPE_OJ.getCode()) {
+            rankList = getOJRankList(limit, currentPage, uidList, false);
+        } else if (type.intValue() == Constants.Contest.TYPE_NEWOJ.getCode()) {
+            rankList = getOJRankList(limit, currentPage, uidList, true);
         } else {
-            throw new StatusFailException("排行榜类型代码不正确，请使用0(ACM),1(OI),2(NewACM),3(NewOI)！");
+            throw new StatusFailException("排行榜类型代码不正确，请使用0(ACM),1(OI),2(NewACM),3(NewOI),4(OJ),5(NewOJ)！");
         }
         return rankList;
     }
@@ -158,6 +163,34 @@ public class RankManager {
                 page.setSearchCount(false);
                 page.setOptimizeCountSql(false);
                 data = userRecordEntityService.getOIRankList(page, null, isNew);
+                redisUtils.set(key, data, cacheRankSecond);
+            }
+        }
+
+        return data;
+    }
+
+    private IPage<OJRankVO> getOJRankList(int limit, int currentPage, List<String> uidList, Boolean isNew) {
+
+        IPage<OJRankVO> data = null;
+        if (uidList != null) {
+            Page<OJRankVO> page = new Page<>(currentPage, limit);
+            page.setSearchCount(false);
+            page.setOptimizeCountSql(false);
+            if (uidList.size() > 0) {
+                data = userRecordEntityService.getOJRankList(page, uidList, isNew);
+            } else {
+                data = page;
+            }
+        } else {
+            String key = isNew ? Constants.Account.NEW_OJ_RANK_CACHE.getCode()
+                    : Constants.Account.OJ_RANK_CACHE.getCode() + "_" + limit + "_" + currentPage;
+            data = (IPage<OJRankVO>) redisUtils.get(key);
+            if (data == null) {
+                Page<OJRankVO> page = new Page<>(currentPage, limit);
+                page.setSearchCount(false);
+                page.setOptimizeCountSql(false);
+                data = userRecordEntityService.getOJRankList(page, null, isNew);
                 redisUtils.set(key, data, cacheRankSecond);
             }
         }

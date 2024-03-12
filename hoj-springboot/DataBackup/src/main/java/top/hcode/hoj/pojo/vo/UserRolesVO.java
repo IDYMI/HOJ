@@ -47,9 +47,6 @@ public class UserRolesVO implements Serializable {
     @ApiModelProperty(value = "真实姓名")
     private String realname;
 
-    @ApiModelProperty(value = "cf的username")
-    private String cfUsername;
-
     @ApiModelProperty(value = "github地址")
     private String github;
 
@@ -91,6 +88,27 @@ public class UserRolesVO implements Serializable {
 
     @ApiModelProperty(value = "联系方式")
     private String phoneNumber;
+
+    @ApiModelProperty(value = "codeforces 用户名")
+    private String codeforces;
+
+    @ApiModelProperty(value = "nowcoder 用户名")
+    private String nowcoder;
+
+    @ApiModelProperty(value = "vjudge 用户名")
+    private String vjudge;
+
+    @ApiModelProperty(value = "poj 用户名")
+    private String poj;
+
+    @ApiModelProperty(value = "atcode 用户名")
+    private String atcode;
+
+    @ApiModelProperty(value = "leetcode 用户名")
+    private String leetcode;
+
+    @ApiModelProperty(value = "是否显示")
+    private Boolean see;
 
     @ApiModelProperty(value = "个性签名")
     private String signature;

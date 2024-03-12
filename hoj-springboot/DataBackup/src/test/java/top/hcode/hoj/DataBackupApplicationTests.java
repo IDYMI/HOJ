@@ -148,7 +148,7 @@ public class DataBackupApplicationTests {
         String PROBLEM_URL = "/showproblem.php?pid=%s";
         Problem info = new Problem();
         String url = HOST + String.format(PROBLEM_URL, 1016);
-        Connection connection = JsoupUtils.getConnectionFromUrl(url, null, null);
+        Connection connection = JsoupUtils.getConnectionFromUrl(url, null, null, false);
         Document document = JsoupUtils.getDocument(connection, null);
         String html = document.html();
         info.setDescription(ReUtil.get(">Problem Description</div> <div class=.*?>([\\s\\S]*?)</div>", html, 1)
@@ -172,7 +172,7 @@ public class DataBackupApplicationTests {
         String problemNum = ReUtil.get("[0-9]+([A-Z]{1}[0-9]{0,1})", problemId, 1);
 
         String url = HOST + String.format(PROBLEM_URL, contestId, problemNum);
-        Connection connection = JsoupUtils.getConnectionFromUrl(url, null, null);
+        Connection connection = JsoupUtils.getConnectionFromUrl(url, null, null, false);
         Document document = JsoupUtils.getDocument(connection, null);
         String html = document.html();
         Problem info = new Problem();

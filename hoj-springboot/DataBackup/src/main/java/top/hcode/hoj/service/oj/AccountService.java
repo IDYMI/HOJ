@@ -26,5 +26,7 @@ public interface AccountService {
 
     public CommonResult<UserInfoVO> changeUserRace(UserSignVO UserSignVo);
 
+    public CommonResult<UserInfoVO> changeUserMultiOj(UserMultiOjVO UserMultiOjVo);
+
     public CommonResult<UserAuthInfoVO> getUserAuthInfo();
 }

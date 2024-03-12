@@ -108,6 +108,15 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public CommonResult<UserInfoVO> changeUserMultiOj(UserMultiOjVO UserMultiOjVo) {
+        try {
+            return CommonResult.successResponse(accountManager.changeUserMultiOj(UserMultiOjVo));
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        }
+    }
+
+    @Override
     public CommonResult<UserAuthInfoVO> getUserAuthInfo() {
         return CommonResult.successResponse(accountManager.getUserAuthInfo());
     }

@@ -10,6 +10,7 @@ import ContestList from '@/views/oj/contest/ContestList.vue';
 import Problem from '@/views/oj/problem/Problem.vue';
 import ACMRank from '@/views/oj/rank/ACMRank.vue';
 import OIRank from '@/views/oj/rank/OIRank.vue';
+import OJRank from '@/views/oj/rank/OJRank.vue';
 import ACMStaticRank from '@/views/oj/rank/ACMContestStatistic.vue';
 import ContestDetails from '@/views/oj/contest/ContestDetails.vue';
 import ACMScoreBoard from '@/views/oj/contest/outside/ACMScoreBoard.vue';
@@ -282,6 +283,12 @@ const ojRoutes = [
     name: 'OI Rank',
     component: OIRank,
     meta: { title: 'OI Rank' },
+  },
+  {
+    path: '/oj-rank',
+    name: 'OJ Rank',
+    component: OJRank,
+    meta: { title: 'OJ Rank' },
   },
   {
     path: '/acm-rank-static/:cids',

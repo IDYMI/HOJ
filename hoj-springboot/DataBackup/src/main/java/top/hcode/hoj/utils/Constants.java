@@ -131,6 +131,8 @@ public class Constants {
         TYPE_OI(1, "OI"),
         TYPE_NEWACM(2, "NEWACM"),
         TYPE_NEWOI(3, "NEWOI"),
+        TYPE_OJ(4, "OJ"),
+        TYPE_NEWOJ(5, "NEWOJ"),
 
         STATUS_SCHEDULED(-1, "Scheduled"),
         STATUS_RUNNING(0, "Running"),
@@ -234,6 +236,9 @@ public class Constants {
 
         NEW_ACM_RANK_CACHE("new_acm_rank_cache"),
         NEW_OI_RANK_CACHE("new_oi_rank_cache"),
+
+        OJ_RANK_CACHE("oj_rank_cache"),
+        NEW_OJ_RANK_CACHE("new_oj_rank_cache"),
 
         GROUP_RANK_CACHE("group_rank_cache"),
 

@@ -31,7 +31,7 @@ public class HDUProblemStrategy extends ProblemStrategy {
                 Assert.isTrue(problemId.matches("[1-9]\\d*"), "HDU题号格式错误！");
                 Problem info = new Problem();
                 String url = HOST + String.format(PROBLEM_URL, problemId);
-                Connection connection = JsoupUtils.getConnectionFromUrl(url, null, null);
+                Connection connection = JsoupUtils.getConnectionFromUrl(url, null, null, false);
                 Document document = JsoupUtils.getDocument(connection, null);
                 String html = document.html();
                 info.setProblemId(JUDGE_NAME + "-" + problemId);

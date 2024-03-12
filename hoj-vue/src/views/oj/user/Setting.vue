@@ -25,6 +25,12 @@
         </template>
         <component :is="Race"></component>
       </el-collapse-item>
+      <el-collapse-item name="MultiOj">
+        <template slot="title">
+          <i class="fa fa-gear">{{ $t("m.Multi_Setting") }}</i>
+        </template>
+        <component :is="MultiOj"></component>
+      </el-collapse-item>
     </el-collapse>
   </el-card>
 </template>
@@ -33,6 +39,7 @@ const Account = () => import("@/components/oj/setting/Account");
 const UserInfo = () => import("@/components/oj/setting/UserInfo");
 const Preferences = () => import("@/components/oj/setting/Preferences");
 const Race = () => import("@/components/oj/setting/Race");
+const MultiOj = () => import("@/components/oj/setting/MultiOj");
 
 export default {
   components: {
@@ -40,6 +47,10 @@ export default {
     UserInfo,
     Preferences,
     Race,
+    MultiOj,
+  },
+  mounted() {
+    this.activeName = [this.$route.query.active || "Preferences"];
   },
   data() {
     return {
@@ -47,6 +58,7 @@ export default {
       UserInfo: "UserInfo",
       Preferences: "Preferences",
       Race: "Race",
+      MultiOj: "MultiOj",
       activeName: ["Preferences"],
     };
   },

@@ -9,6 +9,7 @@ import top.hcode.hoj.pojo.vo.ACMRankVO;
 import top.hcode.hoj.pojo.entity.user.UserRecord;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import top.hcode.hoj.pojo.vo.OIRankVO;
+import top.hcode.hoj.pojo.vo.OJRankVO;
 import top.hcode.hoj.pojo.vo.UserHomeVO;
 
 import java.util.List;
@@ -30,6 +31,9 @@ public interface UserRecordMapper extends BaseMapper<UserRecord> {
     List<ACMRankVO> getRecent7ACRank();
 
     IPage<OIRankVO> getOIRankList(Page<OIRankVO> page, @Param("uidList") List<String> uidList,
+            @Param("isNew") Boolean isNew);
+
+    IPage<OJRankVO> getOJRankList(Page<OJRankVO> page, @Param("uidList") List<String> uidList,
             @Param("isNew") Boolean isNew);
 
     UserHomeVO getUserHomeInfo(@Param("uid") String uid, @Param("username") String username);

@@ -1653,3 +1653,96 @@ DELIMITER ;
 CALL add_JudgeCase_Content;
 
 DROP PROCEDURE add_JudgeCase_Content;
+
+/*
+* 添加用户 OJ 信息表
+
+*/
+DROP PROCEDURE
+IF EXISTS add_user_remoteOj;
+DELIMITER $$
+
+CREATE PROCEDURE add_user_remoteOj ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'user_multi_oj'
+) THEN
+	CREATE TABLE `user_multi_oj` (
+	  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+	  `uid` varchar(32) NOT NULL COMMENT '用户id',
+	  `username` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+      `codeforces` varchar(255) DEFAULT NULL COMMENT 'codeforces的username',
+      `nowcoder` varchar(255) DEFAULT NULL COMMENT 'nowcoder的username',
+      `vjudge` varchar(255) DEFAULT NULL COMMENT 'vjudge的username',
+      `poj` varchar(255) DEFAULT NULL COMMENT 'poj的username',
+      `atcode` varchar(255) DEFAULT NULL COMMENT 'atcode的username',
+      `leetcode` varchar(255) DEFAULT NULL COMMENT 'leetcode的username',
+	  `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	  `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	  PRIMARY KEY (`id`,`uid`),
+	  KEY `uid` (`uid`),
+	  CONSTRAINT `user_multi_oj_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `user_info` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_user_remoteOj ;
+
+DROP PROCEDURE add_user_remoteOj;
+
+/*
+* 批量转移 oj 信息
+
+*/
+INSERT INTO user_multi_oj (`uid`, `username`, `codeforces`)
+SELECT `uuid`, `username`, `cf_username`
+FROM user_info;
+
+
+/*
+* 增加 user_record 表的内容
+
+*/
+DROP PROCEDURE
+IF EXISTS add_userRecord;
+DELIMITER $$
+
+CREATE PROCEDURE add_userRecord ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'user_record'
+	AND column_name = 'codeforces_rating'
+) THEN
+
+	ALTER TABLE `hoj`.`user_record`  ADD COLUMN `codeforces_rating` int COMMENT 'codeforces 分数';
+	ALTER TABLE `hoj`.`user_record`  ADD COLUMN `codeforces_max_rating` int COMMENT 'codeforces 最大分数';
+	ALTER TABLE `hoj`.`user_record`  ADD COLUMN `nowcoder_rating` int COMMENT 'nowcoder 分数';
+	ALTER TABLE `hoj`.`user_record`  ADD COLUMN `codeforces_ac` int COMMENT 'codeforces AC';
+	ALTER TABLE `hoj`.`user_record`  ADD COLUMN `nowcoder_ac` int COMMENT 'nowcoder AC';
+	ALTER TABLE `hoj`.`user_record`  ADD COLUMN `vjudge_ac` int COMMENT 'vjudge AC';
+	ALTER TABLE `hoj`.`user_record`  ADD COLUMN `poj_ac` int COMMENT 'poj AC';
+	ALTER TABLE `hoj`.`user_record`  ADD COLUMN `atcode_ac` int COMMENT 'atcode AC';
+	ALTER TABLE `hoj`.`user_record`  ADD COLUMN `leetcode_ac` int COMMENT 'leetcode AC';
+	ALTER TABLE `hoj`.`user_record`  ADD COLUMN `see` BOOLEAN DEFAULT 0  NULL  COMMENT '是否展示';
+
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_userRecord ;
+
+DROP PROCEDURE add_userRecord;
+

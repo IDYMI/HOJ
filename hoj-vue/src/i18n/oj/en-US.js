@@ -19,6 +19,7 @@ export const m = {
   NavBar_Rank: 'Rank',
   NavBar_ACM_Rank: 'ACM Rank',
   NavBar_OI_Rank: 'OI Rank',
+  NavBar_MultiOj_Rank: 'OJ Rank',
   NavBar_Discussion: 'Discussion',
   NavBar_Group: 'Group',
   NavBar_About: 'About',
@@ -131,7 +132,6 @@ export const m = {
   Avatar_Setting: 'Avatar Setting',
   UserInfo_Setting: 'User Info Setting',
   Upload_avatar_hint: 'Drag and drop the avatar here, or click here.',
-  CF_Username: 'Codeforces Username',
   School: 'School',
   Student_Number: 'Student Number',
   Blog: 'Blog',
@@ -215,6 +215,7 @@ export const m = {
   UserInfo_Setting: 'User Info Setting',
   Preferences_Setting: 'Preferences Setting',
   Race_Setting: 'Race Setting',
+  Multi_Setting: 'MultiOJ Setting',
 
   // App.vue 底部文案
   Service: 'Service',
@@ -374,6 +375,9 @@ export const m = {
 
   // /views/oj/rank/OIRank.vue
   OI_Ranklist: 'OI Ranklist',
+
+  // /views/oj/rank/OJRank.vue
+  OJ_Ranklist: 'OJ Ranklist',
 
   // /views/oj/discussion/discussionList.vue
   Go_to_problem: 'Go to Problem',
@@ -902,6 +906,28 @@ export const m = {
   ClothesSize_Check_length: 'The length is between 1 and 2 the specific size',
   StudentNumber_Check_OnlyDigits: 'The student Number must consist only of digits.',
   StudentNumber_Check_length: 'The length is between 6 and 15 digit characters',
+
+  // /components/oj/setting/MultiOj.vue
+  Home_Multi_Oj: 'Multi Home Oj',
+  Abroad_Multi_Oj: 'Multi Abroad Oj',
+  CF_Username: 'Codeforces Username',
+  NC_Username: 'Nowcoder Username',
+  VJ_Username: 'Vjudge Username',
+  PK_Username: 'Poj Username',
+  AT_Username: 'Atcode Username',
+  LT_Username: 'Leetcode Username',
+  See_Status: 'See Status',
+  See: 'See',
+  Hide: 'Hide',
+  codeforcesAc: 'codeforces\nAC',
+  nowcoderAc: 'nowcoder\nAC',
+  vjudgeAc: 'vjudge\nAC',
+  pojAc: 'poj\nAC',
+  atcodeAc: 'atcode\nAC',
+  leetcodeAc: 'leetcode\nAC',
+  sum: 'All\nAC',
+  codeforcesRating: 'codeforces\nnow&max Rating',
+  nowcoderRating: 'nowcoder\nRating',
 
   // TestCase
   TestCase_Copied_failed: 'Copied failed, Has Too Much Memory, Please Download it !',

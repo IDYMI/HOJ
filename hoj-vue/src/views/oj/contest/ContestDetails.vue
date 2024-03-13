@@ -404,8 +404,24 @@
               <el-form-item prop="ename" :label="$t('m.Ename')" required>
                 <el-input v-model="contestSign.ename" size="small" :maxlength="20"></el-input>
               </el-form-item>
-              <el-form-item :label="$t('m.Team_School')">
-                <el-input v-model="contestSign.school" size="small" :maxlength="20"></el-input>
+              <el-form-item prop="school" :label="$t('m.Team_School')">
+                <el-select
+                  v-model="contestSign.school"
+                  filterable
+                  remote
+                  reserve-keyword
+                  :placeholder="$t('m.Enter_Your_School')"
+                  :remote-method="fetchStates"
+                  :loading="loading"
+                  style="width: 100%;"
+                >
+                  <el-option
+                    v-for="state in filteredStates"
+                    :key="state.value"
+                    :label="state.label"
+                    :value="state.value"
+                  ></el-option>
+                </el-select>
               </el-form-item>
               <el-form-item>
                 <el-col :span="24" style="margin-top: 10px; margin-bottom: 10px">
@@ -730,8 +746,35 @@ export default {
             trigger: "blur",
           },
         ],
+        school: [
+          {
+            pattern: /^[\u4e00-\u9fa5\d]*[\u4e00-\u9fa5]+[\u4e00-\u9fa5\d]*$/,
+            min: 2,
+            max: 15,
+            message: this.$i18n.t("m.School_Check_length"),
+            trigger: "blur",
+          },
+          {
+            validator: (rule, value, callback) => {
+              if (value === null || value === "") {
+                callback();
+              } else if (!this.states.find((item) => item.name === value)) {
+                callback(new Error(this.$i18n.t("m.Not_Find_School")));
+              } else {
+                callback();
+              }
+            },
+            trigger: "blur",
+          },
+        ],
       },
+      filteredStates: [],
+      loading: false,
+      states: [],
     };
+  },
+  mounted() {
+    this.getSchoolList();
   },
   created() {
     this.contestID = this.$route.params.contestID;
@@ -1007,6 +1050,31 @@ export default {
         "el-icon-success": status === 1,
         "el-icon-error": status === 2,
       };
+    },
+    getSchoolList() {
+      api.getSchoolList().then(
+        (res) => {
+          this.states = res.data.data;
+        },
+        (_) => {
+          this.states = [];
+        }
+      );
+    },
+    fetchStates(query) {
+      if (query !== "") {
+        this.loading = true;
+        setTimeout(() => {
+          this.loading = false;
+          this.filteredStates = this.states
+            .filter((state) => {
+              return state.name.toLowerCase().indexOf(query.toLowerCase()) > -1;
+            })
+            .map((state) => ({ label: state.name, value: state.name }));
+        }, 200);
+      } else {
+        this.filteredStates = [];
+      }
     },
   },
   computed: {

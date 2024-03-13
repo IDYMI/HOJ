@@ -451,7 +451,7 @@ a:hover {
 }
 .contest-rank-user-info {
   flex: 1;
-  text-align: right;
+  text-align: center;
   min-width: 0;
 }
 

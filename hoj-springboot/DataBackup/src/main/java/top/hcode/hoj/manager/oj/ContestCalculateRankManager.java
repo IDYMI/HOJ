@@ -776,6 +776,11 @@ public class ContestCalculateRankManager {
         }
 
         int rankNum = 1;
+
+        int schoolRankNum = 1;
+        HashMap<String, Integer> firstSchoolTotalMap = new HashMap<>();
+        HashMap<String, Integer> firstSchoolRankMap = new HashMap<>();
+
         OIContestRankVO lastOIRankVo = null;
         ContestAwardConfigVO configVo = null;
         int len = orderResultList.size();
@@ -788,13 +793,40 @@ public class ContestCalculateRankManager {
             } else {
                 if (rankNum == 1) {
                     currentOIRankVo.setRank(rankNum);
+                    // 判断是不是学校的first AC
+                    if (!StringUtils.isEmpty(currentOIRankVo.getSchool())) {
+                        firstSchoolTotalMap.put(currentOIRankVo.getSchool(), currentOIRankVo.getTotalTime());
+                        firstSchoolRankMap.put(currentOIRankVo.getSchool(), schoolRankNum);
+                        currentOIRankVo.setSchoolRank(schoolRankNum);
+                        schoolRankNum++;
+                    }
                 } else {
                     // 当前用户的程序总运行时间和总得分跟前一个用户一样的话，同时前一个不应该为打星用户，排名则一样
                     if (lastOIRankVo.getTotalScore().equals(currentOIRankVo.getTotalScore())
                             && lastOIRankVo.getTotalTime().equals(currentOIRankVo.getTotalTime())) {
                         currentOIRankVo.setRank(lastOIRankVo.getRank());
+
+                        // 判断是不是学校的first AC
+                        if (!StringUtils.isEmpty(lastOIRankVo.getSchool())
+                                && firstSchoolRankMap.getOrDefault(currentOIRankVo.getSchool(), null) == null) {
+                            Integer rank = firstSchoolRankMap.getOrDefault(lastOIRankVo.getSchool(), null);
+                            Integer schoolTime = firstSchoolTotalMap.getOrDefault(lastOIRankVo.getSchool(), null);
+                            firstSchoolTotalMap.put(currentOIRankVo.getSchool(), schoolTime);
+                            firstSchoolRankMap.put(currentOIRankVo.getSchool(), rank);
+                            currentOIRankVo.setSchoolRank(rank);
+                        }
                     } else {
                         currentOIRankVo.setRank(rankNum);
+                        // 判断是不是学校的first AC
+                        if (!StringUtils.isEmpty(currentOIRankVo.getSchool())) {
+                            Integer schoolTime = firstSchoolTotalMap.getOrDefault(currentOIRankVo.getSchool(), null);
+                            if (schoolTime == null) {
+                                firstSchoolTotalMap.put(currentOIRankVo.getSchool(), currentOIRankVo.getTotalTime());
+                                firstSchoolRankMap.put(currentOIRankVo.getSchool(), schoolRankNum);
+                                currentOIRankVo.setSchoolRank(schoolRankNum);
+                                schoolRankNum++;
+                            }
+                        }
                     }
                 }
 
@@ -1067,6 +1099,11 @@ public class ContestCalculateRankManager {
 
         List<ACMContestRankVO> topACMRankVoList = new ArrayList<>();
         int rankNum = 1;
+
+        int schoolRankNum = 1;
+        HashMap<String, Long> firstSchoolTotalMap = new HashMap<>();
+        HashMap<String, Integer> firstSchoolRankMap = new HashMap<>();
+
         int len = result.size();
         ACMContestRankVO lastACMRankVo = null;
         ContestAwardConfigVO configVo = null;
@@ -1079,13 +1116,40 @@ public class ContestCalculateRankManager {
             } else {
                 if (rankNum == 1) {
                     currentACMRankVo.setRank(rankNum);
+                    // 判断是不是学校的first AC
+                    if (!StringUtils.isEmpty(currentACMRankVo.getSchool())) {
+                        firstSchoolTotalMap.put(currentACMRankVo.getSchool(), currentACMRankVo.getTotalTime());
+                        firstSchoolRankMap.put(currentACMRankVo.getSchool(), schoolRankNum);
+                        currentACMRankVo.setSchoolRank(schoolRankNum);
+                        schoolRankNum++;
+                    }
                 } else {
                     // 当前用户的总罚时和AC数跟前一个用户一样的话，同时前一个不应该为打星，排名则一样
                     if (Objects.equals(lastACMRankVo.getAc(), currentACMRankVo.getAc())
                             && lastACMRankVo.getTotalTime().equals(currentACMRankVo.getTotalTime())) {
                         currentACMRankVo.setRank(lastACMRankVo.getRank());
+
+                        // 判断是不是学校的first AC
+                        if (!StringUtils.isEmpty(lastACMRankVo.getSchool())
+                                && firstSchoolRankMap.getOrDefault(currentACMRankVo.getSchool(), null) == null) {
+                            Integer rank = firstSchoolRankMap.getOrDefault(lastACMRankVo.getSchool(), null);
+                            Long schoolTime = firstSchoolTotalMap.getOrDefault(lastACMRankVo.getSchool(), null);
+                            firstSchoolTotalMap.put(currentACMRankVo.getSchool(), schoolTime);
+                            firstSchoolRankMap.put(currentACMRankVo.getSchool(), rank);
+                            currentACMRankVo.setSchoolRank(rank);
+                        }
                     } else {
                         currentACMRankVo.setRank(rankNum);
+                        // 判断是不是学校的first AC
+                        if (!StringUtils.isEmpty(currentACMRankVo.getSchool())) {
+                            Long schoolTime = firstSchoolTotalMap.getOrDefault(currentACMRankVo.getSchool(), null);
+                            if (schoolTime == null) {
+                                firstSchoolTotalMap.put(currentACMRankVo.getSchool(), currentACMRankVo.getTotalTime());
+                                firstSchoolRankMap.put(currentACMRankVo.getSchool(), schoolRankNum);
+                                currentACMRankVo.setSchoolRank(schoolRankNum);
+                                schoolRankNum++;
+                            }
+                        }
                     }
                 }
 

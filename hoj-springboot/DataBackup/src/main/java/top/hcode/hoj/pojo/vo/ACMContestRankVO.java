@@ -18,6 +18,9 @@ public class ACMContestRankVO {
     @ApiModelProperty(value = "排名,排名为-1则为打星队伍")
     private Integer rank;
 
+    @ApiModelProperty(value = "学校排名")
+    private Integer schoolRank;
+
     @ApiModelProperty(value = "是否得奖")
     private Boolean isWinAward;
 

@@ -793,6 +793,9 @@ const ojApi = {
       data,
     });
   },
+  getSchoolList() {
+    return ajax('/api/get-school-list', 'get', {});
+  },
   changeUserRace(data) {
     return ajax('/api/change-userRace', 'post', {
       data,

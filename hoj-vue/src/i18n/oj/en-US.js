@@ -907,6 +907,8 @@ export const m = {
   ClothesSize_Check_length: 'The length is between 1 and 2 the specific size',
   StudentNumber_Check_OnlyDigits: 'The student Number must consist only of digits.',
   StudentNumber_Check_length: 'The length is between 6 and 15 digit characters',
+  Enter_Your_School: 'Enter Your School',
+  Not_Find_School: 'Don\'t Find School',
 
   // /components/oj/setting/MultiOj.vue
   Home_Multi_Oj: 'Multi Home Oj',

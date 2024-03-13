@@ -21,8 +21,24 @@
           <el-form-item prop="realname" :label="$t('m.RealName')">
             <el-input v-model="formProfile.realname" />
           </el-form-item>
-          <el-form-item prop="school" :label="$t('m.School')">
-            <el-input v-model="formProfile.school" :maxlength="20" />
+          <el-form-item prop="school" :label="$t('m.School')" label-width="auto">
+            <el-select
+              v-model="formProfile.school"
+              filterable
+              remote
+              reserve-keyword
+              :placeholder="$t('m.Enter_Your_School')"
+              :remote-method="fetchStates"
+              :loading="loading"
+              style="width: 100%;"
+            >
+              <el-option
+                v-for="state in filteredStates"
+                :key="state.value"
+                :label="state.label"
+                :value="state.value"
+              ></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item prop="course" :label="$t('m.Course')">
             <el-input v-model="formProfile.course" :maxlength="20" />
@@ -71,7 +87,7 @@ export default {
       formProfile: {
         username: "",
         realname: "",
-        school: "南阳理工学院",
+        school: null,
         course: "",
         number: "",
         clothesSize: "",
@@ -98,6 +114,18 @@ export default {
             min: 2,
             max: 15,
             message: this.$i18n.t("m.School_Check_length"),
+            trigger: "blur",
+          },
+          {
+            validator: (rule, value, callback) => {
+              if (value === null || value === "") {
+                callback();
+              } else if (!this.states.find((item) => item.name === value)) {
+                callback(new Error(this.$i18n.t("m.Not_Find_School")));
+              } else {
+                callback();
+              }
+            },
             trigger: "blur",
           },
         ],
@@ -147,9 +175,13 @@ export default {
           },
         ],
       },
+      filteredStates: [],
+      loading: false,
+      states: [],
     };
   },
   mounted() {
+    this.getSchoolList();
     let profile = this.$store.getters.userInfo;
     Object.keys(this.formProfile).forEach((element) => {
       if (profile[element] !== undefined) {
@@ -177,6 +209,31 @@ export default {
           );
         }
       });
+    },
+    getSchoolList() {
+      api.getSchoolList().then(
+        (res) => {
+          this.states = res.data.data;
+        },
+        (_) => {
+          this.states = [];
+        }
+      );
+    },
+    fetchStates(query) {
+      if (query !== "") {
+        this.loading = true;
+        setTimeout(() => {
+          this.loading = false;
+          this.filteredStates = this.states
+            .filter((state) => {
+              return state.name.toLowerCase().indexOf(query.toLowerCase()) > -1;
+            })
+            .map((state) => ({ label: state.name, value: state.name }));
+        }, 200);
+      } else {
+        this.filteredStates = [];
+      }
     },
   },
   computed: {

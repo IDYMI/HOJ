@@ -908,6 +908,8 @@ export const m = {
   ClothesSize_Check_Required: '衣服尺寸不能为空',
   StudentNumber_Check_OnlyDigits: '学号必须全是数字',
   StudentNumber_Check_length: '长度在 6 到 15 的数字',
+  Enter_Your_School: '请输入学校',
+  Not_Find_School: '没有目标学校',
 
   // /components/oj/setting/MultiOj.vue
   Home_Multi_Oj: '国内 OJ',

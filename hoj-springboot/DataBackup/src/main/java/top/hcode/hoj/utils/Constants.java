@@ -292,6 +292,8 @@ public class Constants {
 
         BOXFILE_BASE_FOLDER("/hoj/file/file"),
 
+        SCHOOL_BASE_FOLDER("/hoj/file/school"),
+
         TESTCASE_BASE_FOLDER("/hoj/testcase"),
 
         FILE_DOWNLOAD_TMP_FOLDER("/hoj/file/zip/download"),

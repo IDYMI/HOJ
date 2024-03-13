@@ -1,6 +1,8 @@
 package top.hcode.hoj.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -140,5 +142,11 @@ public class HomeController {
     public CommonResult<SubmissionStatisticsVO> getLastWeekSubmissionStatistics(
             @RequestParam(value = "forceRefresh", defaultValue = "false") Boolean forceRefresh) {
         return homeService.getLastWeekSubmissionStatistics(forceRefresh);
+    }
+
+    @GetMapping("/get-school-list")
+    @RequiresAuthentication
+    public CommonResult<List<SchoolVO>> getSchoolList() {
+        return homeService.getSchoolList();
     }
 }

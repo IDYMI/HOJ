@@ -2,10 +2,16 @@ package top.hcode.hoj.manager.oj;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.UnicodeUtil;
+import cn.hutool.core.util.CharsetUtil;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +33,7 @@ import top.hcode.hoj.pojo.vo.*;
 import top.hcode.hoj.utils.Constants;
 import top.hcode.hoj.utils.RedisUtils;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -372,4 +379,38 @@ public class HomeManager {
 
         return submissionStatisticsVO;
     }
+
+    public List<SchoolVO> getSchoolList() {
+        try {
+            // 如果失效，前往下载
+            // https://github.com/ATQQ/school-picker/blob/master/components/schoolPicker/school-data/schools.js
+            // 并转化为json形式
+            String schoolDir = Constants.File.SCHOOL_BASE_FOLDER.getPath() + java.io.File.separator + "school.json";
+
+            // 读取学校的文件
+            FileReader inputFile = new FileReader(new java.io.File(schoolDir), CharsetUtil.UTF_8);
+            String input = inputFile.readString()
+                    .replaceAll("\r\n", "\n") // 避免window系统的换行问题
+                    .replaceAll("\r", "\n"); // 避免mac系统的换行问题
+
+            // 转换为List<SchoolVO>
+            ObjectMapper mapper = new ObjectMapper();
+            List<Map<String, String>> data = mapper.readValue(input, new TypeReference<List<Map<String, String>>>() {
+            });
+
+            return data.stream()
+                    .map(item -> {
+                        SchoolVO schoolVo = new SchoolVO();
+                        schoolVo.setProvince(item.get("province"));
+                        schoolVo.setCity(item.get("city"));
+                        schoolVo.setName(item.get("name"));
+                        return schoolVo;
+                    })
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
 }

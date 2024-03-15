@@ -532,6 +532,7 @@ export const m = {
   // /views/oj/contest/children/ScrollBoard.vue
   ScrollBoard_Parameter_Config: 'Scroll Board Config',
   Start_Rolling: 'Start Rolling',
+  Resolver_Rolling: 'Resolver Rolling',
   Contest_ID: 'Contest ID',
   Number_of_gold_medals: 'Number of gold medals',
   Number_of_silver_medals: 'Number of silver medals',

@@ -42,6 +42,11 @@
             type="text"
             slot="reference"
           >{{$t('m.Start_Rolling')}}</el-button>
+          <el-button
+            style="padding: 3px 0; font-size: 16px;"
+            type="text"
+            @click="goResolver"
+          >{{$t('m.Resolver_Rolling')}}</el-button>
         </el-popconfirm>
       </template>
       <template v-else>
@@ -50,8 +55,26 @@
           type="text"
           @click="goScrollBoard"
         >{{$t('m.Start_Rolling')}}</el-button>
+        <el-button
+          style="padding: 3px 0; font-size: 16px;"
+          type="text"
+          @click="goResolver"
+        >{{$t('m.Resolver_Rolling')}}</el-button>
       </template>
     </div>
+    <div></div>
+    <el-dialog :width="dialogWith" :visible.sync="openVisible" :close-on-click-modal="false">
+      <el-form>
+        <el-form-item :label="$t('m.Resolver_Rolling')">
+          <a
+            v-if="data"
+            :href="resolverOnlineUrl"
+            class="el-icon-document-copy"
+            @click="doCopy"
+          >{{ $t('m.Copy') }}</a>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -59,6 +82,8 @@
 import api from "@/common/api";
 import { mapGetters } from "vuex";
 import { CONTEST_STATUS } from "@/common/constants";
+import myMessage from "@/common/message";
+
 export default {
   name: "ScrollBoard",
   data() {
@@ -69,6 +94,10 @@ export default {
       silverMedal: 0,
       bronzeMedal: 0,
       removeStar: false,
+      dialogWith: "80%",
+      openVisible: false,
+      resolverOnlineUrl: "https://resolver.xcpcio.com",
+      data: "",
     };
   },
   created() {
@@ -94,6 +123,34 @@ export default {
     goScrollBoard() {
       let url = `/scrollBoard?cid=${this.cid}&removeStar=${this.removeStar}&medals[]=${this.goldMedal}&medals[]=${this.silverMedal}&medals[]=${this.bronzeMedal}`;
       window.open(url);
+    },
+    goResolver() {
+      this.openVisible = true;
+      api
+        .getContestResolverOnlineInfo(this.cid, this.removeStar)
+        .then((res) => {
+          let data = res.data.data;
+
+          var jsonString = JSON.stringify({
+            config: JSON.stringify(data.config),
+            run: JSON.stringify(data.run),
+            team: JSON.stringify(data.team),
+          });
+
+          this.data = jsonString;
+        });
+    },
+    doCopy() {
+      this.$copyText(this.data).then(
+        () => {
+          myMessage.success(this.$i18n.t("m.Copied_successfully"));
+          this.openVisible = false;
+        },
+        () => {
+          myMessage.success(this.$i18n.t("m.Copied_failed"));
+          this.openVisible = false;
+        }
+      );
     },
   },
   computed: {

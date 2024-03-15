@@ -180,7 +180,7 @@
     </select>
 
     <select id="getContestScrollBoardSubmission" resultType="top.hcode.hoj.pojo.vo.ContestScrollBoardSubmissionVO" useCache="true">
-        select ju.submit_id,ju.submit_time, ju.uid, ju.username, ju.status, ju.nickname, ju.realname, ju.gender, ju.school,
+        select ju.submit_id,ju.submit_time, cp.start_time, ju.uid, ju.username, ju.status, ju.nickname, ju.realname, ju.gender, ju.school,
         cp.display_id
         from
         (
@@ -197,11 +197,11 @@
         )  ju
         right join
         (
-            select cp_.id, cp_.display_id from contest_problem cp_, problem p
-            where cp_.cid = #{cid} and cp_.pid = p.id and p.auth != 2
+            select cp_.id, cp_.display_id, c.start_time from contest_problem cp_, contest c, problem p
+            where cp_.cid = #{cid} and cp_.pid = p.id and cp_.cid = c.id and p.auth != 2
         ) cp
         on ju.cpid = cp.id
-        where ju.submit_id is not null
+        where ju.submit_id is not null and (ju.submit_time - cp.start_time) > 0
         order by ju.submit_id DESC
     </select>
 </mapper>

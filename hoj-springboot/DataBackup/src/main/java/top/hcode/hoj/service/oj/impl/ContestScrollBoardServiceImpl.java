@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.manager.oj.ContestScrollBoardManager;
+import top.hcode.hoj.pojo.vo.ContestResolverOnlineVO;
 import top.hcode.hoj.pojo.vo.ContestScrollBoardInfoVO;
 import top.hcode.hoj.pojo.vo.ContestScrollBoardSubmissionVO;
 import top.hcode.hoj.service.oj.ContestScrollBoardService;
@@ -36,6 +37,17 @@ public class ContestScrollBoardServiceImpl implements ContestScrollBoardService 
         try {
             return CommonResult
                     .successResponse(contestScrollBoardManager.getContestScrollBoardSubmission(cid, removeStar));
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<ContestResolverOnlineVO> getContestResolverOnlineInfo(Long cid,
+            Boolean removeStar) {
+        try {
+            return CommonResult
+                    .successResponse(contestScrollBoardManager.getContestResolverOnlineInfo(cid, removeStar));
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
         }

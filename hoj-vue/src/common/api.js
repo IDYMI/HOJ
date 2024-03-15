@@ -726,7 +726,14 @@ const ojApi = {
       },
     });
   },
-
+  getContestResolverOnlineInfo(cid, removeStar) {
+    return ajax('/api/get-contest-resolver-online-info', 'get', {
+      params: {
+        cid,
+        removeStar,
+      },
+    });
+  },
   // 比赛题目对应的提交重判
   ContestRejudgeProblem(params) {
     return ajax('/api/admin/judge/rejudge-contest-problem', 'get', {

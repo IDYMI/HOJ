@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import top.hcode.hoj.annotation.AnonApi;
 import top.hcode.hoj.common.result.CommonResult;
+import top.hcode.hoj.pojo.vo.ContestResolverOnlineVO;
 import top.hcode.hoj.pojo.vo.ContestScrollBoardInfoVO;
 import top.hcode.hoj.pojo.vo.ContestScrollBoardSubmissionVO;
 import top.hcode.hoj.service.oj.ContestScrollBoardService;
@@ -35,6 +36,13 @@ public class ContestScrollBoardController {
             @RequestParam(value = "cid", required = true) Long cid,
             @RequestParam(value = "removeStar", defaultValue = "false") Boolean removeStar) {
         return contestScrollBoardService.getContestScrollBoardSubmission(cid, removeStar);
+    }
+
+    @GetMapping("/get-contest-resolver-online-info")
+    public CommonResult<ContestResolverOnlineVO> getContestResolverOnlineInfo(
+            @RequestParam(value = "cid", required = true) Long cid,
+            @RequestParam(value = "removeStar", defaultValue = "false") Boolean removeStar) {
+        return contestScrollBoardService.getContestResolverOnlineInfo(cid, removeStar);
     }
 
 }

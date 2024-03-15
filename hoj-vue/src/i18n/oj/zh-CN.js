@@ -532,6 +532,7 @@ export const m = {
   // /views/oj/contest/children/ScrollBoard.vue
   ScrollBoard_Parameter_Config: '滚榜参数配置',
   Start_Rolling: '开始滚榜',
+  Resolver_Rolling: 'Resolver 滚榜',
   Contest_ID: '比赛ID',
   Number_of_gold_medals: '金牌数量',
   Number_of_silver_medals: '银牌数量',

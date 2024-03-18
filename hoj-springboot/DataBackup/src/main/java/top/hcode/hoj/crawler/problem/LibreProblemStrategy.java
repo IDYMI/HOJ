@@ -1,6 +1,7 @@
 package top.hcode.hoj.crawler.problem;
 
 import cn.hutool.core.util.ReUtil;
+import cn.hutool.http.HtmlUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -31,10 +32,9 @@ public class LibreProblemStrategy extends ProblemStrategy {
 
     public static final String PROBLEM_URL = "/api/problem/getProblem";
 
-
     @Override
     public RemoteProblemInfo getProblemInfo(String problemId, String author) throws Exception {
-        //题号仅为正整数
+        // 题号仅为正整数
         if (!problemId.matches("[1-9]\\d*")) {
             throw new IllegalArgumentException("LibreOJ: Incorrect problem id format!");
         }
@@ -53,7 +53,7 @@ public class LibreProblemStrategy extends ProblemStrategy {
                     .timeout(5000)
                     .execute()
                     .body();
-        }catch (cn.hutool.core.io.IORuntimeException e){
+        } catch (cn.hutool.core.io.IORuntimeException e) {
             try {
                 TimeUnit.SECONDS.sleep(2);
             } catch (InterruptedException ignored) {
@@ -69,14 +69,15 @@ public class LibreProblemStrategy extends ProblemStrategy {
         if (parseObj.containsKey("error")) {
             throw new IllegalArgumentException("LibreOJ: Incorrect problem id!");
         }
-        //实际提交id和展示id并非一个，该id为实际提交id
+        // 实际提交id和展示id并非一个，该id为实际提交id
         String id = JSONUtil.parseObj(parseObj.getStr("meta")).getStr("id");
         JSONObject localizedContentsOfLocale = JSONUtil.parseObj(parseObj.get("localizedContentsOfLocale"));
         JSONObject judgeInfo = JSONUtil.parseObj(parseObj.get("judgeInfo"));
         JSONArray problemDetailArray = JSONUtil.parseArray(localizedContentsOfLocale.get("contentSections"));
-        //删除第一行可能会出现的题目原题pdf链接 链接可能已经失效
-        String desctiption = ReUtil.delFirst("\\*\\*(.*?)\\*\\*", JSONUtil.parseObj(problemDetailArray.get(0)).getStr("text"));
-        //样例处理
+        // 删除第一行可能会出现的题目原题pdf链接 链接可能已经失效
+        String desctiption = ReUtil.delFirst("\\*\\*(.*?)\\*\\*",
+                JSONUtil.parseObj(problemDetailArray.get(0)).getStr("text"));
+        // 样例处理
         JSONArray samples = JSONUtil.parseArray(parseObj.get("samples"));
         StringBuilder examples = new StringBuilder();
         samples.forEach(e -> {
@@ -95,13 +96,16 @@ public class LibreProblemStrategy extends ProblemStrategy {
                 .setTitle(localizedContentsOfLocale.getStr("title"))
                 .setTimeLimit(Integer.parseInt(judgeInfo.getStr("timeLimit")))
                 .setMemoryLimit(Integer.parseInt(judgeInfo.getStr("memoryLimit")))
-                .setDescription(desctiption)
-                .setInput(JSONUtil.parseObj(problemDetailArray.get(1)).getStr("text"))
-                .setOutput(JSONUtil.parseObj(problemDetailArray.get(2)).getStr("text"))
+                .setDescription("<pp>" + HtmlUtil.unescape(desctiption.replaceAll("(?<=\\>)\\s+(?=\\<)", "")))
+                .setInput("<pp>" + HtmlUtil.unescape(JSONUtil.parseObj(problemDetailArray.get(1)).getStr("text")
+                        .replaceAll("(?<=\\>)\\s+(?=\\<)", "")))
+                .setOutput("<pp>" + HtmlUtil.unescape(JSONUtil.parseObj(problemDetailArray.get(2)).getStr("text")
+                        .replaceAll("(?<=\\>)\\s+(?=\\<)", "")))
                 .setExamples(examples.toString())
                 .setAuthor(author)
                 .setIsRemote(true)
-                .setSource("<a style='color:#1A5CC8' href='" + HOST + "/p/" + problemId + "'>" + NAME + "-" + problemId + "</a>")
+                .setSource("<a style='color:#1A5CC8' href='" + HOST + "/p/" + problemId + "'>" + NAME + "-" + problemId
+                        + "</a>")
                 .setAuth(1)
                 .setOpenCaseResult(false)
                 .setIsGroup(false)

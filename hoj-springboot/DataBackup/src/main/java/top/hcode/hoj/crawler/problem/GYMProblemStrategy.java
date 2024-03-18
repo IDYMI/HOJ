@@ -2,6 +2,7 @@ package top.hcode.hoj.crawler.problem;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ReUtil;
+import cn.hutool.http.HtmlUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
@@ -153,7 +154,8 @@ public class GYMProblemStrategy extends CFProblemStrategy {
                         .append(pdfURI).append("\">").append(problemId).append("</a></p>");
             }
         }
-        problem.setDescription(description.toString());
+        problem.setDescription(
+                "<pp>" + HtmlUtil.unescape(description.toString().replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
         problem.setType(0)
                 .setIsRemote(true)
                 .setAuth(1)

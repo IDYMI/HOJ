@@ -1,6 +1,7 @@
 package top.hcode.hoj.crawler.problem;
 
 import cn.hutool.core.util.ReUtil;
+import cn.hutool.http.HtmlUtil;
 import cn.hutool.http.HttpUtil;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.problem.Tag;
@@ -65,7 +66,7 @@ public class SPOJProblemStrategy extends ProblemStrategy {
                 .setType(0)
                 .setTimeLimit((int) (Double.parseDouble(timeLimit) * 1000))
                 .setMemoryLimit(Integer.parseInt(memoryLimit))
-                .setDescription(desc.trim())
+                .setDescription("<pp>" + HtmlUtil.unescape(desc.trim().replaceAll("(?<=\\>)\\s+(?=\\<)", "")))
                 .setIsRemote(true)
                 .setSource(getProblemSource(problemId))
                 .setAuth(1)

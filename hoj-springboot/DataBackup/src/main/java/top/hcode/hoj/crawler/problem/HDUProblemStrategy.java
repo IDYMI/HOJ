@@ -1,6 +1,8 @@
 package top.hcode.hoj.crawler.problem;
 
 import cn.hutool.core.util.ReUtil;
+import cn.hutool.http.HtmlUtil;
+
 import com.baomidou.mybatisplus.extension.api.R;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
@@ -38,10 +40,16 @@ public class HDUProblemStrategy extends ProblemStrategy {
                 info.setTitle(ReUtil.get("color:#1A5CC8\">([\\s\\S]*?)</h1>", html, 1).trim());
                 info.setTimeLimit(Integer.parseInt(ReUtil.get("(\\d*) MS", html, 1)));
                 info.setMemoryLimit(Integer.parseInt(ReUtil.get("/(\\d*) K", html, 1)) / 1024);
-                info.setDescription(ReUtil.get(">Problem Description</div> <div class=.*?>([\\s\\S]*?)</div>", html, 1)
-                                .replaceAll("src=\"[../]*", "src=\"" + HOST + "/"));
-                info.setInput(ReUtil.get(">Input</div> <div class=.*?>([\\s\\S]*?)</div>", html, 1));
-                info.setOutput(ReUtil.get(">Output</div> <div class=.*?>([\\s\\S]*?)</div>", html, 1));
+                info.setDescription("<pp>" + HtmlUtil.unescape(
+                                ReUtil.get(">Problem Description</div> <div class=.*?>([\\s\\S]*?)</div>", html, 1)
+                                                .replaceAll("src=\"[../]*", "src=\"" + HOST + "/")
+                                                .replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
+                info.setInput("<pp>" + HtmlUtil
+                                .unescape(ReUtil.get(">Input</div> <div class=.*?>([\\s\\S]*?)</div>", html, 1)
+                                                .replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
+                info.setOutput("<pp>" + HtmlUtil
+                                .unescape(ReUtil.get(">Output</div> <div class=.*?>([\\s\\S]*?)</div>", html, 1)
+                                                .replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
                 StringBuilder sb = new StringBuilder("<input>");
                 sb.append(ReUtil.get(">Sample Input</div><div .*?,monospace;\">([\\s\\S]*?)</div></pre>", html, 1));
                 sb.append("</input><output>");
@@ -49,8 +57,9 @@ public class HDUProblemStrategy extends ProblemStrategy {
                                 ">Sample Output</div><div .*?monospace;\">([\\s\\S]*?)(<div style=.*?</div><i style=.*?</i>)*?</div></pre>",
                                 html, 1)).append("</output>");
                 info.setExamples(sb.toString());
-                info.setHint(ReUtil.get("<i>Hint</i></div>([\\s\\S]*?)</div><i .*?<br><[^<>]*?panel_title[^<>]*?>",
-                                html, 1));
+                info.setHint("<pp>" + HtmlUtil.unescape(
+                                ReUtil.get("<i>Hint</i></div>([\\s\\S]*?)</div><i .*?<br><[^<>]*?panel_title[^<>]*?>",
+                                                html, 1).replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
                 info.setIsRemote(true);
                 info.setSource(String.format(
                                 "<a style='color:#1A5CC8' href='https://acm.hdu.edu.cn/showproblem.php?pid=%s'>%s</a>",

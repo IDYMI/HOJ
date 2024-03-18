@@ -130,7 +130,7 @@ public class CFProblemStrategy extends ProblemStrategy {
                     .trim();
         }
 
-        info.setDescription(tmpDesc);
+        info.setDescription("<pp>" + HtmlUtil.unescape(tmpDesc.replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
 
         String inputDesc = ReUtil.get(
                 "<div class=\"section-title\">\\s*Input\\s*</div>([\\s\\S]*?)</div>\\s*<div class=\"output-specification\">",
@@ -150,7 +150,7 @@ public class CFProblemStrategy extends ProblemStrategy {
             inputDesc = inputDesc.replaceAll("\\$\\$\\$", "\\$").trim();
         }
 
-        info.setInput(inputDesc);
+        info.setInput("<pp>" + HtmlUtil.unescape(inputDesc.replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
 
         String outputDesc = ReUtil.get(
                 "<div class=\"section-title\">\\s*Output\\s*</div>([\\s\\S]*?)</div>\\s*<div class=\"sample-tests\">",
@@ -158,7 +158,7 @@ public class CFProblemStrategy extends ProblemStrategy {
         if (!StringUtils.isEmpty(outputDesc)) {
             outputDesc = outputDesc.replaceAll("\\$\\$\\$", "\\$").trim();
         }
-        info.setOutput(outputDesc);
+        info.setOutput("<pp>" + HtmlUtil.unescape(outputDesc.replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
 
         List<String> inputExampleList = ReUtil.findAll(Pattern.compile(
                 "<div class=\"input\">\\s*<div class=\"title\">\\s*Input\\s*</div>\\s*<pre>([\\s\\S]*?)</pre>\\s*</div>"),
@@ -192,7 +192,8 @@ public class CFProblemStrategy extends ProblemStrategy {
         String tmpHint = ReUtil.get("<div class=\"section-title\">\\s*Note\\s*</div>([\\s\\S]*?)</div>\\s*</div>", html,
                 1);
         if (tmpHint != null) {
-            info.setHint(tmpHint.replaceAll("\\$\\$\\$", "\\$").trim());
+            info.setHint("<pp>" + HtmlUtil
+                    .unescape(tmpHint.replaceAll("\\$\\$\\$", "\\$").trim().replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
         }
 
         info.setIsRemote(true);

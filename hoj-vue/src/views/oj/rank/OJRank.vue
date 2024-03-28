@@ -78,6 +78,18 @@
             >{{ row.nickname }}</el-tag>
           </template>
         </vxe-table-column>
+        <template v-if="isMainAdminRole">
+          <vxe-table-column :title="$t('m.RealName')" min-width="80">
+            <template v-slot="{ row }">
+              <span>{{ row.realname }}</span>
+            </template>
+          </vxe-table-column>
+          <vxe-table-column :title="$t('m.Course')" min-width="80">
+            <template v-slot="{ row }">
+              <span>{{ row.course }}</span>
+            </template>
+          </vxe-table-column>
+        </template>
         <vxe-table-column
           v-for="column in columns"
           :key="column.title"
@@ -148,6 +160,7 @@ export default {
       loadingTable: false,
       screenWidth: 768,
       columns: [
+        { title: "m.nyojAC", field: "nyojAc" },
         { title: "m.codeforcesAc", field: "codeforcesAc" },
         { title: "m.nowcoderAc", field: "nowcoderAc" },
         { title: "m.vjudgeAc", field: "vjudgeAc" },
@@ -213,7 +226,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["isAuthenticated", "userInfo"]),
+    ...mapGetters(["isAuthenticated", "userInfo", "isMainAdminRole"]),
   },
 };
 </script>

@@ -35,6 +35,15 @@ public class OJRankVO implements Serializable {
     @ApiModelProperty(value = "头衔、称号的颜色")
     private String titleColor;
 
+    @ApiModelProperty(value = "真实姓名")
+    private String realname;
+
+    @ApiModelProperty(value = "专业/班级")
+    private String course;
+
+    @ApiModelProperty(value = "学校")
+    private String school;
+
     @ApiModelProperty(value = "codeforces 分数")
     private Integer codeforcesRating;
 
@@ -61,6 +70,9 @@ public class OJRankVO implements Serializable {
 
     @ApiModelProperty(value = "leetcode AC")
     private Integer leetcodeAc;
+
+    @ApiModelProperty(value = "nyoj AC")
+    private Integer nyojAc;
 
     @ApiModelProperty(value = "全部 AC")
     private Integer sum;

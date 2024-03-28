@@ -63,12 +63,16 @@
     </select>
 
     <select id="getOJRankList" resultType="top.hcode.hoj.pojo.vo.OJRankVO" useCache="true">
-        SELECT u.uuid as uid,u.nickname,u.username,left(u.signature,100) as signature,u.avatar,
-        u.title_name,u.title_color,
+        SELECT u.uuid as uid, u.nickname, u.username, left(u.signature,100) as signature, u.avatar,
+        u.title_name, u.title_color,
+        us.realname as realname, us.course as course, us.school as school,
         ur.*,
-        (COALESCE(ur.codeforces_ac, 0) + COALESCE(ur.nowcoder_ac, 0) + COALESCE(ur.vjudge_ac, 0) + COALESCE(ur.poj_ac, 0) + COALESCE(ur.atcode_ac, 0) + COALESCE(ur.leetcode_ac, 0)) as sum
+        nyoj.nyoj_ac,
+        (COALESCE(ur.codeforces_ac, 0) + COALESCE(ur.nowcoder_ac, 0) + COALESCE(ur.vjudge_ac, 0) + COALESCE(ur.poj_ac, 0) + COALESCE(ur.atcode_ac, 0) + COALESCE(ur.leetcode_ac, 0) + nyoj.nyoj_ac) as sum
         FROM user_info u
         LEFT JOIN user_record ur ON u.uuid = ur.uid
+        LEFT JOIN user_sign us ON u.uuid = us.uid
+        LEFT JOIN (SELECT uid, COUNT( DISTINCT pid ) as nyoj_ac FROM user_acproblem GROUP BY uid) nyoj ON u.uuid = nyoj.uid
         <where>
             u.status = 0 AND ur.see = 1
             <if test="isNew">

@@ -482,6 +482,14 @@ public class ConfigManager {
                     config.getScpcPasswordList(),
                     Constants.RemoteOJ.SCPC.getName());
         }
+        if (checkListDiff(config.getQojUsernameList(), switchConfig.getQojUsernameList()) ||
+                checkListDiff(config.getQojPasswordList(), switchConfig.getQojPasswordList())) {
+            switchConfig.setQojUsernameList(config.getQojUsernameList());
+            switchConfig.setQojPasswordList(config.getQojPasswordList());
+            changeRemoteJudgeAccount(config.getQojUsernameList(),
+                    config.getQojPasswordList(),
+                    Constants.RemoteOJ.QOJ.getName());
+        }
         if (checkListDiff(config.getMossUsernameList(), switchConfig.getMossUsernameList())) {
             switchConfig.setMossUsernameList(config.getMossUsernameList());
             changeRemoteJudgeAccount(config.getMossUsernameList(), null,

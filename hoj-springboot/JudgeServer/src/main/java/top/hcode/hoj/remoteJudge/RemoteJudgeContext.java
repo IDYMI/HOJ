@@ -115,6 +115,16 @@ public class RemoteJudgeContext {
                     remoteJudgeDTO.setProblemNum(arr2[1]);
                 }
                 break;
+            case "QOJ":
+                String[] arr3 = remoteJudgeDTO.getCompleteProblemId().split("_");
+                if (arr3.length == 1) {
+                    remoteJudgeDTO.setContestId("0");
+                    remoteJudgeDTO.setProblemNum(arr3[0]);
+                } else {
+                    remoteJudgeDTO.setContestId(arr3[0]);
+                    remoteJudgeDTO.setProblemNum(arr3[1]);
+                }
+                break;
         }
     }
 

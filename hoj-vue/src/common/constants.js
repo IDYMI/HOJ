@@ -211,6 +211,10 @@ export const REMOTE_OJ = [
     name: 'SCPC',
     key: 'SCPC',
   },
+  {
+    name: 'QOJ',
+    key: 'QOJ',
+  },
 ];
 
 export const CONTEST_STATUS = {

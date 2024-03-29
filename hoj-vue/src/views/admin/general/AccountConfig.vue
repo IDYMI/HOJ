@@ -72,6 +72,15 @@
         </el-col>
         <el-col :xs="24" :md="12" style="margin-top: 15px;">
           <RemoteJudgeAccount
+            :usernameList.sync="switchConfig.qojUsernameList"
+            :passwordList.sync="switchConfig.qojPasswordList"
+            :loading.sync="loading"
+            @saveSwitchConfig="saveSwitchConfig"
+            OJ="QOJ"
+          ></RemoteJudgeAccount>
+        </el-col>
+        <el-col :xs="24" :md="12" style="margin-top: 15px;">
+          <RemoteJudgeAccount
             :usernameList.sync="switchConfig.mossUsernameList"
             :loading.sync="loading"
             @saveSwitchConfig="saveSwitchConfig"

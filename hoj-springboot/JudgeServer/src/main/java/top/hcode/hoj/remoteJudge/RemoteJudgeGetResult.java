@@ -10,6 +10,7 @@ import top.hcode.hoj.dao.JudgeCaseEntityService;
 import top.hcode.hoj.dao.JudgeEntityService;
 import top.hcode.hoj.judge.JudgeContext;
 import top.hcode.hoj.pojo.entity.judge.Judge;
+import top.hcode.hoj.pojo.entity.judge.JudgeCase;
 import top.hcode.hoj.remoteJudge.entity.RemoteJudgeDTO;
 import top.hcode.hoj.remoteJudge.entity.RemoteJudgeRes;
 import top.hcode.hoj.remoteJudge.task.RemoteJudgeStrategy;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 
 @Slf4j(topic = "hoj")
 @Component
@@ -130,39 +132,36 @@ public class RemoteJudgeGetResult {
                     // 设置排序后的submit_id
                     finalJudgeRes = judgeContext.setSortedId(finalJudgeRes);
 
+                    Integer score = null;
                     // 如果是比赛题目，需要特别适配OI比赛的得分 除AC给100 其它结果给0分
                     if (remoteJudgeDTO.getCid() != 0) {
-                        int score = 0;
-
+                        score = 0;
                         if (Objects.equals(finalJudgeRes.getStatus(), Constants.Judge.STATUS_ACCEPTED.getStatus())) {
                             score = 100;
                         }
 
                         finalJudgeRes.setScore(score);
-                        // 写回数据库
-                        judgeEntityService.updateById(finalJudgeRes);
-                        // 同步其它表
-                        judgeContext.updateOtherTable(remoteJudgeDTO.getJudgeId(),
-                                status,
-                                remoteJudgeDTO.getCid(),
-                                remoteJudgeDTO.getUid(),
-                                remoteJudgeDTO.getPid(),
-                                remoteJudgeDTO.getGid(),
-                                score,
-                                finalJudgeRes.getTime());
 
                     } else {
-                        judgeEntityService.updateById(finalJudgeRes);
-                        // 同步其它表
-                        judgeContext.updateOtherTable(remoteJudgeDTO.getJudgeId(),
-                                status,
-                                remoteJudgeDTO.getCid(),
-                                remoteJudgeDTO.getUid(),
-                                remoteJudgeDTO.getPid(),
-                                remoteJudgeDTO.getGid(),
-                                null,
-                                null);
+                        score = 0;
+                        if (!CollectionUtils.isEmpty(remoteJudgeRes.getJudgeCaseList())) {
+                            List<JudgeCase> judgeCaseList = remoteJudgeRes.getJudgeCaseList();
+                            for (int i = 0; i < judgeCaseList.size(); i++) {
+                                score += judgeCaseList.get(i).getScore() != null ? judgeCaseList.get(i).getScore() : 0;
+                            }
+                        }
                     }
+                    // 写回数据库
+                    judgeEntityService.updateById(finalJudgeRes);
+                    // 同步其它表
+                    judgeContext.updateOtherTable(remoteJudgeDTO.getJudgeId(),
+                            status,
+                            remoteJudgeDTO.getCid(),
+                            remoteJudgeDTO.getUid(),
+                            remoteJudgeDTO.getPid(),
+                            remoteJudgeDTO.getGid(),
+                            score,
+                            finalJudgeRes.getTime());
 
                     Future future = futureTaskMap.get(key);
                     if (future != null) {

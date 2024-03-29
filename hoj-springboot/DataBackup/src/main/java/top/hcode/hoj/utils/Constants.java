@@ -90,6 +90,7 @@ public class Constants {
         ATCODER("AC"),
         LIBRE("LIBRE"),
         SCPC("SCPC"),
+        QOJ("QOJ"),
         MOSS("MOSS");
 
         private final String name;

@@ -86,6 +86,7 @@
 | 2024-01-02 | 增加赛供文件                                                         | IDYMI          |
 | 2024-02-20 | 错误测试点查看                                                       | IDYMI          |
 | 2024-03-12 | 多平台 OJ 排行榜                                                     | IDYMI          |
+| 2024-03-24 | 添加 QOJ 远程评测                                                    | IDYMI          |
 
 ## 三、新功能部分截图
 
@@ -275,3 +276,12 @@
    ![image.png](docs/docs/.vuepress/public/d48a50e482854d2fac9fca142cccbea4.png)
 
 2024 年 3 月 12 日 11 点
+
+# 增加 QOJ 远程评测
+
+## 更新内容
+
+1. 增加 QOJ 远程评测
+   ![image.png](docs/docs/.vuepress/public/2b3e7ac7a3a94ecd93f77812669d8028.png)
+
+2024 年 3 月 24 日 20 点

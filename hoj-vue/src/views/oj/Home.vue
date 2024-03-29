@@ -397,6 +397,12 @@ export default {
           logo: require("@/assets/scpc-logo.png"),
           status: true,
         },
+        {
+          url: "https://qoj.ac/",
+          name: "QOJ",
+          logo: require("@/assets/qoj-logo.png"),
+          status: true,
+        },
       ],
     };
   },

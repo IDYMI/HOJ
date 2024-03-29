@@ -165,6 +165,12 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${scpc-password-list}")
     private List<String> scpcPasswordList;
 
+    @Value("${qoj-username-list}")
+    private List<String> qojUsernameList;
+
+    @Value("${qoj-password-list}")
+    private List<String> qojPasswordList;
+
     @Value("${moss-username-list}")
     private List<String> mossUsernameList;
 
@@ -193,6 +199,7 @@ public class StartupRunner implements CommandLineRunner {
 
         upsertHOJLanguageV3();
 
+        upsertHOJLanguageV4();
     }
 
     /**
@@ -353,6 +360,20 @@ public class StartupRunner implements CommandLineRunner {
             isChanged = true;
         }
 
+        if ((CollectionUtils.isEmpty(switchConfig.getQojUsernameList())
+                && !CollectionUtils.isEmpty(qojUsernameList))
+                || forcedUpdateRemoteJudgeAccount) {
+            switchConfig.setSpojUsernameList(qojUsernameList);
+            isChanged = true;
+        }
+
+        if ((CollectionUtils.isEmpty(switchConfig.getQojPasswordList())
+                && !CollectionUtils.isEmpty(qojPasswordList))
+                || forcedUpdateRemoteJudgeAccount) {
+            switchConfig.setSpojPasswordList(qojPasswordList);
+            isChanged = true;
+        }
+
         if ((CollectionUtils.isEmpty(switchConfig.getLibreojUsernameList())
                 && !CollectionUtils.isEmpty(libreojUsernameList))
                 || forcedUpdateRemoteJudgeAccount) {
@@ -402,6 +423,9 @@ public class StartupRunner implements CommandLineRunner {
             addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.SCPC.getName(),
                     switchConfig.getScpcUsernameList(),
                     switchConfig.getScpcPasswordList());
+            addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.QOJ.getName(),
+                    switchConfig.getQojUsernameList(),
+                    switchConfig.getQojPasswordList());
             addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.MOSS.getName(),
                     switchConfig.getMossUsernameList(),
                     null);
@@ -787,4 +811,42 @@ public class StartupRunner implements CommandLineRunner {
 
     }
 
+    private void upsertHOJLanguageV4() {
+        /**
+         * 2024.03.18 新增qoj语言支持
+         */
+
+        int count = languageEntityService.count(new QueryWrapper<Language>()
+                .eq("oj", Constants.RemoteOJ.QOJ.getName()));
+        if (count == 0) {
+            List<String> languageList = Arrays.asList("text/x-c++src", "C++ 98", "C++ 98",
+                    "text/x-c++src", "C++ 11", "C++ 11",
+                    "text/x-c++src", "C++ 14", "C++ 14",
+                    "text/x-c++src", "C++ 17", "C++ 17",
+                    "text/x-c++src", "C++ 20", "C++ 20",
+                    "text/x-c++src", "C++ 23", "C++ 23",
+                    "text/x-csrc", "C 89", "C 89",
+                    "text/x-csrc", "C 99", "C 99",
+                    "text/x-csrc", "C 11", "C 11",
+                    "text/x-d", "D", "D",
+                    "text/x-java", "Java 8", "Java 8",
+                    "text/x-java", "Java 11", "Java 11",
+                    "text/x-pascal", "Pascal", "Pascal",
+                    "text/x-python", "Python 3", "Python 3",
+                    "text/x-rustsrc", "Rust", "Rust");
+
+            List<Language> languages = new ArrayList<>();
+            for (int i = 0; i <= languageList.size() - 3; i += 3) {
+                languages.add(new Language()
+                        .setContentType(languageList.get(i))
+                        .setDescription(languageList.get(i + 1))
+                        .setName(languageList.get(i + 2))
+                        .setOj(Constants.RemoteOJ.QOJ.getName())
+                        .setSeq(0)
+                        .setIsSpj(false));
+            }
+            languageEntityService.saveBatch(languages);
+        }
+
+    }
 }

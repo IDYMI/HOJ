@@ -81,6 +81,9 @@ public class RemoteProblemManager {
             case "SCPC":
                 problemStrategy = new SCPCProblemStrategy();
                 break;
+            case "QOJ":
+                problemStrategy = new QOJProblemStrategy();
+                break;
             default:
                 throw new Exception("未知的OJ的名字，暂时不支持！");
         }
@@ -91,6 +94,11 @@ public class RemoteProblemManager {
                 SwitchConfig switchConfig = nacosSwitchConfig.getSwitchConfig();
                 String username = switchConfig.getScpcSuperAdminAccount();
                 String password = switchConfig.getScpcSuperAdminPassword();
+                return problemContext.getProblemInfoByLogin(problemId, author, username, password);
+            } else if (Objects.equals("QOJ", OJName)) {
+                SwitchConfig switchConfig = nacosSwitchConfig.getSwitchConfig();
+                String username = switchConfig.getQojUsernameList().get(0);
+                String password = switchConfig.getQojPasswordList().get(0);
                 return problemContext.getProblemInfoByLogin(problemId, author, username, password);
             } else {
                 return problemContext.getProblemInfo(problemId, author);

@@ -53,6 +53,8 @@ scpc-username-list: ${SCPC_ACCOUNT_USERNAME_LIST:}
 scpc-password-list: ${SCPC_ACCOUNT_PASSWORD_LIST:}
 qoj-username-list: ${QOJ_ACCOUNT_USERNAME_LIST:}
 qoj-password-list: ${QOJ_ACCOUNT_PASSWORD_LIST:}
+nswoj-username-list: ${NSWOJ_ACCOUNT_USERNAME_LIST:}
+nswoj-password-list: ${NSWOJ_ACCOUNT_PASSWORD_LIST:}
 moss-username-list: ${MOSS_ACCOUNT_USERNAME_LIST:}
 # 是否强制用配置更新覆盖remote judge的账号
 forced-update-remote-judge-account: ${FORCED_UPDATE_REMOTE_JUDGE_ACCOUNT:false}

@@ -171,6 +171,12 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${qoj-password-list}")
     private List<String> qojPasswordList;
 
+    @Value("${nswoj-username-list}")
+    private List<String> nswojUsernameList;
+
+    @Value("${nswoj-password-list}")
+    private List<String> nswojPasswordList;
+
     @Value("${moss-username-list}")
     private List<String> mossUsernameList;
 
@@ -200,6 +206,8 @@ public class StartupRunner implements CommandLineRunner {
         upsertHOJLanguageV3();
 
         upsertHOJLanguageV4();
+
+        upsertHOJLanguageV5();
     }
 
     /**
@@ -374,6 +382,20 @@ public class StartupRunner implements CommandLineRunner {
             isChanged = true;
         }
 
+        if ((CollectionUtils.isEmpty(switchConfig.getNswojUsernameList())
+                && !CollectionUtils.isEmpty(nswojUsernameList))
+                || forcedUpdateRemoteJudgeAccount) {
+            switchConfig.setSpojUsernameList(nswojUsernameList);
+            isChanged = true;
+        }
+
+        if ((CollectionUtils.isEmpty(switchConfig.getNswojPasswordList())
+                && !CollectionUtils.isEmpty(nswojPasswordList))
+                || forcedUpdateRemoteJudgeAccount) {
+            switchConfig.setSpojPasswordList(nswojPasswordList);
+            isChanged = true;
+        }
+
         if ((CollectionUtils.isEmpty(switchConfig.getLibreojUsernameList())
                 && !CollectionUtils.isEmpty(libreojUsernameList))
                 || forcedUpdateRemoteJudgeAccount) {
@@ -426,6 +448,9 @@ public class StartupRunner implements CommandLineRunner {
             addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.QOJ.getName(),
                     switchConfig.getQojUsernameList(),
                     switchConfig.getQojPasswordList());
+            addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.NSWOJ.getName(),
+                    switchConfig.getNswojUsernameList(),
+                    switchConfig.getNswojPasswordList());
             addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.MOSS.getName(),
                     switchConfig.getMossUsernameList(),
                     null);
@@ -842,6 +867,48 @@ public class StartupRunner implements CommandLineRunner {
                         .setDescription(languageList.get(i + 1))
                         .setName(languageList.get(i + 2))
                         .setOj(Constants.RemoteOJ.QOJ.getName())
+                        .setSeq(0)
+                        .setIsSpj(false));
+            }
+            languageEntityService.saveBatch(languages);
+        }
+
+    }
+
+    private void upsertHOJLanguageV5() {
+        /**
+         * 2024.03.18 新增nswoj语言支持
+         */
+
+        int count = languageEntityService.count(new QueryWrapper<Language>()
+                .eq("oj", Constants.RemoteOJ.NSWOJ.getName()));
+        if (count == 0) {
+            List<String> languageList = Arrays.asList("text/x-c++src", "C++", "C++",
+                    "text/x-c++src", "C++ 98", "C++ 98",
+                    "text/x-c++src", "C++ 11", "C++ 11",
+                    "text/x-c++src", "C++ 14", "C++ 14",
+                    "text/x-c++src", "C++ 17", "C++ 17",
+                    "text/x-csrc", "C", "C",
+                    "text/x-java", "Java", "Java",
+                    "text/x-pascal", "Pascal", "Pascal",
+                    "text/x-python", "Python", "Python",
+                    "text/x-python", "Python 2", "Python 2",
+                    "text/x-python", "Python 3", "Python 3",
+                    "text/x-php", "PHP", "PHP",
+                    "text/x-rustsrc", "Rust", "Rust",
+                    "text/javascript", "Javascript", "Javascript",
+                    "text/golang", "Golang", "Golang",
+                    "text/x-ruby", "Ruby", "Ruby",
+                    "text/x-csharp", "C#", "C#",
+                    "text/x-rustsrc", "Rust", "Rust");
+
+            List<Language> languages = new ArrayList<>();
+            for (int i = 0; i <= languageList.size() - 3; i += 3) {
+                languages.add(new Language()
+                        .setContentType(languageList.get(i))
+                        .setDescription(languageList.get(i + 1))
+                        .setName(languageList.get(i + 2))
+                        .setOj(Constants.RemoteOJ.NSWOJ.getName())
                         .setSeq(0)
                         .setIsSpj(false));
             }

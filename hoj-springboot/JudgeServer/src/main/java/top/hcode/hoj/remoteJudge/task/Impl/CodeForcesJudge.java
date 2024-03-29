@@ -123,7 +123,7 @@ public class CodeForcesJudge extends RemoteJudgeStrategy {
             e.printStackTrace();
         }
         Long maxRunId = getMaxIdByParseHtmlWithRetry();
-        remoteJudgeDTO.setSubmitId(maxRunId);
+        remoteJudgeDTO.setSubmitId(String.valueOf(maxRunId));
     }
 
     @SuppressWarnings("unchecked")

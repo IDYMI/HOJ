@@ -26,6 +26,8 @@ public class RemoteJudgeFactory {
                 return new SCPCJudge();
             case QOJ_JUDGE:
                 return new QOJJudge();
+            case NSWOJ_JUDGE:
+                return new NSWOJJudge();
             default:
                 return null;
         }

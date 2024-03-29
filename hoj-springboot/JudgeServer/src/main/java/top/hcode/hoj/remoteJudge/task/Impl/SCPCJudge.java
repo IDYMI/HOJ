@@ -79,11 +79,11 @@ public class SCPCJudge extends RemoteJudgeStrategy {
             response = trySubmit();
         }
 
-        Long maxRunId = getMaxRunId(
+        String maxRunId = getMaxRunId(
                 remoteJudgeDTO.getUsername(),
                 Long.valueOf(remoteJudgeDTO.getContestId()),
                 remoteJudgeDTO.getProblemNum());
-        if (maxRunId == -1L) { // 等待2s再次查询，如果还是失败，则表明提交失败了
+        if (maxRunId == null) { // 等待2s再次查询，如果还是失败，则表明提交失败了
             try {
                 TimeUnit.SECONDS.sleep(2);
             } catch (InterruptedException e) {
@@ -130,7 +130,7 @@ public class SCPCJudge extends RemoteJudgeStrategy {
         RemoteJudgeDTO remoteJudgeDTO = getRemoteJudgeDTO();
         List<HttpCookie> cookies = remoteJudgeDTO.getCookies();
         String csrfToken = remoteJudgeDTO.getCsrfToken();
-        Long submitId = remoteJudgeDTO.getSubmitId();
+        String submitId = remoteJudgeDTO.getSubmitId();
 
         String url = HOST + SUBMISSION_RESULT_URL;
 
@@ -199,12 +199,12 @@ public class SCPCJudge extends RemoteJudgeStrategy {
         return language;
     }
 
-    private Long getMaxRunId(String username, Long cid, String problemId) {
+    private String getMaxRunId(String username, Long cid, String problemId) {
         RemoteJudgeDTO remoteJudgeDTO = getRemoteJudgeDTO();
         List<HttpCookie> cookies = remoteJudgeDTO.getCookies();
         String csrfToken = remoteJudgeDTO.getCsrfToken();
 
-        Long maxRunId = -1L;
+        String maxRunId = null;
 
         String url = HOST + (cid == 0 ? COMMONSUBMISSIONS_URL : CONTESTSUBMISSIONS_URL);
         HttpRequest httpRequest = HttpUtil.createGet(url);
@@ -237,7 +237,7 @@ public class SCPCJudge extends RemoteJudgeStrategy {
 
             if (records.size() > 0) {
                 JSONObject record = records.getJSONObject(0);
-                maxRunId = Long.parseLong(record.getStr("submitId"));
+                maxRunId = record.getStr("submitId");
             }
         }
         return maxRunId;

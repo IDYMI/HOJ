@@ -100,7 +100,7 @@ public class AtCoderJudge extends RemoteJudgeStrategy {
                 remoteJudgeDTO.getCompleteProblemId());
 
         remoteJudgeDTO.setCookies(remoteJudgeDTO.getCookies())
-                .setSubmitId(maxRunId);
+                .setSubmitId(String.valueOf(maxRunId));
 
     }
 

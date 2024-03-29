@@ -184,7 +184,7 @@ public class RemoteJudgeGetResult {
     }
 
     private void changeRemoteJudgeLock(String remoteJudge, String username, String ip, Integer port,
-            Long resultSubmitId) {
+            String resultSubmitId) {
         log.info("After Get Result,remote_judge:[{}],submit_id: [{}]! Begin to return the account to other task!",
                 remoteJudge, resultSubmitId);
         // 将账号变为可用

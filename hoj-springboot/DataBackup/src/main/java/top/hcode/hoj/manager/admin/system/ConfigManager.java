@@ -505,6 +505,15 @@ public class ConfigManager {
                     Constants.RemoteOJ.LIBRE.getName());
         }
 
+        if (checkListDiff(config.getNswojUsernameList(), switchConfig.getNswojUsernameList()) ||
+                checkListDiff(config.getNswojPasswordList(), switchConfig.getNswojPasswordList())) {
+            switchConfig.setNswojUsernameList(config.getNswojUsernameList());
+            switchConfig.setNswojPasswordList(config.getNswojPasswordList());
+            changeRemoteJudgeAccount(config.getNswojUsernameList(),
+                    config.getNswojPasswordList(),
+                    Constants.RemoteOJ.NSWOJ.getName());
+        }
+
         boolean isOk = nacosSwitchConfig.publishSwitchConfig();
         if (!isOk) {
             throw new StatusFailException("修改失败");

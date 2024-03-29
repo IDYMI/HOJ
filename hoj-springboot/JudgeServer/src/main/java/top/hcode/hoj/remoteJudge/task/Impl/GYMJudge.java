@@ -61,7 +61,7 @@ public class GYMJudge extends CodeForcesJudge {
         HttpRequest.getCookieManager().getCookieStore().removeAll();
 
         RemoteJudgeDTO remoteJudgeDTO = getRemoteJudgeDTO();
-        Long submitId = remoteJudgeDTO.getSubmitId();
+        String submitId = remoteJudgeDTO.getSubmitId();
 
         RemoteJudgeRes remoteJudgeRes = RemoteJudgeRes.builder()
                 .status(Constants.Judge.STATUS_JUDGING.getStatus())

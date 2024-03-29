@@ -31,7 +31,7 @@ public class Judge implements Serializable {
 
     @ApiModelProperty(value = "排序后的 Id")
     private Long sortedId;
-    
+
     @ApiModelProperty(value = "题目id")
     private Long pid;
 
@@ -102,7 +102,7 @@ public class Judge implements Serializable {
     private Integer oiRankScore;
 
     @ApiModelProperty(value = "vjudge判题在其它oj的提交id")
-    private Long vjudgeSubmitId;
+    private String vjudgeSubmitId;
 
     @ApiModelProperty(value = "vjudge判题在其它oj的提交用户名")
     private String vjudgeUsername;

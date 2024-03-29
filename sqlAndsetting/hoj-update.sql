@@ -1746,3 +1746,18 @@ CALL add_userRecord ;
 
 DROP PROCEDURE add_userRecord;
 
+
+/*
+* 更新 vjudge_submit_id 为 String
+*/
+DROP PROCEDURE IF EXISTS judge_Update_vjudge_submit_id;
+DELIMITER $$
+
+CREATE PROCEDURE judge_Update_vjudge_submit_id ()
+BEGIN
+    ALTER TABLE judge MODIFY COLUMN vjudge_submit_id VARCHAR(255) NULL COMMENT 'vjudge判题在其它oj的提交id';
+END$$
+
+DELIMITER ;
+CALL judge_Update_vjudge_submit_id ;
+

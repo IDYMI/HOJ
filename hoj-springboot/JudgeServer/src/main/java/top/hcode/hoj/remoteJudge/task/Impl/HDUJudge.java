@@ -99,7 +99,7 @@ public class HDUJudge extends RemoteJudgeStrategy {
             maxRunId = getMaxRunId(remoteJudgeDTO.getUsername(), remoteJudgeDTO.getCompleteProblemId());
         }
         remoteJudgeDTO.setCookies(cookies)
-                .setSubmitId(maxRunId);
+                .setSubmitId(String.valueOf(maxRunId));
     }
 
     @Override

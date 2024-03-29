@@ -76,9 +76,9 @@ public class SPOJJudge extends RemoteJudgeStrategy {
 
         String runId = ReUtil.get("name=\"newSubmissionId\" value=\"(\\d+)\"", response.body(), 1);
         if (runId == null) {
-            remoteJudgeDTO.setSubmitId(-1L);
+            remoteJudgeDTO.setSubmitId(null);
         } else {
-            remoteJudgeDTO.setSubmitId(Long.parseLong(runId));
+            remoteJudgeDTO.setSubmitId(runId);
         }
     }
 
@@ -86,7 +86,7 @@ public class SPOJJudge extends RemoteJudgeStrategy {
     public RemoteJudgeRes result() {
         RemoteJudgeDTO remoteJudgeDTO = getRemoteJudgeDTO();
         List<HttpCookie> cookies = remoteJudgeDTO.getCookies();
-        Long submitId = remoteJudgeDTO.getSubmitId();
+        String submitId = remoteJudgeDTO.getSubmitId();
 
         String url = HOST + SUBMISSION_RESULT_URL;
         HttpResponse response = HttpUtil.createPost(url)

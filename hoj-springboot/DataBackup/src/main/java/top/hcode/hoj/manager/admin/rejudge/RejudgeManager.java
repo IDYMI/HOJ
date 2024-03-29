@@ -212,7 +212,7 @@ public class RejudgeManager {
         }
     }
 
-    private boolean isHasSubmitIdRemoteRejudge(Long vjudgeSubmitId, int status) {
+    private boolean isHasSubmitIdRemoteRejudge(String vjudgeSubmitId, int status) {
         boolean isHasSubmitIdRemoteRejudge = false;
         if (vjudgeSubmitId != null &&
                 (status == Constants.Judge.STATUS_SUBMITTED_FAILED.getStatus()

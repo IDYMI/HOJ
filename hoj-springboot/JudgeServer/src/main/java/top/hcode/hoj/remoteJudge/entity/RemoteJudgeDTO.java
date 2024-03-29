@@ -115,7 +115,7 @@ public class RemoteJudgeDTO implements Serializable {
     /**
      * 远程测评的提交id（远程oj的提交id）
      */
-    private Long submitId;
+    private String submitId;
 
     /**
      * 远程测评的测试数据的序号(codeforces)

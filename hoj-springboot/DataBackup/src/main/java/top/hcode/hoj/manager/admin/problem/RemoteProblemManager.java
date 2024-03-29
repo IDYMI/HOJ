@@ -84,6 +84,9 @@ public class RemoteProblemManager {
             case "QOJ":
                 problemStrategy = new QOJProblemStrategy();
                 break;
+            case "NSWOJ":
+                problemStrategy = new NSWOJProblemStrategy();
+                break;
             default:
                 throw new Exception("未知的OJ的名字，暂时不支持！");
         }

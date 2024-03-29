@@ -577,7 +577,7 @@ public class SynchronousManager {
                 .setIp(record.getStr("ip"))
                 .setVersion(record.getInt("version"))
                 .setOiRankScore(record.getInt("oiRankScore"))
-                .setVjudgeSubmitId(record.getLong("vjudgeSubmitId"))
+                .setVjudgeSubmitId(String.valueOf(record.getLong("vjudgeSubmitId")))
                 .setVjudgeUsername(record.getStr("vjudgeUsername"))
                 .setVjudgePassword(record.getStr("vjudgePassword"))
                 .setIsManual(record.getBool("isManual"))

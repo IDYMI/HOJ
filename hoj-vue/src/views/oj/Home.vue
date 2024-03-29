@@ -403,6 +403,12 @@ export default {
           logo: require("@/assets/qoj-logo.png"),
           status: true,
         },
+        {
+          url: "/discussion-detail/28",
+          name: "NSWOJ",
+          logo: require("@/assets/nswoj-logo.png"),
+          status: true,
+        },
       ],
     };
   },

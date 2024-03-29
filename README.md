@@ -87,6 +87,7 @@
 | 2024-02-20 | 错误测试点查看                                                       | IDYMI          |
 | 2024-03-12 | 多平台 OJ 排行榜                                                     | IDYMI          |
 | 2024-03-24 | 添加 QOJ 远程评测                                                    | IDYMI          |
+| 2024-03-29 | 添加 NSWOJ 远程评测                                                  | IDYMI          |
 
 ## 三、新功能部分截图
 
@@ -285,3 +286,13 @@
    ![image.png](docs/docs/.vuepress/public/2b3e7ac7a3a94ecd93f77812669d8028.png)
 
 2024 年 3 月 24 日 20 点
+
+# 增加 NSWOJ 远程评测
+
+## 新手入坑，菜就多练！！！！
+
+1. 增加 NSWOJ 远程评测
+   ![image.png](docs/docs/.vuepress/public/f3c1e59f4c574a919cbab66a70ab5235.png)
+   ![image.png](docs/docs/.vuepress/public/f70bdbb4c9da4fb2ae8f81a2a615e63e.png)
+
+2024 年 3 月 29 日 15 点

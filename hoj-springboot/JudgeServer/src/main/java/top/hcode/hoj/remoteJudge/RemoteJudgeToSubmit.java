@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
 import top.hcode.hoj.dao.JudgeEntityService;
 import top.hcode.hoj.judge.JudgeContext;
 import top.hcode.hoj.pojo.entity.judge.Judge;
@@ -40,9 +42,9 @@ public class RemoteJudgeToSubmit {
             errLog = e.getMessage();
         }
 
-        Long submitId = remoteJudgeDTO.getSubmitId();
+        String submitId = remoteJudgeDTO.getSubmitId();
         // 提交失败 前端手动按按钮再次提交 修改状态 STATUS_SUBMITTED_FAILED
-        if (submitId == null || submitId == -1L) {
+        if (StringUtils.isEmpty(submitId)) {
             // 将使用的账号放回对应列表
             log.error("[{}] Submit Failed! Begin to return the account to other task!", remoteJudgeDTO.getOj());
             remoteJudgeService.changeAccountStatus(remoteJudgeDTO.getOj(),
@@ -69,7 +71,7 @@ public class RemoteJudgeToSubmit {
                     .eq("submit_id", remoteJudgeDTO.getJudgeId());
             judgeEntityService.update(judgeUpdateWrapper);
             // 更新其它表
-            judgeContext.updateOtherTable(remoteJudgeDTO.getSubmitId(),
+            judgeContext.updateOtherTable(remoteJudgeDTO.getJudgeId(),
                     Constants.Judge.STATUS_SYSTEM_ERROR.getStatus(),
                     remoteJudgeDTO.getCid(),
                     remoteJudgeDTO.getUid(),

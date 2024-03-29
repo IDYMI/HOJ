@@ -84,7 +84,7 @@ public class POJJudge extends RemoteJudgeStrategy {
         }
 
         remoteJudgeDTO.setCookies(cookies)
-                .setSubmitId(maxRunId);
+                .setSubmitId(String.valueOf(maxRunId));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class POJJudge extends RemoteJudgeStrategy {
 
         RemoteJudgeDTO remoteJudgeDTO = getRemoteJudgeDTO();
         List<HttpCookie> cookies = remoteJudgeDTO.getCookies();
-        Long submitId = remoteJudgeDTO.getSubmitId();
+        String submitId = remoteJudgeDTO.getSubmitId();
 
         if (CollectionUtils.isEmpty(cookies)) {
             login();

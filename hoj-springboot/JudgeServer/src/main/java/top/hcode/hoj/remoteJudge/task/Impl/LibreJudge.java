@@ -113,7 +113,7 @@ public class LibreJudge extends RemoteJudgeStrategy {
         String submissionId = JSONUtil.parseObj(body).getStr("submissionId");
         //提交成功
         if (StringUtils.isNotBlank(submissionId)) {
-            remoteJudgeDTO.setSubmitId(Long.parseLong(submissionId));
+            remoteJudgeDTO.setSubmitId(submissionId);
         } else {
             //再试一次
             try {
@@ -127,7 +127,7 @@ public class LibreJudge extends RemoteJudgeStrategy {
                     .body();
             submissionId = JSONUtil.parseObj(body).getStr("submissionId");
             if (StringUtils.isNotBlank(submissionId)) {
-                remoteJudgeDTO.setSubmitId(Long.parseLong(submissionId));
+                remoteJudgeDTO.setSubmitId(submissionId);
             } else {
                 throw new RuntimeException("[LibreOJ] Failed to submit!");
             }

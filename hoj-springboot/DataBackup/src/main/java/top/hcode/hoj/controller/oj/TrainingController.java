@@ -56,7 +56,7 @@ public class TrainingController {
      * @Since 2021/11/20
      */
     @GetMapping("/get-training-detail")
-    @RequiresAuthentication
+    @AnonApi
     public CommonResult<TrainingVO> getTraining(@RequestParam(value = "tid") Long tid) {
         return trainingService.getTraining(tid);
     }

@@ -276,15 +276,10 @@ export default {
     },
 
     toTraining(trainingID) {
-      if (!this.isAuthenticated) {
-        myMessage.warning(this.$i18n.t("m.Please_login_first"));
-        this.$store.dispatch("changeModalStatus", { visible: true });
-      } else {
-        this.$router.push({
-          name: "TrainingDetails",
-          params: { trainingID: trainingID },
-        });
-      }
+      this.$router.push({
+        name: "TrainingDetails",
+        params: { trainingID: trainingID },
+      });
     },
     goUserHome(username) {
       this.$router.push({

@@ -124,9 +124,6 @@ router.beforeEach((to, from, next) => {
           path: '/admin/login', // 管理端无token认证返回登录页
         });
       } else {
-        next({
-          path: '/home', // 无token认证的一致返回到主页
-        });
         store.commit('changeModalStatus', { mode: 'Login', visible: true });
       }
       store.commit('clearUserInfoAndToken');

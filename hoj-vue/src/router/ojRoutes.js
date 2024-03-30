@@ -160,19 +160,19 @@ const ojRoutes = [
     name: 'ContestDetails',
     path: '/contest/:contestID/',
     component: ContestDetails,
-    meta: { title: 'Contest Details', requireAuth: true },
+    meta: { title: 'Contest Details' },
     children: [
       {
         name: 'ContestSubmissionList',
         path: 'submissions',
         component: SubmissionList,
-        meta: { title: 'Contest Submission' },
+        meta: { title: 'Contest Submission', requireAuth: true },
       },
       {
         name: 'ContestSubmissionDetails',
         path: 'problem/:problemID/submission-detail/:submitID',
         component: SubmissionDetails,
-        meta: { title: 'Contest Submission Details' },
+        meta: { title: 'Contest Submission Details', requireAuth: true },
       },
       {
         name: 'ContestAdminMossDetails',
@@ -180,61 +180,62 @@ const ojRoutes = [
         component: ContestAdminMossDetails,
         meta: {
           title: 'Contest Moss Details',
+          requireAuth: true,
         },
       },
       {
         name: 'ContestProblemList',
         path: 'problems',
         component: ContestProblemList,
-        meta: { title: 'Contest Problem' },
+        meta: { title: 'Contest Problem', requireAuth: true },
       },
       {
         name: 'ContestProblemDetails',
         path: 'problem/:problemID/',
         component: Problem,
-        meta: { title: 'Contest Problem Details' },
+        meta: { title: 'Contest Problem Details', requireAuth: true },
       },
       {
         name: 'ContestAnnouncementList',
         path: 'announcement/:announcementID?',
         component: Announcements,
-        meta: { title: 'Contest Announcement' },
+        meta: { title: 'Contest Announcement', requireAuth: true },
       },
       {
         name: 'ContestRank',
         path: 'rank',
         component: ContestRank,
-        meta: { title: 'Contest Rank' },
+        meta: { title: 'Contest Rank', requireAuth: true },
       },
       {
         name: 'ContestACInfo',
         path: 'ac-info',
         component: ACMInfoAdmin,
-        meta: { title: 'Contest AC Info' },
+        meta: { title: 'Contest AC Info', requireAuth: true },
       },
       {
         name: 'ContestRejudgeAdmin',
         path: 'rejudge',
         component: ContestRejudgeAdmin,
-        meta: { title: 'Contest Rejudge' },
+        meta: { title: 'Contest Rejudge', requireAuth: true },
       },
       {
         name: 'ContestComment',
         path: 'comment',
         component: ContestComment,
-        meta: { title: 'Contest Comment', access: 'contestComment' },
+        meta: { title: 'Contest Comment', access: 'contestComment', requireAuth: true },
       },
       {
         name: 'ContestPrint',
         path: 'print',
         component: ContestPrint,
-        meta: { title: 'Contest Print' },
+        meta: { title: 'Contest Print', requireAuth: true },
       },
       {
         name: 'ContestAdminPrint',
         path: 'admin-print',
         component: ContestAdminPrint,
-        meta: { title: 'Contest Admin Print' },
+        meta: { title: 'Contest Admin Print', requireAuth: true },
       },
       {
         name: 'ContestAdminSign',
@@ -242,6 +243,7 @@ const ojRoutes = [
         component: ContestAdminSign,
         meta: {
           title: 'Contest Admin Sign',
+          requireAuth: true,
         },
       },
       {
@@ -250,13 +252,14 @@ const ojRoutes = [
         component: ContestAdminMoss,
         meta: {
           title: 'Contest Admin Moss',
+          requireAuth: true,
         },
       },
       {
         name: 'ScrollBoard',
         path: 'scroll-board',
         component: ScrollBoard,
-        meta: { title: 'Contest Scroll Board' },
+        meta: { title: 'Contest Scroll Board', requireAuth: true },
       },
     ],
   },

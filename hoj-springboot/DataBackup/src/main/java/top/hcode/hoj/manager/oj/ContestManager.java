@@ -162,6 +162,10 @@ public class ContestManager {
     public List<ContestFileConfigVO> getContestFileList(Long cid) throws StatusFailException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
+        if (userRolesVo == null) {
+            return null;
+        }
+
         ContestVO contestInfo = contestEntityService.getContestInfoById(cid);
         if (contestInfo == null) {
             throw new StatusFailException("对不起，该比赛不存在!");
@@ -243,6 +247,12 @@ public class ContestManager {
     public AccessVO getContestAccess(Long cid) throws StatusFailException {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        if (userRolesVo == null) {
+            AccessVO accessVo = new AccessVO();
+            accessVo.setAccess(false);
+            return accessVo;
+        }
 
         QueryWrapper<ContestRegister> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("cid", cid).eq("uid", userRolesVo.getUid());
@@ -941,6 +951,10 @@ public class ContestManager {
 
         // 超级管理员或者该比赛的创建者，则为比赛管理者
         boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
+
+        if (userRolesVo == null) {
+            return null;
+        }
 
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
         contestValidator.validateContestAuth(contest, userRolesVo, isRoot);

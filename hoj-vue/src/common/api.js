@@ -93,7 +93,7 @@ axios.interceptors.response.use(
         // 在登录成功后返回当前页面，这一步需要在登录页操作。
         case 401:
           if (error.response.data.msg) {
-            mMessage.error(error.response.data.msg);
+            mMessage.warning(error.response.data.msg);
             if (!isMobile) {
               Vue.prototype.$notify.error({
                 title: i18n.t('m.Error'),

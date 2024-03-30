@@ -145,7 +145,7 @@ public class HomeController {
     }
 
     @GetMapping("/get-school-list")
-    @RequiresAuthentication
+    @AnonApi
     public CommonResult<List<SchoolVO>> getSchoolList() {
         return homeService.getSchoolList();
     }

@@ -661,6 +661,10 @@ public class InventManager {
             throw new StatusFailException("获取报名失败，该比赛已不存在！");
         }
 
+        if (username == null) {
+            return null;
+        }
+
         boolean isRoot = SecurityUtils.getSubject().hasRole("root")
                 || SecurityUtils.getSubject().hasRole("admin");
 

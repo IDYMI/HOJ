@@ -61,10 +61,9 @@ public class InventController {
     }
 
     @GetMapping("/sign")
-    @RequiresAuthentication
     public CommonResult<ContestSignVO> getSign(
-            @RequestParam("cid") Long cid,
-            @RequestParam("username") String username) {
+            @RequestParam(value = "cid", required = true) Long cid,
+            @RequestParam(value = "username", required = false) String username) {
         return inventService.getSign(cid, username);
     }
 }

@@ -146,7 +146,7 @@ public class ContestManager {
 
         Contest contest = contestEntityService.getById(cid);
 
-        if (contest.getIsGroup()) {
+        if (contest.getIsGroup() && userRolesVo != null) {
             Boolean isGroupRoot = groupManager.getGroupAuthAdmin(contest.getGid());
             if (!groupValidator.isGroupMember(userRolesVo.getUid(), contest.getGid()) && !isGroupRoot) {
                 throw new StatusForbiddenException("对不起，您无权限操作！");

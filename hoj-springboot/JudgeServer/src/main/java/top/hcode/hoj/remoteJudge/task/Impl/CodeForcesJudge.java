@@ -474,7 +474,7 @@ public class CodeForcesJudge extends RemoteJudgeStrategy {
         } else if (language.startsWith("GNU G++17")) {
             return "54";
         } else if (language.startsWith("GNU G++20")) {
-            return "73";
+            return "89";
         } else if (language.startsWith("Microsoft Visual C++ 2017")) {
             return "59";
         } else if (language.startsWith("C# 8, .NET Core")) {

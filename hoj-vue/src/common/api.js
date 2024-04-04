@@ -41,12 +41,12 @@ axios.interceptors.request.use(
     // NProgress.done();
     mMessage.error(error.response.data.msg);
     if (!isMobile) {
-      Vue.prototype.$notify.error({
-        title: i18n.t('m.Error'),
-        message: error.response.data.msg,
-        duration: 5000,
-        offset: 50,
-      });
+      // Vue.prototype.$notify.error({
+      //   title: i18n.t('m.Error'),
+      //   message: error.response.data.msg,
+      //   duration: 5000,
+      //   offset: 50,
+      // });
     }
     return Promise.error(error);
   }
@@ -64,14 +64,14 @@ axios.interceptors.response.use(
       return Promise.resolve(response);
     } else {
       mMessage.error(response.data.msg);
-      if (!isMobile) {
-        Vue.prototype.$notify.error({
-          title: i18n.t('m.Error'),
-          message: response.data.msg,
-          duration: 5000,
-          offset: 50,
-        });
-      }
+      // if (!isMobile) {
+      //   Vue.prototype.$notify.error({
+      //     title: i18n.t('m.Error'),
+      //     message: response.data.msg,
+      //     duration: 5000,
+      //     offset: 50,
+      //   });
+      // }
       return Promise.reject(response);
     }
   },
@@ -94,14 +94,14 @@ axios.interceptors.response.use(
         case 401:
           if (error.response.data.msg) {
             mMessage.warning(error.response.data.msg);
-            if (!isMobile) {
-              Vue.prototype.$notify.error({
-                title: i18n.t('m.Error'),
-                message: error.response.data.msg,
-                duration: 5000,
-                offset: 50,
-              });
-            }
+            // if (!isMobile) {
+            //   Vue.prototype.$notify.error({
+            //     title: i18n.t('m.Error'),
+            //     message: error.response.data.msg,
+            //     duration: 5000,
+            //     offset: 50,
+            //   });
+            // }
           }
           if (error.response.config.headers['Url-Type'] === 'admin') {
             router.push('/admin/login');
@@ -116,12 +116,12 @@ axios.interceptors.response.use(
           if (error.response.data.msg) {
             mMessage.error(error.response.data.msg);
             if (!isMobile) {
-              Vue.prototype.$notify.error({
-                title: i18n.t('m.Error'),
-                message: error.response.data.msg,
-                duration: 5000,
-                offset: 50,
-              });
+              // Vue.prototype.$notify.error({
+              //   title: i18n.t('m.Error'),
+              //   message: error.response.data.msg,
+              //   duration: 5000,
+              //   offset: 50,
+              // });
             }
           }
           let isAdminApi = error.response.config.url.startsWith('/api/admin');
@@ -141,12 +141,12 @@ axios.interceptors.response.use(
             if (error.response.data.msg) {
               mMessage.error(error.response.data.msg);
               if (!isMobile) {
-                Vue.prototype.$notify.error({
-                  title: i18n.t('m.Error'),
-                  message: error.response.data.msg,
-                  duration: 5000,
-                  offset: 50,
-                });
+                // Vue.prototype.$notify.error({
+                //   title: i18n.t('m.Error'),
+                //   message: error.response.data.msg,
+                //   duration: 5000,
+                //   offset: 50,
+                // });
               }
             } else {
               mMessage.error(i18n.t('m.Server_error_please_refresh_again'));

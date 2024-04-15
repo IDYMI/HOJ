@@ -37,6 +37,9 @@ const getters = {
   contestRuleType: (state, getters) => {
     return state.contest.type;
   },
+  contestGid: (state, getters) => {
+    return state.contest.gid;
+  },
   isContestAdmin: (state, getters, _, rootGetters) => {
     return rootGetters.isAuthenticated && (state.contest.author === rootGetters.userInfo.username || rootGetters.isMainAdminRole || state.groupContestAuth == 5);
   },

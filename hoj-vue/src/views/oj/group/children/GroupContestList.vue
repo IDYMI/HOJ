@@ -380,6 +380,7 @@ export default {
     };
   },
   mounted() {
+    this.adminPage = this.$route.query.adminPage;
     this.CONTEST_STATUS_REVERSE = Object.assign({}, CONTEST_STATUS_REVERSE);
     this.CONTEST_TYPE = Object.assign({}, CONTEST_TYPE);
     this.CONTEST_TYPE_REVERSE = Object.assign({}, CONTEST_TYPE_REVERSE);

@@ -114,13 +114,13 @@
                 </div>
               </el-popover>
             </div>
-            <div class="admin" v-if="contest.gid === null">
+            <div class="admin">
               <el-button
                 v-if="isContestAdmin"
                 round
                 size="small"
                 slot="reference"
-                @click="toAdminContest()"
+                @click="toAdminContest(contest.gid)"
               >{{$t('m.To_Admin_Background')}}</el-button>
             </div>
           </div>
@@ -897,11 +897,21 @@ export default {
         },
       });
     },
-    toAdminContest() {
-      this.$router.push({
-        name: "admin-contest-list",
-        query: { keyword: this.contest.title, auth: this.contest.auth },
-      });
+    toAdminContest(gid) {
+      if (gid != null) {
+        this.$router.push({
+          name: "GroupContestList",
+          params: {
+            groupID: gid,
+          },
+          query: { adminPage: true },
+        });
+      } else {
+        this.$router.push({
+          name: "admin-contest-list",
+          query: { keyword: this.contest.title, auth: this.contest.auth },
+        });
+      }
     },
     getSign() {
       if (this.contest.auth === 3) {

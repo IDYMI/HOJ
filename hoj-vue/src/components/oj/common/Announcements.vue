@@ -186,17 +186,26 @@ export default {
       this.$router.push({ name: router_name });
     },
     goEditAnnouncement() {
-      let contestId = this.$route.params.contestID;
-      const params = this.isContest ? { contestId } : {};
-      // console.log(params);
-      this.$router.push({
-        name: this.edit_route_name,
-        params: params,
-      });
+      if (this.contestGid != null) {
+        this.$router.push({
+          name: "GroupContestList",
+          params: {
+            groupID: this.contestGid,
+          },
+          query: { adminPage: true },
+        });
+      } else {
+        let contestId = this.$route.params.contestID;
+        const params = this.isContest ? { contestId } : {};
+        this.$router.push({
+          name: this.edit_route_name,
+          params: params,
+        });
+      }
     },
   },
   computed: {
-    ...mapGetters(["isMainAdminRole"]),
+    ...mapGetters(["isMainAdminRole", "contestGid"]),
     title() {
       if (this.listVisible) {
         return this.isContest

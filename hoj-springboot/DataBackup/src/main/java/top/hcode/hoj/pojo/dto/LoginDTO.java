@@ -1,6 +1,7 @@
 package top.hcode.hoj.pojo.dto;
 
 import lombok.Data;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
@@ -17,4 +18,7 @@ public class LoginDTO implements Serializable {
 
     @NotBlank(message = "密码不能为空")
     private String password;
+
+    @ApiModelProperty(value = "新密码")
+    private String newPassword;
 }

@@ -93,6 +93,7 @@ export const m = {
   Extra_Account_Tips: '请输入允许参加比赛账号的用户名，并用空格隔开。',
   Password_Length: '密码长度',
   Password_Custom: '自定义密码',
+  Account_Type: '账号类型',
   True: '是',
   False: '否',
   Generate_and_Export: '生成 & 导出',

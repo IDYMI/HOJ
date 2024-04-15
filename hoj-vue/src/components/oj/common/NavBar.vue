@@ -700,6 +700,7 @@
 </template>
 <script>
 import Login from "@/components/oj/common/Login";
+import ContestAccountLogin from "@/components/oj/common/ContestAccountLogin";
 import Register from "@/components/oj/common/Register";
 import ResetPwd from "@/components/oj/common/ResetPassword";
 import MsgSvg from "@/components/oj/msg/msgSvg";
@@ -709,6 +710,7 @@ import api from "@/common/api";
 export default {
   components: {
     Login,
+    ContestAccountLogin,
     Register,
     ResetPwd,
     Avatar,
@@ -726,13 +728,18 @@ export default {
     this.setHiddenHeaderHeight();
     if (this.isAuthenticated) {
       this.getUnreadMsgCount();
+      this.addSession();
       this.msgTimer = setInterval(() => {
         this.getUnreadMsgCount();
       }, 120 * 1000);
+      this.msgTimer2 = setInterval(() => {
+        this.addSession();
+      }, 20 * 1000);
     }
   },
   beforeDestroy() {
     clearInterval(this.msgTimer);
+    clearInterval(this.msgTimer2);
   },
   data() {
     return {
@@ -781,6 +788,17 @@ export default {
         this.$router.push(route);
       } else {
         window.open("/admin/");
+      }
+    },
+    addSession() {
+      if (
+        this.userInfo.roleList.includes("contest_account") ||
+        this.userInfo.roleList.includes("team_contest_account")
+      ) {
+        api.addSession().then(
+          (res) => {},
+          (_) => {}
+        );
       }
     },
     getUnreadMsgCount() {
@@ -920,12 +938,21 @@ export default {
         if (this.msgTimer) {
           clearInterval(this.msgTimer);
         }
+        if (this.msgTimer2) {
+          clearInterval(this.msgTimer2);
+        }
         this.getUnreadMsgCount();
+        this.addSession();
         this.msgTimer = setInterval(() => {
           this.getUnreadMsgCount();
         }, 120 * 1000);
+        // 每20秒检测session
+        this.msgTimer2 = setInterval(() => {
+          this.addSession();
+        }, 20 * 1000);
       } else {
         clearInterval(this.msgTimer);
+        clearInterval(this.msgTimer2);
       }
     },
     $route() {

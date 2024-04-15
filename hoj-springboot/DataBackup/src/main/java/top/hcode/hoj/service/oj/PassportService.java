@@ -20,6 +20,8 @@ public interface PassportService {
 
     public CommonResult<UserInfoVO> login(LoginDTO loginDto, HttpServletResponse response, HttpServletRequest request);
 
+    public CommonResult<Void> addSession(HttpServletRequest request);
+
     public CommonResult<RegisterCodeVO> getRegisterCode(String email);
 
     public CommonResult<Void> register(RegisterDTO registerDto);

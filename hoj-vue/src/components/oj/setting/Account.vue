@@ -11,13 +11,13 @@
             :rules="rulePassword"
           >
             <el-form-item :label="$t('m.Old_Password')" prop="oldPassword">
-              <el-input v-model="formPassword.oldPassword" type="password" />
+              <el-input v-model="formPassword.oldPassword" type="password" show-password />
             </el-form-item>
             <el-form-item :label="$t('m.New_Password')" prop="newPassword">
-              <el-input v-model="formPassword.newPassword" type="password" />
+              <el-input v-model="formPassword.newPassword" type="password" show-password />
             </el-form-item>
             <el-form-item :label="$t('m.Confirm_New_Password')" prop="againPassword">
-              <el-input v-model="formPassword.againPassword" type="password" />
+              <el-input v-model="formPassword.againPassword" type="password" show-password />
             </el-form-item>
           </el-form>
           <el-popover
@@ -75,7 +75,7 @@
           <p class="section-title">{{ $t('m.Change_Email') }}</p>
           <el-form class="setting-content" ref="formEmail" :model="formEmail" :rules="ruleEmail">
             <el-form-item :label="$t('m.Current_Password')" prop="password">
-              <el-input v-model="formEmail.password" type="password" />
+              <el-input v-model="formEmail.password" type="password" show-password />
             </el-form-item>
             <el-form-item :label="$t('m.Old_Email')">
               <el-input v-model="formEmail.oldEmail" disabled />

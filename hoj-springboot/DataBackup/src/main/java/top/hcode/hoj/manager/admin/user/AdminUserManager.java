@@ -274,6 +274,11 @@ public class AdminUserManager {
         int numberTo = (int) params.getOrDefault("number_to", 10);
         int passwordLength = (int) params.getOrDefault("password_length", 6);
         String passwd = (String) params.getOrDefault("password_custom", "");
+        int type = (int) params.getOrDefault("type", false);
+
+        if (passwd != null && passwd != "" && passwd.length() < 6) {
+            throw new StatusFailException("请输入大于6位的密码！");
+        }
 
         List<UserInfo> userInfoList = new LinkedList<>();
         List<UserRole> userRoleList = new LinkedList<>();
@@ -292,7 +297,7 @@ public class AdminUserManager {
                     .setPassword(SecureUtil.md5(password)));
             userInfo.put(username, password);
             userRoleList.add(new UserRole()
-                    .setRoleId(1002L)
+                    .setRoleId(type == 0 ? 1002L : (type == 1 ? 1009L : 1010L))
                     .setUid(uuid));
             userRecordList.add(new UserRecord().setUid(uuid));
             userPreferencesList.add(new UserPreferences().setUid(uuid));

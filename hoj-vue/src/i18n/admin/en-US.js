@@ -93,6 +93,7 @@ export const m = {
   Extra_Account_Tips: 'Please enter the username of the account allowed to enter to the contest, separated by spaces.',
   Password_Length: 'Password Length',
   Password_Custom: 'Password Custom',
+  Account_Type: 'Account Type',
   True: 'True',
   False: 'False',
   Generate_and_Export: 'Generate & Export',

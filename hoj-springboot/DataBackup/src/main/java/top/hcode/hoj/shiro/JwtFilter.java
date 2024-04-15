@@ -1,5 +1,6 @@
 package top.hcode.hoj.shiro;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import io.jsonwebtoken.Claims;
@@ -11,6 +12,7 @@ import org.apache.shiro.web.filter.authc.AuthenticatingFilter;
 import org.apache.shiro.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
@@ -20,15 +22,22 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import top.hcode.hoj.annotation.AnonApi;
 import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.common.result.ResultStatus;
+import top.hcode.hoj.dao.user.UserRoleEntityService;
+import top.hcode.hoj.pojo.vo.UserInfoVO;
+import top.hcode.hoj.pojo.vo.UserRolesVO;
 import top.hcode.hoj.utils.JwtUtils;
 import top.hcode.hoj.utils.RedisUtils;
 import top.hcode.hoj.utils.ServiceContextUtils;
+import top.hcode.hoj.pojo.entity.user.Role;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author: Himit_ZH
@@ -44,6 +53,9 @@ public class JwtFilter extends AuthenticatingFilter {
 
     @Autowired
     private RedisUtils redisUtils;
+
+    @Resource
+    private UserRoleEntityService userRoleEntityService;
 
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
@@ -121,8 +133,11 @@ public class JwtFilter extends AuthenticatingFilter {
             }
             String userId = claim.getSubject();
 
-            // 如果校验请求携带的token 与 redis缓存对应的token
-            // 那就会造成一个地方登录，另一个地方老的token就直接失效。
+            if (checkIpOnly(userId, token, servletRequest, servletResponse)) {
+                return this.onLoginFailure(null,
+                        new AuthenticationException("登录状态已失效，请重新登录！"), servletRequest, servletResponse);
+            }
+
             // 对于OJ来说，允许多地方登录在线。
             boolean hasToken = jwtUtils.hasToken(userId);
             if (!hasToken) {
@@ -207,5 +222,29 @@ public class JwtFilter extends AuthenticatingFilter {
             return false;
         }
         return super.preHandle(request, response);
+    }
+
+    private boolean checkIpOnly(String userId, String token, ServletRequest servletRequest,
+            ServletResponse servletResponse) throws Exception {
+        // 获取redis缓存对应的token
+        String redis_token = (String) redisUtils.get(ShiroConstant.SHIRO_TOKEN_KEY + userId);
+
+        UserRolesVO userRolesVo = userRoleEntityService.getUserRoles(userId, null);
+        UserInfoVO userInfoVo = new UserInfoVO();
+        BeanUtil.copyProperties(userRolesVo, userInfoVo, "roles");
+        userInfoVo.setRoleList(userRolesVo.getRoles()
+                .stream()
+                .map(Role::getRole)
+                .collect(Collectors.toList()));
+
+        // 如果是比赛账号
+        if (userInfoVo.getRoleList().contains("contest_account")) {
+            // 如果校验请求携带的token 与 redis缓存对应的token
+            // 那就会造成一个地方登录，另一个地方老的token就直接失效。
+            if (redis_token != null && !token.equals(redis_token)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

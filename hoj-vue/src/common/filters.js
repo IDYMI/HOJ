@@ -27,6 +27,10 @@ function parseRole(num) {
     return '用户(禁止提交&禁言)';
   } else if (num == 1008) {
     return '题目管理员';
+  } else if (num == 1009) {
+    return '比赛账号';
+  } else if (num == 1010) {
+    return '组队比赛账号';
   }
 }
 function parseContestType(num) {

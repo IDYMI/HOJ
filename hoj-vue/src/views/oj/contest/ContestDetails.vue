@@ -151,6 +151,7 @@
               <el-input
                 v-model="contestPassword"
                 type="password"
+                show-password
                 :placeholder="$t('m.Enter_the_contest_password')"
                 @keydown.enter.native="checkPassword"
                 style="width:70%"

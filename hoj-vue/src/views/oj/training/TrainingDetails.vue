@@ -44,6 +44,7 @@
                   <el-input
                     v-model="trainingPassword"
                     type="password"
+                    show-password
                     :placeholder="$t('m.Enter_the_training_password')"
                     @keydown.enter.native="checkPassword"
                     style="width:70%"

@@ -227,7 +227,19 @@
               <el-input-number v-model="formGenerateUser.number_to" style="width: 100%"></el-input-number>
             </el-form-item>
           </el-col>
-          <el-col :md="4" :xs="24" v-if="!isPasswdCustom">
+          <el-col :md="3" :xs="24">
+            <el-form-item :label="$t('m.Account_Type')">
+              <el-select v-model="formGenerateUser.type" :width="40">
+                <el-option label="用户" :value="0" :key="0"></el-option>
+                <el-option label="比赛账号" :value="1" :key="1"></el-option>
+                <el-option label="组队比赛账号" :value="2" :key="2"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="10">
+          <el-col :md="5" :xs="24" v-if="!isPasswdCustom">
             <el-form-item :label="$t('m.Password_Length')" prop="password_length">
               <el-input
                 v-model.number="formGenerateUser.password_length"
@@ -235,12 +247,11 @@
               ></el-input>
             </el-form-item>
           </el-col>
-          <el-col :md="4" :xs="24">
+          <el-col :md="6" :xs="24">
             <el-form-item :label="$t('m.Password_Custom')" prop="password_custom">
               <el-switch
                 v-model="isPasswdCustom"
                 :active-text="$t('m.True')"
-                :width="40"
                 :inactive-text="$t('m.False')"
               ></el-switch>
               <el-input
@@ -347,6 +358,8 @@
                 <el-option label="超级管理员" :value="1000" :key="1000"></el-option>
                 <el-option label="普通管理员" :value="1001" :key="1001"></el-option>
                 <el-option label="题目管理员" :value="1008" :key="1008"></el-option>
+                <el-option label="比赛账号" :value="1009" :key="1009"></el-option>
+                <el-option label="组队比赛账号" :value="1010" :key="1010"></el-option>
                 <el-option label="用户(默认)" :value="1002" :key="1002"></el-option>
                 <el-option label="用户(禁止提交)" :value="1003" :key="1003"></el-option>
                 <el-option label="用户(禁止发讨论)" :value="1004" :key="1004"></el-option>
@@ -422,6 +435,20 @@ export default {
             )
           )
         );
+      }
+      callback();
+    };
+    const CheckPwd = (rule, value, callback) => {
+      if (value != null && value != undefined && value != "") {
+        if (value.length < 6 || value.length > 25) {
+          callback(
+            new Error(
+              this.$i18n.t(
+                "m.Please_select_6_to_25_characters_for_password_length"
+              )
+            )
+          );
+        }
       }
       callback();
     };
@@ -527,6 +554,7 @@ export default {
         number_to: 10,
         password_length: 6,
         password_custom: "",
+        type: 0,
       },
       formGenerateRules: {
         number_from: [
@@ -557,7 +585,7 @@ export default {
           },
           { validator: CheckPwdLength, trigger: "blur" },
         ],
-        password_custom: [{ validator: CheckPwdLength, trigger: "blur" }],
+        password_custom: [{ validator: CheckPwd, trigger: "blur" }],
       },
       isPasswdCustom: false,
     };

@@ -6,6 +6,8 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+
+import com.alibaba.excel.util.CollectionUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.apache.shiro.SecurityUtils;
@@ -17,6 +19,7 @@ import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.common.exception.StatusForbiddenException;
 import top.hcode.hoj.config.NacosSwitchConfig;
 import top.hcode.hoj.config.WebConfig;
+import top.hcode.hoj.dao.contest.ContestEntityService;
 import top.hcode.hoj.dao.user.SessionEntityService;
 import top.hcode.hoj.dao.user.UserInfoEntityService;
 import top.hcode.hoj.dao.user.UserPreferencesEntityService;
@@ -30,6 +33,7 @@ import top.hcode.hoj.pojo.dto.ApplyResetPasswordDTO;
 import top.hcode.hoj.pojo.dto.LoginDTO;
 import top.hcode.hoj.pojo.dto.RegisterDTO;
 import top.hcode.hoj.pojo.dto.ResetPasswordDTO;
+import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.user.*;
 import top.hcode.hoj.pojo.vo.RegisterCodeVO;
 import top.hcode.hoj.pojo.vo.UserInfoVO;
@@ -43,6 +47,9 @@ import top.hcode.hoj.utils.RedisUtils;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -90,11 +97,17 @@ public class PassportManager {
     @Resource
     private NoticeManager noticeManager;
 
+    @Resource
+    private ContestEntityService contestEntityService;
+
     public UserInfoVO login(LoginDTO loginDto, HttpServletResponse response, HttpServletRequest request)
-            throws StatusFailException {
+            throws StatusFailException, StatusForbiddenException {
         // 去掉账号密码首尾的空格
         loginDto.setPassword(loginDto.getPassword().trim());
         loginDto.setUsername(loginDto.getUsername().trim());
+        if (loginDto.getNewPassword() != null) {
+            loginDto.setNewPassword(loginDto.getNewPassword().trim());
+        }
 
         if (StringUtils.isEmpty(loginDto.getUsername()) || StringUtils.isEmpty(loginDto.getPassword())) {
             throw new StatusFailException("用户名或密码不能为空！");
@@ -134,6 +147,39 @@ public class PassportManager {
             throw new StatusFailException("该账户已被封禁，请联系管理员进行处理！");
         }
 
+        // 查询用户角色
+        List<String> rolesList = new LinkedList<>();
+        userRolesVo.getRoles().stream()
+                .forEach(role -> rolesList.add(role.getRole()));
+
+        // 比赛账号
+        if ((rolesList.contains("contest_account")
+                || rolesList.contains("team_contest_account"))) {
+            String username = loginDto.getUsername();
+            String oldPassword = loginDto.getPassword();
+            String newPassword = loginDto.getNewPassword();
+
+            if (newPassword != null) {
+                if (SecureUtil.md5(oldPassword).equals(SecureUtil.md5(newPassword))) {
+                    throw new StatusFailException("新密码与原始密码相同，请更改！");
+                }
+
+                if (newPassword.length() < 6 || newPassword.length() > 20) {
+                    throw new StatusFailException("新密码长度应该为6~20位！");
+                }
+
+                // 更新原始密码
+                UpdateWrapper<UserInfo> userInfoUpdateWrapper = new UpdateWrapper<>();
+                userInfoUpdateWrapper.eq("username", username).set("password", SecureUtil.md5(newPassword));
+                userInfoEntityService.update(userInfoUpdateWrapper);
+            } else {
+                // 首次登录强制要求更改密码
+                if (userRolesVo.getGmtCreate().equals(userRolesVo.getGmtModified())) {
+                    throw new StatusForbiddenException("该账户为比赛账户，首次登录请更改密码！");
+                }
+            }
+        }
+
         String jwt = jwtUtils.generateToken(userRolesVo.getUid());
         response.setHeader("Authorization", jwt); // 放到信息头部
         response.setHeader("Access-Control-Expose-Headers", "Authorization");
@@ -159,6 +205,35 @@ public class PassportManager {
                 .map(Role::getRole)
                 .collect(Collectors.toList()));
         return userInfoVo;
+    }
+
+    public void addSession(HttpServletRequest request) throws StatusFailException {
+        // 获取当前用户信息
+        AccountProfile accountProfile = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        // 获取对应用户的
+        UserRolesVO userRolesVo = userRoleEntityService.getUserRoles(accountProfile.getUid(), null);
+
+        // 查询用户角色
+        List<String> rolesList = new LinkedList<>();
+        userRolesVo.getRoles().stream()
+                .forEach(role -> rolesList.add(role.getRole()));
+
+        QueryWrapper<Contest> queryWrapper = new QueryWrapper<>();
+        // 过滤密码
+        queryWrapper.select(Contest.class, info -> !info.getColumn().equals("pwd"));
+        queryWrapper.eq("status", 0); // 筛选正在进行的比赛
+        List<Contest> contestList = contestEntityService.list(queryWrapper);
+
+        // 当有比赛的时候，如果是比赛账号，持续获取ip
+        if (!CollectionUtils.isEmpty(contestList) && (rolesList.contains("contest_account")
+                || rolesList.contains("team_contest_account"))) {
+            // 会话记录保存
+            sessionEntityService.save(new Session()
+                    .setUid(userRolesVo.getUid())
+                    .setIp(IpUtils.getUserIpAddr(request))
+                    .setUserAgent(request.getHeader("User-Agent")));
+        }
     }
 
     public RegisterCodeVO getRegisterCode(String email)

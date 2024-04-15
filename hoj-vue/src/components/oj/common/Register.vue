@@ -18,6 +18,7 @@
           :placeholder="$t('m.Register_Password')"
           @keyup.enter.native="handleRegister"
           type="password"
+          show-password
         ></el-input>
       </el-form-item>
       <el-form-item prop="passwordAgain">
@@ -27,6 +28,7 @@
           :placeholder="$t('m.Register_Password_Again')"
           @keyup.enter.native="handleRegister"
           type="password"
+          show-password
         ></el-input>
       </el-form-item>
       <el-form-item prop="email">

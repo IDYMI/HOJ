@@ -1761,3 +1761,16 @@ END$$
 DELIMITER ;
 CALL judge_Update_vjudge_submit_id ;
 
+/*
+ * 增加 role 表的 contest_account 比赛账号
+
+ */
+INSERT INTO `role`(`id`, `role`, `description`, `status`) VALUES ('1009', 'contest_account', '比赛账号', 0);
+INSERT INTO `role`(`id`, `role`, `description`, `status`) VALUES ('1010', 'team_contest_account', '组队比赛账号', 0);
+
+/*
+ * 增加 role_auth 表的 比赛账号 权限
+
+ */
+INSERT INTO `role_auth`(`auth_id`, `role_id`) VALUES (2, 1009),(8, 1009),(9, 1009),(10, 1009),(11, 1009),(12, 1009),(13, 1009),(14, 1009);
+INSERT INTO `role_auth`(`auth_id`, `role_id`) VALUES (2, 1010),(8, 1010),(9, 1010),(10, 1010),(11, 1010),(12, 1010),(13, 1010),(14, 1010);

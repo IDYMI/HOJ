@@ -222,6 +222,11 @@ const ojApi = {
       data,
     });
   },
+  addSession(data) {
+    return ajax('/api/session', 'post', {
+      data,
+    });
+  },
   checkUsernameOrEmail(username, email) {
     return ajax('/api/check-username-or-email', 'post', {
       data: {

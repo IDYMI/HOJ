@@ -36,6 +36,18 @@ public class PassportServiceImpl implements PassportService {
             return CommonResult.successResponse(passportManager.login(loginDto, response, request));
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
+    }
+
+    @Override
+    public CommonResult<Void> addSession(HttpServletRequest request) {
+        try {
+            passportManager.addSession(request);
+            return CommonResult.successResponse();
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
         }
     }
 

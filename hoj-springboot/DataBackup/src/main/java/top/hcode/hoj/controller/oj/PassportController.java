@@ -12,6 +12,7 @@ import top.hcode.hoj.pojo.dto.RegisterDTO;
 import top.hcode.hoj.pojo.dto.ResetPasswordDTO;
 import top.hcode.hoj.pojo.vo.RegisterCodeVO;
 import top.hcode.hoj.pojo.vo.UserInfoVO;
+import top.hcode.hoj.pojo.vo.UserUnreadMsgCountVO;
 import top.hcode.hoj.service.oj.PassportService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @Author: Himit_ZH
  * @Date: 2022/3/11 17:00
- * @Description: 处理登录、注册、重置密码
+ * @Description: 处理登录、注册、重置密码、检测IP
  */
 @RestController
 @RequestMapping("/api")
@@ -41,6 +42,12 @@ public class PassportController {
     public CommonResult<UserInfoVO> login(@Validated @RequestBody LoginDTO loginDto, HttpServletResponse response,
             HttpServletRequest request) {
         return passportService.login(loginDto, response, request);
+    }
+
+    @RequestMapping(value = "/session", method = RequestMethod.POST)
+    @RequiresAuthentication
+    public CommonResult<Void> addSession(HttpServletRequest request) {
+        return passportService.addSession(request);
     }
 
     /**

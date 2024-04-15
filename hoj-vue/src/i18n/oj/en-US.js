@@ -33,6 +33,7 @@ export const m = {
   NavBar_Management: 'Management',
   NavBar_Logout: 'Logout',
   Dialog_Login: 'Login',
+  Dialog_ContestAccountLogin: 'ContestAccount Login',
   Dialog_Register: 'Register',
   Dialog_Reset_Password: 'Reset Password',
   Click_To_Home: 'Click to Home',
@@ -57,6 +58,9 @@ export const m = {
   Password_Check_Required: 'The password is required.',
   Password_Check_Between: 'The length of the password is between 6 and 20.',
   Welcome_Back: 'Welcome back~',
+
+  // /components/oj/common/ContestAccountLogin.vue 比赛账号登录弹窗
+  NewPassword_Again_Check_Required: 'The new password again is required.',
 
   // /components/oj/common/Register.vue 注册弹窗
   Register_Username: 'Please Enter Username',

@@ -16,6 +16,7 @@
               v-model="formResetPassword.password"
               prefix-icon="el-icon-lock"
               type="password"
+              show-password
               :placeholder="$t('m.Set_New_Password_Msg')"
             ></el-input>
           </el-form-item>
@@ -24,6 +25,7 @@
               v-model="formResetPassword.passwordAgain"
               prefix-icon="el-icon-lock"
               type="password"
+              show-password
               :placeholder="$t('m.Set_New_Password_Again_Msg')"
             ></el-input>
           </el-form-item>

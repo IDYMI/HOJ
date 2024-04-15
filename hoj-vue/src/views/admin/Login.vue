@@ -39,6 +39,7 @@
         <el-form-item prop="password">
           <el-input
             type="password"
+            show-password
             v-model="ruleForm2.password"
             auto-complete="off"
             :placeholder="$t('m.Please_enter_password')"

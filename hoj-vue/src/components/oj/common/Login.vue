@@ -16,6 +16,7 @@
           prefix-icon="el-icon-lock"
           :placeholder="$t('m.Login_Password')"
           type="password"
+          show-password
           @keyup.enter.native="enterHandleLogin"
         ></el-input>
       </el-form-item>
@@ -176,6 +177,12 @@ export default {
               mMessage.success(this.$i18n.t("m.Welcome_Back"));
             },
             (_) => {
+              let status = _.data.status;
+              // 禁止登录
+              if (status === 403) {
+                // 切换到比赛专用登录界面
+                this.switchMode("ContestAccountLogin");
+              }
               this.$store.dispatch("incrLoginFailNum", false);
               this.btnLoginLoading = false;
             }

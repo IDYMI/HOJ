@@ -116,13 +116,15 @@ public class UserRoleEntityServiceImpl extends ServiceImpl<UserRoleMapper, UserR
 
     private final static List<String> ChineseRole = Arrays.asList("超级管理员", "普通管理员",
             "普通用户(默认)", "普通用户(禁止提交)", "普通用户(禁止发讨论)", "普通用户(禁言)", "普通用户(禁止提交&禁止发讨论)",
-            "用户(禁止提交&禁言)", "题目管理员");
+            "用户(禁止提交&禁言)", "题目管理员", "比赛账号", "组队比赛账号");
 
     private final static List<String> EnglishRole = Arrays.asList("Super Administrator", "General Administrator",
             "Normal User(Default)", "Normal User(No Submission)", "Normal User(No Discussion)",
             "Normal User(Forbidden Words)",
             "Normal User(No Submission & No Discussion)",
-            "Normal User(No Submission & Forbidden Words)", "Problem Administrator");
+            "Normal User(No Submission & Forbidden Words)", "Problem Administrator",
+            "Contest Account",
+            "Team Contest Account");
 
     @Override
     public String getAuthChangeContent(int oldType, int newType) {

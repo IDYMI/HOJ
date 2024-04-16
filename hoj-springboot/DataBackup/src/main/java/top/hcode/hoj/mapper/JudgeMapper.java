@@ -46,6 +46,19 @@ public interface JudgeMapper extends BaseMapper<Judge> {
             @Param("sealTimeUid") String sealTimeUid,
             @Param("completeProblemID") Boolean completeProblemID);
 
+    List<JudgeVO> getAcContestSubmissionList(
+            @Param("displayId") String displayId,
+            @Param("cid") Long cid,
+            @Param("status") Integer status,
+            @Param("username") String username,
+            @Param("uid") String uid,
+            @Param("beforeContestSubmit") Boolean beforeContestSubmit,
+            @Param("rule") String rule,
+            @Param("startTime") Date startTime,
+            @Param("sealRankTime") Date sealRankTime,
+            @Param("sealTimeUid") String sealTimeUid,
+            @Param("completeProblemID") Boolean completeProblemID);
+
     int getTodayJudgeNum();
 
     ProblemCountVO getContestProblemCount(@Param("pid") Long pid,

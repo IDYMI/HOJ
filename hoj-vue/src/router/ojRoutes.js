@@ -29,6 +29,7 @@ import ScrollBoard from '@/views/oj/contest/children/ScrollBoard.vue';
 import ContestRejudgeAdmin from '@/views/oj/contest/children/ContestRejudgeAdmin.vue';
 import DiscussionList from '@/views/oj/discussion/discussionList.vue';
 import Discussion from '@/views/oj/discussion/discussion.vue';
+import AcCsv from '@/components/oj/common/AcCsv.vue';
 import Introduction from '@/views/oj/about/Introduction.vue';
 import Developer from '@/views/oj/about/Developer.vue';
 import Message from '@/views/oj/message/message.vue';
@@ -162,6 +163,12 @@ const ojRoutes = [
     component: ContestDetails,
     meta: { title: 'Contest Details' },
     children: [
+      {
+        name: 'ContestAcCsv',
+        path: 'acCsv',
+        meta: { title: 'AcCsv' },
+        component: AcCsv,
+      },
       {
         name: 'ContestSubmissionList',
         path: 'submissions',

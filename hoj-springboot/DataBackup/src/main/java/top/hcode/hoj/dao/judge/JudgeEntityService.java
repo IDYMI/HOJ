@@ -44,6 +44,19 @@ public interface JudgeEntityService extends IService<Judge> {
             String sealTimeUid,
             Boolean completeProblemID);
 
+    List<JudgeVO> getAcContestSubmissionList(
+            String displayId,
+            Long cid,
+            Integer status,
+            String username,
+            String uid,
+            Boolean beforeContestSubmit,
+            String rule,
+            Date startTime,
+            Date sealRankTime,
+            String sealTimeUid,
+            Boolean completeProblemID);
+
     void failToUseRedisPublishJudge(Long submitId, Long pid, Boolean isContest);
 
     ProblemCountVO getContestProblemCount(Long pid,
@@ -59,5 +72,6 @@ public interface JudgeEntityService extends IService<Judge> {
 
     public List<ProblemCountVO> getProblemListCount(List<Long> pidList);
 
-    public List<ContestScrollBoardSubmissionVO> getContestScrollBoardSubmission(Long cid, List<String> removeUidList);
+    public List<ContestScrollBoardSubmissionVO> getContestScrollBoardSubmission(Long cid,
+            List<String> removeUidList);
 }

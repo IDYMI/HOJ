@@ -599,6 +599,12 @@ const ojApi = {
       params,
     });
   },
+  // 获取AC表格
+  getAcContestSubmissionList(params) {
+    return ajax('/api/ac-contest-submissions', 'get', {
+      params,
+    });
+  },
   // 获取同步赛提交列表
   getSynchronousSubmissionList(limit, params) {
     params.limit = limit;

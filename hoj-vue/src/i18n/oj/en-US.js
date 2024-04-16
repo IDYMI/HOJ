@@ -943,4 +943,11 @@ export const m = {
   TestCase_Copied_failed: 'Copied failed, Has Too Much Memory, Please Download it !',
   Upload_NotSupport: 'Not Support Such File',
   TestCase_Copied_successfully: 'TestCase copied successfully (Only Views Parts!)',
+
+  // /components/oj/common/Highlight.vue
+  Unfold: 'Unfold',
+  Fold: 'Fold',
+
+  // /components/oj/common/AcSubmissions.vue
+  ContestAcCsv: 'AC Csv',
 };

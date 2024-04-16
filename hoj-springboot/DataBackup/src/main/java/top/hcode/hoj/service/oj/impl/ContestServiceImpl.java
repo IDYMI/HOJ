@@ -162,6 +162,19 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
+    public CommonResult<List<SubmissionVO>> getAcContestSubmissionList(String displayId, String searchUsername,
+            Long searchCid) {
+        try {
+            return CommonResult.successResponse(
+                    contestManager.getAcContestSubmissionList(displayId, searchUsername, searchCid));
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
+    }
+
+    @Override
     public CommonResult<IPage<JudgeVO>> getSynchronousSubmissionList(Integer limit,
             Integer currentPage,
             Boolean onlyMine,

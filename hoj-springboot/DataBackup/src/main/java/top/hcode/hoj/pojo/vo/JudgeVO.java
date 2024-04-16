@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import top.hcode.hoj.pojo.entity.judge.Judge;
 
 import java.util.Date;
 
@@ -31,6 +32,9 @@ public class JudgeVO {
 
     @ApiModelProperty(value = "用户名")
     private String username;
+
+    @ApiModelProperty(value = "真实姓名")
+    private String realname;
 
     @ApiModelProperty(value = "题目id")
     private Long pid;
@@ -67,6 +71,9 @@ public class JudgeVO {
 
     @ApiModelProperty(value = "代码长度")
     private Integer length;
+
+    @ApiModelProperty(value = "代码")
+    private String code;
 
     @ApiModelProperty(value = "代码语言")
     private String language;

@@ -61,7 +61,7 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
         page.setSearchCount(false);
         page.setOptimizeCountSql(false);
         // 关闭count sql的优化，解决前端查询慢的效率问题。
-        
+
         IPage<JudgeVO> commonJudgeList = judgeMapper.getCommonJudgeList(page, searchPid, status, username, uid,
                 completeProblemID, gid);
         List<JudgeVO> records = commonJudgeList.getRecords();
@@ -111,6 +111,24 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
         Page<JudgeVO> page = new Page<>(currentPage, limit);
 
         return judgeMapper.getContestJudgeList(page, displayId, cid, status, username, uid, beforeContestSubmit,
+                rule, startTime, sealRankTime, sealTimeUid, completeProblemID);
+    }
+
+    @Override
+    public List<JudgeVO> getAcContestSubmissionList(
+            String displayId,
+            Long cid,
+            Integer status,
+            String username,
+            String uid,
+            Boolean beforeContestSubmit,
+            String rule,
+            Date startTime,
+            Date sealRankTime,
+            String sealTimeUid,
+            Boolean completeProblemID) {
+
+        return judgeMapper.getAcContestSubmissionList(displayId, cid, status, username, uid, beforeContestSubmit,
                 rule, startTime, sealRankTime, sealTimeUid, completeProblemID);
     }
 

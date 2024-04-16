@@ -163,6 +163,16 @@ public class ContestController {
                 containsEnd);
     }
 
+    @GetMapping("/ac-contest-submissions")
+    @RequiresAuthentication
+    public CommonResult<List<SubmissionVO>> getAcContestSubmissionList(
+            @RequestParam(value = "problemID", required = false) String displayId,
+            @RequestParam(value = "username", required = false) String searchUsername,
+            @RequestParam(value = "contestID", required = true) Long searchCid) {
+
+        return contestService.getAcContestSubmissionList(displayId, searchUsername, searchCid);
+    }
+
     @GetMapping("/synchronous-submissions")
     @RequiresAuthentication
     public CommonResult<IPage<JudgeVO>> getSynchronousSubmissionList(

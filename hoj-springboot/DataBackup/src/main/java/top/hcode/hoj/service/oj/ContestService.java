@@ -45,6 +45,9 @@ public interface ContestService {
             Boolean completeProblemID,
             Boolean isContainsContestEndJudge);
 
+    public CommonResult<List<SubmissionVO>> getAcContestSubmissionList(String displayId, String searchUsername,
+            Long searchCid);
+
     public CommonResult<IPage<JudgeVO>> getSynchronousSubmissionList(Integer limit,
             Integer currentPage,
             Boolean onlyMine,

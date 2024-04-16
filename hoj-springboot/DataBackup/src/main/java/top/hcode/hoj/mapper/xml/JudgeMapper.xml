@@ -85,6 +85,57 @@
         order by j.sorted_id DESC
     </select>
 
+    <select id="getAcContestSubmissionList" resultType="top.hcode.hoj.pojo.vo.JudgeVO" useCache="true">
+        select j.submit_id,j.sorted_id,j.submit_time,j.uid,j.username,us.realname,cp.display_id,cp.display_title as title,
+        j.status,j.share,j.time,j.memory,j.score,j.length,j.code,j.language,j.cid,j.cpid,j.judger,j.is_manual
+        from judge j right join
+        (
+            select display_title,display_id,cid,pid from contest_problem
+            <where>
+                cid = #{cid}
+                <if test="displayId!=null and displayId!=''">
+                    <if test="completeProblemID != true">
+                        AND display_id like concat('%',#{displayId},'%')
+                    </if>
+                    <if test="completeProblemID">
+                        AND display_id = #{displayId}
+                    </if>
+                </if>
+            </where>
+        ) cp
+        on j.pid = cp.pid AND j.cid = cp.cid
+        left join user_sign us on us.uid = j.uid
+        <where>
+            <if test="cid!=null">
+                AND j.cid = #{cid}
+            </if>
+            <if test="username!='' and username!=null">
+                AND j.username like concat('%',#{username},'%')
+            </if>
+            <if test="status!=null">
+                AND j.status = #{status}
+            </if>
+            <if test="uid!=null and uid!=''">
+                AND j.uid = #{uid}
+            </if>
+            <if test="beforeContestSubmit!=null and beforeContestSubmit==true">
+                AND #{startTime} > j.submit_time
+            </if>
+            <if test="beforeContestSubmit!=null and beforeContestSubmit==false">
+                AND j.submit_time >= #{startTime}
+            </if>
+            <choose>
+                <when test="sealRankTime!=null and rule=='ACM'">
+                    AND (#{sealRankTime} > j.submit_time OR j.uid=#{sealTimeUid})
+                </when>
+                <when test="sealRankTime!=null and rule=='OI'">
+                    AND #{sealRankTime} > j.submit_time
+                </when>
+            </choose>
+        </where>
+        order by j.submit_id
+    </select>
+
     <select id="getTodayJudgeNum" resultType="int">
         SELECT count(*) FROM judge WHERE DATE(gmt_create) = CURDATE();
     </select>

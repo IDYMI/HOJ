@@ -1,6 +1,9 @@
 <template>
   <div class="markdown-body submission-detail">
-    <pre v-highlight="code" :style="styleObject"><code :class="language"></code></pre>
+    <div @click="collapsedClick()" style="cursor: pointer;">
+      <pre ref="codeContainer" v-highlight="code" :style="styleObject" v-if="collapsed"><code :class="language"></code><span v-if="canFold"><i class="el-icon-caret-top"></i>{{ $t('m.Fold') }}</span></pre>
+      <pre v-if="!collapsed"><span><i class="el-icon-caret-bottom"></i>{{ $t('m.Unfold') }}</span></pre>
+    </div>
   </div>
 </template>
 
@@ -26,6 +29,21 @@ export default {
       type: String,
       default: "#19be6b",
     },
+    canFold: {
+      type: Boolean,
+      default: false,
+    },
+    collapsed: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  methods: {
+    collapsedClick() {
+      if (this.canFold) {
+        this.collapsed = !this.collapsed;
+      }
+    },
   },
   watch: {
     borderColor(newval, oldval) {
@@ -33,6 +51,17 @@ export default {
         this.styleObject["border-left"] = "3px solid " + newval;
       }
     },
+  },
+  updated() {
+    this.$nextTick(() => {
+      if (this.$refs.codeContainer) {
+        this.$emit(
+          "height-change",
+          this.$refs.codeContainer.clientHeight,
+          this.$refs.codeContainer.scrollHeight
+        );
+      }
+    });
   },
 };
 </script>

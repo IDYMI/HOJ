@@ -635,6 +635,16 @@
             <router-view v-if="route_name === 'ScrollBoard'"></router-view>
           </transition>
         </el-tab-pane>
+
+        <el-tab-pane name="ContestAcCsv" lazy :disabled="contestMenuDisabled">
+          <span slot="label">
+            <i class="el-icon-s-grid" aria-hidden="true"></i>
+            &nbsp;{{ $t('m.ContestAcCsv') }}
+          </span>
+          <transition name="el-zoom-in-bottom">
+            <router-view v-if="route_name === 'ContestAcCsv'"></router-view>
+          </transition>
+        </el-tab-pane>
       </el-tabs>
     </div>
   </div>

@@ -721,6 +721,78 @@ public class ContestManager {
         }
     }
 
+    public List<SubmissionVO> getAcContestSubmissionList(String displayId, String searchUsername,
+            Long searchCid) throws StatusFailException, StatusForbiddenException {
+
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+        // 获取本场比赛的状态
+        Contest contest = contestEntityService.getById(searchCid);
+
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
+
+        // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
+        contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
+
+        String rule;
+        if (contest.getType().intValue() == Constants.Contest.TYPE_ACM.getCode()) {
+            rule = Constants.Contest.TYPE_ACM.getName();
+        } else {
+            rule = Constants.Contest.TYPE_OI.getName();
+        }
+        Date sealRankTime = null;
+
+        // 需要判断是否需要封榜
+        if (contestValidator.isSealRank(userRolesVo.getUid(), contest, true, isRoot)) {
+            sealRankTime = contest.getSealRankTime();
+        } else {
+            // 不展示比赛后的提交，则将sealRankTime设置成为比赛结束时间
+            sealRankTime = contest.getEndTime();
+        }
+        // OI比赛封榜期间不更新，ACM比赛封榜期间可看到自己的提交，但是其它人的不可见
+        List<JudgeVO> contestJudgeList = judgeEntityService.getAcContestSubmissionList(
+                displayId,
+                searchCid,
+                0,
+                searchUsername,
+                null,
+                false,
+                rule,
+                contest.getStartTime(),
+                sealRankTime,
+                userRolesVo.getUid(),
+                null);
+
+        // 比赛还是进行阶段，同时不是超级管理员与比赛管理员
+        if (contest.getStatus().intValue() == Constants.Contest.STATUS_RUNNING.getCode() && !isRoot) {
+            throw new StatusFailException("对不起，该比赛正在进行，无法获取所有的代码详情！");
+        }
+
+        Map<String, List<JudgeVO>> groupedByUser = contestJudgeList.stream()
+                .collect(Collectors.groupingBy(JudgeVO::getUid));
+
+        return groupedByUser.entrySet().stream()
+                .map(entry -> {
+                    List<CodeVO> codeList = entry.getValue().stream()
+                            .map(judge -> {
+                                CodeVO code = new CodeVO();
+                                code.setCode(judge.getCode());
+                                code.setLanguage(judge.getLanguage());
+                                code.setSubmitId(judge.getSubmitId());
+                                code.setDisplayId(judge.getDisplayId());
+                                return code;
+                            })
+                            .collect(Collectors.toList());
+
+                    SubmissionVO submission = new SubmissionVO();
+                    submission.setUid(entry.getKey());
+                    submission.setUsername(entry.getValue().get(0).getUsername());
+                    submission.setRealname(entry.getValue().get(0).getRealname());
+                    submission.setCodeList(codeList);
+                    return submission;
+                })
+                .collect(Collectors.toList());
+    }
+
     public IPage<JudgeVO> getSynchronousSubmissionList(Integer limit,
             Integer currentPage,
             boolean onlyMine,

@@ -380,6 +380,12 @@ public class HomeManager {
         return submissionStatisticsVO;
     }
 
+    /**
+     * @MethodName getSchoolList
+     * @Params
+     * @Description 文件获取学校列表 （废弃）
+     * @Return
+     */
     public List<SchoolVO> getSchoolList() {
         try {
             // 如果失效，前往下载

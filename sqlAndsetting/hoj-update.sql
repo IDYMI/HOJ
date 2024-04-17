@@ -1774,3 +1774,170 @@ INSERT INTO `role`(`id`, `role`, `description`, `status`) VALUES ('1010', 'team_
  */
 INSERT INTO `role_auth`(`auth_id`, `role_id`) VALUES (2, 1009),(8, 1009),(9, 1009),(10, 1009),(11, 1009),(12, 1009),(13, 1009),(14, 1009);
 INSERT INTO `role_auth`(`auth_id`, `role_id`) VALUES (2, 1010),(8, 1010),(9, 1010),(10, 1010),(11, 1010),(12, 1010),(13, 1010),(14, 1010);
+
+/*
+* 添加 school 表
+
+*/
+DROP PROCEDURE
+IF EXISTS add_school;
+DELIMITER $$
+
+CREATE PROCEDURE add_school ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'school'
+) THEN
+	CREATE TABLE `school` (
+	  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+	  `province` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '省份',
+	  `city` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '城市',
+      `name` varchar(255) COLLATE utf8mb4_bin NOT NULL COMMENT '学校名称',
+      `short_name` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '学校简称',
+	  `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	  `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	  KEY `id` (`id`)
+	) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_school ;
+
+DROP PROCEDURE add_school;
+
+/*
+* 添加 examination_room 表
+
+*/
+DROP PROCEDURE
+IF EXISTS add_examination_room;
+DELIMITER $$
+
+CREATE PROCEDURE add_examination_room ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'examination_room'
+) THEN
+	CREATE TABLE `examination_room` (
+	  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+	  `school_id` bigint unsigned NOT NULL COMMENT '学校id',
+	  `building` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '建筑号',
+      `room` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '房间号',
+      `max_row` int DEFAULT '7' COMMENT '最大行数，默认从0到n-1',
+      `max_col` int DEFAULT '7' COMMENT '最大列数，默认从0到n-1',
+      `status` int(11) DEFAULT '0' COMMENT '教室是否废弃',
+	  `author` varchar(255) NOT NULL COMMENT '发表者用户名',
+	  `modified_user` varchar(255) DEFAULT NULL COMMENT '修改者的用户名',
+	  `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	  `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	  PRIMARY KEY (`id`,`school_id`),
+	  KEY `school_id` (`school_id`),
+	  CONSTRAINT `examination_room_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `school` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_examination_room ;
+
+DROP PROCEDURE add_examination_room;
+
+/*
+* 添加 examination_seat 考场布局表
+
+*/
+DROP PROCEDURE
+IF EXISTS add_examination_seat;
+DELIMITER $$
+
+CREATE PROCEDURE add_examination_seat ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'examination_seat'
+) THEN
+	CREATE TABLE `examination_seat` (
+	  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+	  `eid` bigint unsigned NOT NULL COMMENT '考场编号',
+	  `grow` int DEFAULT NULL COMMENT '座位的x轴',
+      `gcol` int DEFAULT NULL COMMENT '座位的y轴',
+      `type` int(11) DEFAULT NULL COMMENT '0为可选座位，3为维修座位，4为该地方无座位',
+      `status` int(11) DEFAULT '0',
+	  `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	  `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	  PRIMARY KEY (`id`, `eid`),
+	  KEY `eid` (`eid`),
+	  CONSTRAINT `examination_seat_ibfk_1` FOREIGN KEY (`eid`) REFERENCES `examination_room` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_examination_seat ;
+
+DROP PROCEDURE add_examination_seat;
+
+/*
+* 添加 examination_seat 比赛座位表
+
+*/
+DROP PROCEDURE
+IF EXISTS add_contest_seat;
+DELIMITER $$
+
+CREATE PROCEDURE add_contest_seat ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'contest_seat'
+) THEN
+	CREATE TABLE `contest_seat` (
+	  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+	  `uid` varchar(255) DEFAULT NULL COMMENT '用户编号',
+      `cid` bigint unsigned NOT NULL COMMENT '比赛Id',
+      `sid` bigint unsigned NOT NULL COMMENT '座位Id',
+	  `sort_id` bigint unsigned DEFAULT NULL COMMENT '座位排序',
+      `title` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '比赛标题',
+	  `realname` varchar(100) COLLATE utf8mb4_bin NOT NULL COMMENT '考生姓名',
+      `course` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '专业/班级',
+      `number` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '学号',
+      `subject` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '科目',
+      `type` int(11) DEFAULT NULL COMMENT '0为可选座位，1为选中座位，2为已选座位',
+	  `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	  `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	  PRIMARY KEY (`id`, `sid`),
+	  KEY `sid` (`sid`),
+	  CONSTRAINT `contest_seat_ibfk_1` FOREIGN KEY (`sid`) REFERENCES `examination_seat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	  KEY `cid` (`cid`),
+	  CONSTRAINT `contest_seat_ibfk_2` FOREIGN KEY (`cid`) REFERENCES `contest` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_contest_seat ;
+
+DROP PROCEDURE add_contest_seat;

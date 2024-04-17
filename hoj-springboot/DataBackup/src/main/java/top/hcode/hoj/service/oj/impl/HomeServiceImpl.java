@@ -68,8 +68,4 @@ public class HomeServiceImpl implements HomeService {
         return CommonResult.successResponse(homeManager.getLastWeekSubmissionStatistics(forceRefresh));
     }
 
-    @Override
-    public CommonResult<List<SchoolVO>> getSchoolList() {
-        return CommonResult.successResponse(homeManager.getSchoolList());
-    }
 }

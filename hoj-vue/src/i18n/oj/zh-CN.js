@@ -951,4 +951,29 @@ export const m = {
 
   // /components/oj/common/AcSubmissions.vue
   ContestAcCsv: 'AC表格',
+
+  // /components/oj/common/ExaminationRoom.vue
+  PlaceRemoved: '删除',
+  PlaceAvailable: '可用',
+  PlaceSelected: '已选',
+  PlaceUsed: '你的位置',
+  PlaceMaintenance: '维修',
+  ScreenOrientation: '屏幕方向',
+  Building: '教学楼',
+  Room: '教室',
+  Place: '位置',
+  Room_Size: '预设大小（ 行 / 列 ）',
+  Create_Room: '生成房间',
+  Resize_Room: '此操作会删除当前的所有布局，确定嘛？',
+  Your_Place: '你的位置',
+  Your_Username: '你的用户名',
+  Grow: '排',
+  Gcol: '列',
+  Count: '座位数',
+  Used: '已使用',
+
+  // /components/oj/common/SearchExamination.vue
+  Search_ExaminationSeat: '搜索考场',
+  Enter_RealnameOrNumber: '输入 `真实姓名` or `学号`',
+  View: '查看考场座位分布',
 };

@@ -34,6 +34,4 @@ public interface HomeService {
 
     public CommonResult<SubmissionStatisticsVO> getLastWeekSubmissionStatistics(Boolean forceRefresh);
 
-    public CommonResult<List<SchoolVO>> getSchoolList();
-
 }

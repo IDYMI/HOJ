@@ -21,6 +21,11 @@ const TrainingList = () => import('@/views/admin/training/TrainingList');
 const TrainingProblemList = () => import('@/views/admin/training/TrainingProblemList');
 const TrainingCategory = () => import('@/views/admin/training/Category');
 const DiscussionList = () => import('@/views/admin/discussion/Discussion');
+const ExaminationRoom = () => import('@/views/admin/examination/ExaminationRoom');
+const ExaminationRoomList = () => import('@/views/admin/examination/ExaminationRoomList');
+const ExaminationSeat = () => import('@/views/admin/examination/ExaminationSeat');
+const ExaminationList = () => import('@/views/admin/examination/ExaminationList');
+
 const adminRoutes = [
   {
     path: '/admin/login',
@@ -200,6 +205,36 @@ const adminRoutes = [
         name: 'admin-discussion-list',
         component: DiscussionList,
         meta: { requireMainRoleAdmin: true, title: 'Discussion Admin' },
+      },
+      {
+        path: 'examination/:examinationRoomId/edit',
+        name: 'admin-edit-examination-room',
+        component: ExaminationRoom,
+        meta: { title: 'Edit ExaminationRoom' },
+      },
+      {
+        path: 'examination/create',
+        name: 'admin-create-examination-room',
+        component: ExaminationRoom,
+        meta: { title: 'Create ExaminationRoom' },
+      },
+      {
+        path: 'examination',
+        name: 'admin-examination-room-list',
+        component: ExaminationRoomList,
+        meta: { title: 'ExaminationRoom List' },
+      },
+      {
+        path: 'examination/assign',
+        name: 'admin-examination-list',
+        component: ExaminationList,
+        meta: { title: 'Assign ExaminationRoom List' },
+      },
+      {
+        path: 'contest/:contestId/assign',
+        name: 'admin-edit-examinationRoom',
+        component: ExaminationSeat,
+        meta: { title: 'Assign ExaminationSeat' },
       },
     ],
   },

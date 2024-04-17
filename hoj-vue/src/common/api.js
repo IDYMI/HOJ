@@ -2137,6 +2137,52 @@ const adminApi = {
       data,
     });
   },
+  getExaminationRoomList(currentPage, limit, keyword, cid) {
+    let params = { currentPage, limit, cid };
+    if (keyword) {
+      params.keyword = keyword;
+    }
+    return ajax('/api/get-examination-room-list', 'get', {
+      params: params,
+    });
+  },
+  getExaminationRoom(eid) {
+    return ajax('/api/examination-room', 'get', {
+      params: { eid },
+    });
+  },
+  admin_createExaminationRoom(data) {
+    return ajax('/api/examination-room', 'post', {
+      data,
+    });
+  },
+  admin_editExaminationRoom(data) {
+    return ajax('/api/examination-room', 'put', {
+      data,
+    });
+  },
+  admin_examinationSeat(data) {
+    return ajax('/api/examination-seat', 'post', {
+      data,
+    });
+  },
+  getExaminationSeatList(currentPage, limit, cid, keyword) {
+    return ajax('/api/get-contest-examination-room-list', 'get', {
+      params: { limit, currentPage, cid, keyword },
+    });
+  },
+  getExaminationSeat(eid, cid) {
+    let params = {};
+    if (eid) {
+      params.eid = eid;
+    }
+    if (cid) {
+      params.cid = cid;
+    }
+    return ajax('/api/examination-seat', 'get', {
+      params: params,
+    });
+  },
 };
 
 // 集中导出oj前台的api和admin管理端的api

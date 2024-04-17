@@ -29,6 +29,8 @@ import ScrollBoard from '@/views/oj/contest/children/ScrollBoard.vue';
 import ContestRejudgeAdmin from '@/views/oj/contest/children/ContestRejudgeAdmin.vue';
 import DiscussionList from '@/views/oj/discussion/discussionList.vue';
 import Discussion from '@/views/oj/discussion/discussion.vue';
+import ExaminationRoom from '@/components/oj/common/ExaminationRoom.vue';
+import SearchExamination from '@/components/oj/common/SearchExamination.vue';
 import AcCsv from '@/components/oj/common/AcCsv.vue';
 import Introduction from '@/views/oj/about/Introduction.vue';
 import Developer from '@/views/oj/about/Developer.vue';
@@ -467,6 +469,18 @@ const ojRoutes = [
         meta: { title: 'Group Rank' },
       },
     ],
+  },
+  {
+    path: '/searchExamination/:contestId',
+    name: 'search-examination-room',
+    meta: { title: 'SearchExamination' },
+    component: SearchExamination,
+  },
+  {
+    path: '/examinationRoom/:examinationRoomId',
+    name: 'get-examination-room',
+    meta: { title: 'ExaminationRoom' },
+    component: ExaminationRoom,
   },
   {
     path: '/introduction',

@@ -129,6 +129,27 @@
             }}
           </el-menu-item>
         </el-submenu>
+        <el-submenu index="examination">
+          <template slot="title">
+            <i class="el-icon-monitor" aria-hidden="true" style="font-size: 20px"></i>
+            {{ $t("m.ExaminationRoom_Admin") }}
+          </template>
+          <el-menu-item index="/admin/examination">
+            {{
+            $t("m.ExaminationRoom_List")
+            }}
+          </el-menu-item>
+          <el-menu-item index="/admin/examination/create">
+            {{
+            $t("m.Create_ExaminationRoom")
+            }}
+          </el-menu-item>
+          <el-menu-item index="/admin/examination/assign">
+            {{
+            $t("m.Assign_ExaminationSeat")
+            }}
+          </el-menu-item>
+        </el-submenu>
       </el-menu>
       <div id="header">
         <el-row>
@@ -547,6 +568,68 @@
               <mu-list-item-title>
                 {{
                 $t("m.Admin_Category")
+                }}
+              </mu-list-item-title>
+            </mu-list-item>
+          </mu-list-item>
+
+          <mu-list-item
+            button
+            :ripple="false"
+            nested
+            :open="openSideMenu === 'examination'"
+            @toggle-nested="openSideMenu = arguments[0] ? 'examination' : ''"
+          >
+            <mu-list-item-action>
+              <mu-icon value=":el-icon-monitor fa-size" size="24"></mu-icon>
+            </mu-list-item-action>
+            <mu-list-item-title>
+              {{
+              $t("m.ExaminationRoom_Admin")
+              }}
+            </mu-list-item-title>
+            <mu-list-item-action>
+              <mu-icon class="toggle-icon" size="24" value=":el-icon-arrow-down"></mu-icon>
+            </mu-list-item-action>
+            <mu-list-item
+              button
+              :ripple="false"
+              slot="nested"
+              to="/admin/examination"
+              @click="opendrawer = !opendrawer"
+              active-class="mobile-menu-active"
+            >
+              <mu-list-item-title>
+                {{
+                $t("m.ExaminationRoom_List")
+                }}
+              </mu-list-item-title>
+            </mu-list-item>
+            <mu-list-item
+              button
+              :ripple="false"
+              slot="nested"
+              to="/admin/examination/create"
+              @click="opendrawer = !opendrawer"
+              active-class="mobile-menu-active"
+            >
+              <mu-list-item-title>
+                {{
+                $t("m.Create_ExaminationRoom")
+                }}
+              </mu-list-item-title>
+            </mu-list-item>
+            <mu-list-item
+              button
+              :ripple="false"
+              slot="nested"
+              to="/admin/examination/assign"
+              @click="opendrawer = !opendrawer"
+              active-class="mobile-menu-active"
+            >
+              <mu-list-item-title>
+                {{
+                $t("m.Assign_ExaminationSeat")
                 }}
               </mu-list-item-title>
             </mu-list-item>

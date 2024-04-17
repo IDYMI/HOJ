@@ -950,4 +950,29 @@ export const m = {
 
   // /components/oj/common/AcSubmissions.vue
   ContestAcCsv: 'AC Csv',
+
+  // /components/oj/common/ExaminationRoom.vue
+  PlaceRemoved: 'Removed',
+  PlaceAvailable: 'Available',
+  PlaceSelected: 'Selected',
+  PlaceUsed: 'Used',
+  PlaceMaintenance: 'Maintenance',
+  ScreenOrientation: 'Screen orientation',
+  Building: 'Building',
+  Room: 'Room',
+  Place: '位置',
+  Room_Size: 'Room Size（ Row / Col ）',
+  Create_Room: 'Create Room',
+  Resize_Room: 'This will delete all current layouts, Agree?',
+  Your_Place: 'Your Place',
+  Your_Username: 'Your Username',
+  Grow: 'Row',
+  Gcol: 'Rol',
+  Count: 'Count',
+  Used: 'Used',
+
+  // /components/oj/common/SearchExamination.vue
+  Search_ExaminationSeat: 'Search ExaminationSeat',
+  Enter_RealnameOrNumber: 'Enter Your `Realname` or `Student number`',
+  View: 'View',
 };

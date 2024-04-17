@@ -79,6 +79,9 @@ export const m = {
   Import_User_Tips3: 'The first line does not need to write the seven column names ("username", "password", "email","realname","gender","nickname","school").',
   Import_User_Tips4: 'If the gender is male, please use "male" or "0", if the gender is female, please use "female" or "1". If it is not filled in, it is assumed to be "secrecy".',
   Import_User_Tips5: 'Please import the file saved as UTF-8 code, otherwise Chinese may be garbled.',
+  Import_User_Tips6: 'There are four columns of data: realname, student_number, course, subject. The realname and student_number cannot be empty, others can be enmpty, otherwise the data in this row may fail to be imported.',
+  Import_User_Tips7: 'The first line does not need to write the four column names ("realname", "student_number", "course","subject").',
+  Import_User_Tips8: 'Add the content of the selected file to the end of the original list.',
   Choose_File: 'Choose File',
   Show_All: 'Show All',
   Password: 'Password',
@@ -112,6 +115,7 @@ export const m = {
   Error_Please_check_your_choice: 'Wrong, please check your choice.',
   Generate_User_Success: 'All users in the specified format have been created successfully, and the user table has been downloaded to your computer successfully!',
   Generate_Skipped_Reason: 'rows user data are filtered because it may be an empty row or a column(username or password) value is empty.',
+  Generate_Skipped_Reason2: 'rows user data are filtered because it may be an empty row or a column(realname or student number) value is empty.',
   Upload_Users_Successfully: 'Upload Users Successfully',
 
   // /views/admin/general/Auth.vue
@@ -505,4 +509,27 @@ export const m = {
   Output_Description_Required: 'Output Description is required',
   Rule_NotDeal: 'Not Deal Rules',
   The_username_role: 'The username is not in compliance (cannot contain $).',
+
+  // ExaminationRoom
+  ExaminationRoom_Admin: 'ExaminationRoom',
+  Create_ExaminationRoom: 'Create ExaminationRoom',
+  Assign_ExaminationSeat: 'Assign ExaminationSeat',
+  Edit_ExaminationRoom: 'Edit ExaminationRoom',
+  ExaminationRoom_List: 'ExaminationRoom List',
+  Assign_ExaminationRoom_List: 'Assign ExaminationRoom List',
+  To_Admin_Contest: 'To Admin Contest',
+  View_Assign_ExaminationSeat: 'View Assign ExaminationRoom List',
+  To_Assign_ExaminationSeat: 'To Assign ExaminationSeat',
+  Assign_Success: 'Assign Success',
+  Assign_Failed: 'Assign Failed',
+
+  // ExaminationSeat
+  Add_Place: 'Add Place',
+  Eid_List: 'Eid List',
+  Retroflex: 'Retroflex',
+  Random: 'Random',
+  Sorted: 'Sorted Id',
+  Spaced: 'Spaced',
+  StudentInfo: 'Student Info',
+  Subject: 'Subject',
 };

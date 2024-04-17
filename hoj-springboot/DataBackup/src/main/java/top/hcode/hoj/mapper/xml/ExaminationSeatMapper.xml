@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.hcode.hoj.mapper.ExaminationSeatMapper">
+    <select id="getSeatList" resultType="top.hcode.hoj.pojo.vo.ExaminationSeatVO" useCache="true">
+        SELECT s.id as school_id, s.name as school, es.id as sid, er.building, er.room, es.grow, es.gcol, es.type as type, er.id as eid, cs.cid as cid, cs.realname, cs.number
+        FROM examination_seat es
+        LEFT JOIN examination_room er ON es.eid = er.id
+        LEFT JOIN school s ON s.id = er.school_id
+        LEFT JOIN contest_seat cs on cs.sid = es.id and (cs.cid is null or cs.cid = #{cid})
+        <where>
+            <if test="eidList!=null and eidList.size>0">
+                er.id IN
+                <foreach collection="eidList" index="index" item="item"
+                         open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY er.building, er.room, es.grow, es.gcol
+    </select>
+
+    <select id="getContestSeatList" resultType="top.hcode.hoj.pojo.vo.ExaminationSeatVO" useCache="true">
+        SELECT cs.id, es.id as sid, cs.title, es.grow as grow, es.gcol as gcol, cs.uid as username, cs.realname as realname, cs.course as course, cs.number as number, COALESCE(cs.type, es.type) as type
+        FROM examination_seat es
+        LEFT JOIN contest_seat cs ON cs.sid = es.id
+        <where>
+            <if test="eid!=null">
+                es.eid = #{eid}
+            </if>
+            <if test="cid!=null">
+                cs.cid = #{cid}
+            </if>
+        </where>
+        ORDER BY cs.gmt_create, es.grow, es.gcol
+    </select>
+
+</mapper>

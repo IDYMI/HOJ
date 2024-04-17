@@ -6,8 +6,9 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-
 public class SchoolVO {
+
+    private Long id;
 
     @ApiModelProperty(value = "省份")
     private String province;

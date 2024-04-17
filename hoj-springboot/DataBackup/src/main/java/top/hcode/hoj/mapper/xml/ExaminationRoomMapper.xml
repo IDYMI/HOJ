@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.hcode.hoj.mapper.ExaminationRoomMapper">
+
+    <resultMap id="map_AdminExaminationRoomList" type="top.hcode.hoj.pojo.vo.ExaminationRoomVO">
+        <id column="id" property="eid"></id>
+        <result column="schoolId" property="schoolId"></result>
+        <result column="name" property="school"></result>
+        <result column="building" property="building"></result>
+        <result column="room" property="room"></result>
+        <result column="max_row" property="maxRow"></result>
+        <result column="max_col" property="maxCol"></result>
+        <result column="count" property="count"></result>
+        <result column="author" property="author"></result>
+        <result column="gmt_create" property="gmtCreate"></result>
+        <result column="gmt_modified" property="gmtModified"></result>
+    </resultMap>
+
+    <select id="getExaminationRoomList" resultMap="map_AdminExaminationRoomList">
+        SELECT s.name AS name, er.*, COUNT(es.id) AS count
+        FROM examination_room er
+        LEFT JOIN school s ON s.id = er.school_id
+        LEFT JOIN examination_seat es ON er.id = es.eid AND es.type = 0
+        <where>
+            er.status = 0
+            <if test="eid != null">
+                and er.id = #{eid}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (
+                s.name like concat('%',#{keyword},'%') or er.building like concat('%',#{keyword},'%') or er.room like concat('%',#{keyword},'%')
+                )
+            </if>
+        </where>
+        GROUP BY s.name, er.id,er.school_id
+        ORDER BY er.school_id, er.building, er.room
+    </select>
+
+    <select id="getExaminationUsed" resultType="int">
+        SELECT COUNT(*) FROM contest_seat cs
+        LEFT JOIN examination_seat es ON es.id = cs.sid
+        <where>
+            es.eid = #{eid} and cs.cid = #{cid}
+        </where>
+    </select>
+
+    <select id="getContestEidList" resultType="top.hcode.hoj.pojo.vo.ExaminationRoomVO" useCache="true">
+        SELECT DISTINCT es.eid, s.name as school, er.building, er.room, er.max_row, er.max_col, cs.cid
+        FROM examination_room er
+        LEFT JOIN school s ON s.id = er.school_id
+        LEFT JOIN examination_seat es ON er.id = es.eid
+        LEFT JOIN contest_seat cs ON cs.sid = es.id
+        <where>
+            cs.cid is not null and cs.cid= #{cid}
+            <if test="keyword != null and keyword != ''">
+                AND cs.realname LIKE concat('%',#{keyword},'%')
+                OR cs.number LIKE concat('%',#{keyword},'%')
+            </if>
+        </where>
+        order by es.eid
+    </select>
+
+    <select id="getEidList" resultType="top.hcode.hoj.pojo.vo.ExaminationRoomVO" useCache="true">
+        SELECT DISTINCT es.eid, s.name as school, er.building, er.room, er.max_row, er.max_col, cs.cid
+        FROM examination_room er
+        LEFT JOIN school s ON s.id = er.school_id
+        LEFT JOIN examination_seat es ON er.id = es.eid
+        LEFT JOIN contest_seat cs ON cs.sid = es.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                cs.realname LIKE concat('%',#{keyword},'%')
+                OR cs.number LIKE concat('%',#{keyword},'%')
+            </if>
+        </where>
+        order by es.eid
+    </select>
+</mapper>

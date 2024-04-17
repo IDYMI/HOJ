@@ -319,3 +319,12 @@
    ![image.png](docs/docs/.vuepress/public/31fee356424e402fb095ac357264d168.png)
 
 2024 年 4 月 15 日 16 点
+
+# 增加 考场分配查询系统
+
+1. 查看比赛对应分配的考场 https://nyoj.online/SearchExamination/cid
+   ![image.png](docs/docs/.vuepress/public/9a4c8a878e584e0d907bc7bba8ce69bf.png)
+2. 查看自己的座位
+   ![image.png](docs/docs/.vuepress/public/e04f86a3e9304a7196fc81fe61510e00.png)
+
+2024 年 4 月 17 日 19 点

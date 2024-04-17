@@ -79,6 +79,9 @@ export const m = {
   Import_User_Tips3: '第一行不必写(“用户名”，“密码”，“邮箱”，"真实姓名"，“性别”，“昵称”，“学校”)这七个列名',
   Import_User_Tips4: '性别为男请使用“male”或“0”，女请使用“female”或“1”，不填默认为“secrecy”。',
   Import_User_Tips5: '请导入保存为UTF-8编码的文件，否则中文可能会乱码。',
+  Import_User_Tips6: '共四列数据：真实姓名和学号不能为空，专业/班级，科目可选填，否则该行数据可能导入失败。',
+  Import_User_Tips7: '第一行不必写(“真实姓名”，“学号”，“专业/班级”，"科目")这四个列名',
+  Import_User_Tips8: '选择的文件内容，将添加到原来的列表后方',
   Choose_File: '选择文件',
   Show_All: '显示全部',
   Password: '密码',
@@ -112,6 +115,7 @@ export const m = {
   Error_Please_check_your_choice: '错误，请检查你的输入或选择是否准确',
   Generate_User_Success: '所有用户已经被成功创建, 用户的列表数据文件将下载到你的电脑里',
   Generate_Skipped_Reason: '行用户数据被过滤，原因是可能为空行或某个列值(用户名或密码)为空',
+  Generate_Skipped_Reason2: '行用户数据被过滤，原因是可能为空行或某个列值(真实姓名或学号)为空',
   Upload_Users_Successfully: '上传用户成功',
 
   // /views/admin/general/User.vue
@@ -504,4 +508,27 @@ export const m = {
   Output_Description_Required: '输出描述不能为空',
   Rule_NotDeal: '不符合题目的规范',
   The_username_role: '用户名不合规范（不能含有‘$’）',
+
+  // ExaminationRoom
+  ExaminationRoom_Admin: '考场管理',
+  Create_ExaminationRoom: '创建考场',
+  Assign_ExaminationSeat: '分配考场',
+  Edit_ExaminationRoom: '编辑考场',
+  ExaminationRoom_List: '考场列表',
+  Assign_ExaminationRoom_List: '分配列表',
+  To_Admin_Contest: '前往管理比赛',
+  View_Assign_ExaminationSeat: '查看分配考场列表',
+  To_Assign_ExaminationSeat: '前往分配考场',
+  Assign_Success: '分配成功',
+  Assign_Failed: '分配失败',
+
+  // ExaminationSeat
+  Add_Place: '添加考场',
+  Eid_List: '选择的考场编号',
+  Retroflex: '是否回型排列',
+  Random: '是否打乱排序',
+  Sorted: '是否按照数量排序',
+  Spaced: '是否隔开',
+  StudentInfo: '考生信息',
+  Subject: '科目',
 };

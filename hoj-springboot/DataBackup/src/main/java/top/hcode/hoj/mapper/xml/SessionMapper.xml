@@ -2,5 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="top.hcode.hoj.mapper.SessionMapper">
 
+    <select id="getContestSessionList" resultType="top.hcode.hoj.pojo.vo.SessionVO" useCache="true">
+        SELECT ui.uuid as uid, ui.username, us.realname, s.ip, s.route_name, s.gmt_create
+        FROM contest c, session s
+        LEFT JOIN user_info ui ON ui.uuid = s.uid
+        LEFT JOIN user_sign us ON ui.uuid = us.uid
+        <where>
+            (s.gmt_create BETWEEN c.start_time AND c.end_time) AND c.id = #{cid}
+            <if test="keyword!=null">
+                AND (ui.username like CONCAT("%",#{keyword},"%") OR us.realname like CONCAT("%",#{keyword},"%") OR s.ip like CONCAT("%",#{keyword},"%"))
+            </if>
+            <if test="unkeyword!=null">
+                AND (ui.username not like CONCAT("%",#{unkeyword},"%") AND us.realname not like CONCAT("%",#{unkeyword},"%") AND s.ip not like CONCAT("%",#{unkeyword},"%"))
+            </if>
+        </where>
+        ORDER BY s.gmt_create DESC, ui.username, s.ip
+    </select>
 
 </mapper>

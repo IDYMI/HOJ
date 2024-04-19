@@ -472,6 +472,10 @@ export const m = {
   Group_Contest_Tag: '团队比赛',
   Contains_Submission_After_Contest: '包含赛后的提交',
   To_Admin_Background: '后台编辑',
+  Admin_Session: '会话统计',
+  routeName: '路由名称',
+  Enter_Session_Keyword: '输入关键词',
+  Enter_Session_Unkeyword: '输入反选关键词',
 
   // /views/oj/contest/children/ACMContestRank.vue
   Contest_Rank: '比赛排名',

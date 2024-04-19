@@ -27,6 +27,7 @@ import ContestAdminMoss from '@/views/oj/contest/moss/ContestAdminMoss.vue';
 import ContestAdminMossDetails from '@/views/oj/contest/moss/ContestAdminMossDetails.vue';
 import ScrollBoard from '@/views/oj/contest/children/ScrollBoard.vue';
 import ContestRejudgeAdmin from '@/views/oj/contest/children/ContestRejudgeAdmin.vue';
+import ContestSession from '@/views/oj/contest/children/ContestSession.vue';
 import DiscussionList from '@/views/oj/discussion/discussionList.vue';
 import Discussion from '@/views/oj/discussion/discussion.vue';
 import ExaminationRoom from '@/components/oj/common/ExaminationRoom.vue';
@@ -269,6 +270,12 @@ const ojRoutes = [
         path: 'scroll-board',
         component: ScrollBoard,
         meta: { title: 'Contest Scroll Board', requireAuth: true },
+      },
+      {
+        name: 'ContestSession',
+        path: 'contest-session',
+        component: ContestSession,
+        meta: { title: 'Contest Session', requireAuth: true },
       },
     ],
   },

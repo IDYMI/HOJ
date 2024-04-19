@@ -13,6 +13,7 @@ import top.hcode.hoj.pojo.entity.contest.ContestPrint;
 import top.hcode.hoj.pojo.entity.contest.ContestRecord;
 import top.hcode.hoj.pojo.entity.contest.ContestSign;
 import top.hcode.hoj.pojo.vo.ContestSignVO;
+import top.hcode.hoj.pojo.vo.SessionVO;
 import top.hcode.hoj.service.oj.ContestAdminService;
 
 /**
@@ -124,5 +125,17 @@ public class ContestAdminController {
     public CommonResult<Void> updateContestSign(@RequestBody ContestSignVO contestSignVo) {
 
         return contestAdminService.updateContestSign(contestSignVo);
+    }
+
+    @GetMapping("/get-contest-session")
+    @RequiresAuthentication
+    public CommonResult<IPage<SessionVO>> getContestSession(
+            @RequestParam(value = "cid", required = true) Long cid,
+            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "unkeyword", required = false) String unkeyword) {
+
+        return contestAdminService.getContestSession(cid, currentPage, limit, keyword, unkeyword);
     }
 }

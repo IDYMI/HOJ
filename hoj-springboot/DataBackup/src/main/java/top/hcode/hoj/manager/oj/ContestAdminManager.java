@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
 import java.util.List;
 
 import org.springframework.util.StringUtils;
@@ -25,6 +26,7 @@ import top.hcode.hoj.dao.contest.ContestRegisterEntityService;
 import top.hcode.hoj.dao.contest.ContestSignEntityService;
 import top.hcode.hoj.dao.user.UserSignEntityService;
 import top.hcode.hoj.manager.group.GroupManager;
+import top.hcode.hoj.mapper.SessionMapper;
 import top.hcode.hoj.pojo.dto.CheckACDTO;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.contest.ContestPrint;
@@ -33,6 +35,7 @@ import top.hcode.hoj.pojo.entity.contest.ContestRegister;
 import top.hcode.hoj.pojo.entity.contest.ContestSign;
 import top.hcode.hoj.pojo.entity.user.UserSign;
 import top.hcode.hoj.pojo.vo.ContestSignVO;
+import top.hcode.hoj.pojo.vo.SessionVO;
 import top.hcode.hoj.pojo.vo.UserSignVO;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
@@ -63,6 +66,9 @@ public class ContestAdminManager {
 
     @Autowired
     private ContestRegisterEntityService contestRegisterEntityService;
+
+    @Resource
+    private SessionMapper sessionMapper;
 
     @Autowired
     private InventManager inventManager;
@@ -385,6 +391,33 @@ public class ContestAdminManager {
         if (!isOk) {
             throw new StatusFailException("修改失败！");
         }
+
+    }
+
+    public IPage<SessionVO> getContestSession(Long cid, Integer currentPage, Integer limit, String keyword,
+            String unkeyword)
+            throws StatusForbiddenException {
+
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        // 获取本场比赛的状态
+        Contest contest = contestEntityService.getById(cid);
+
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
+
+        if (!isRoot
+                && !contest.getUid().equals(userRolesVo.getUid())
+                && !(contest.getIsGroup() && groupValidator.isGroupRoot(userRolesVo.getUid(), contest.getGid()))) {
+            throw new StatusForbiddenException("对不起，您无权限操作！");
+        }
+
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 10;
+
+        IPage<SessionVO> iPage = new Page<>(currentPage, limit);
+        return sessionMapper.getContestSessionList(iPage, cid, keyword, unkeyword);
 
     }
 

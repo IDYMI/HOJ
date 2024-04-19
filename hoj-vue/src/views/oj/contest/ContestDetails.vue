@@ -624,6 +624,23 @@
           </transition>
         </el-tab-pane>
 
+        <el-tab-pane
+          name="ContestSession"
+          lazy
+          :disabled="contestMenuDisabled"
+          v-if="isContestAdmin"
+        >
+          <span slot="label">
+            <i class="el-icon-aim"></i>
+            &nbsp;{{
+            $t("m.Admin_Session")
+            }}
+          </span>
+          <transition name="el-zoom-in-bottom">
+            <router-view v-if="route_name === 'ContestSession'"></router-view>
+          </transition>
+        </el-tab-pane>
+
         <el-tab-pane name="ScrollBoard" lazy :disabled="contestMenuDisabled" v-if="showScrollBoard">
           <span slot="label">
             <i class="el-icon-video-camera-solid" aria-hidden="true"></i>

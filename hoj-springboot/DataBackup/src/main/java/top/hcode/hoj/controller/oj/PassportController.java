@@ -10,9 +10,9 @@ import top.hcode.hoj.pojo.dto.ApplyResetPasswordDTO;
 import top.hcode.hoj.pojo.dto.LoginDTO;
 import top.hcode.hoj.pojo.dto.RegisterDTO;
 import top.hcode.hoj.pojo.dto.ResetPasswordDTO;
+import top.hcode.hoj.pojo.dto.SessionDTO;
 import top.hcode.hoj.pojo.vo.RegisterCodeVO;
 import top.hcode.hoj.pojo.vo.UserInfoVO;
-import top.hcode.hoj.pojo.vo.UserUnreadMsgCountVO;
 import top.hcode.hoj.service.oj.PassportService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,8 +46,8 @@ public class PassportController {
 
     @RequestMapping(value = "/session", method = RequestMethod.POST)
     @RequiresAuthentication
-    public CommonResult<Void> addSession(HttpServletRequest request) {
-        return passportService.addSession(request);
+    public CommonResult<Void> addSession(@Validated @RequestBody SessionDTO sessionDTo, HttpServletRequest request) {
+        return passportService.addSession(sessionDTo, request);
     }
 
     /**

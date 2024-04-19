@@ -791,11 +791,15 @@ export default {
       }
     },
     addSession() {
+      this.routeName = this.$route.name;
+      let data = {
+        routeName: this.routeName,
+      };
       if (
         this.userInfo.roleList.includes("contest_account") ||
         this.userInfo.roleList.includes("team_contest_account")
       ) {
-        api.addSession().then(
+        api.addSession(data).then(
           (res) => {},
           (_) => {}
         );

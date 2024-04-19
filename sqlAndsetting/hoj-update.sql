@@ -1941,3 +1941,32 @@ DELIMITER ;
 CALL add_contest_seat ;
 
 DROP PROCEDURE add_contest_seat;
+
+
+/*
+* 比赛账号检测浏览器页面变化
+*/
+DROP PROCEDURE
+IF EXISTS add_session_routName;
+DELIMITER $$
+
+CREATE PROCEDURE add_session_routName ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'session'
+	AND column_name = 'route_name'
+) THEN
+	ALTER TABLE session ADD COLUMN route_name varchar(255) DEFAULT NULL COMMENT '浏览器页面';
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_session_routName ;
+
+DROP PROCEDURE add_session_routName;

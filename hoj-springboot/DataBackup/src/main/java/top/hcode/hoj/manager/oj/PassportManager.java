@@ -33,6 +33,7 @@ import top.hcode.hoj.pojo.dto.ApplyResetPasswordDTO;
 import top.hcode.hoj.pojo.dto.LoginDTO;
 import top.hcode.hoj.pojo.dto.RegisterDTO;
 import top.hcode.hoj.pojo.dto.ResetPasswordDTO;
+import top.hcode.hoj.pojo.dto.SessionDTO;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.user.*;
 import top.hcode.hoj.pojo.vo.RegisterCodeVO;
@@ -207,7 +208,7 @@ public class PassportManager {
         return userInfoVo;
     }
 
-    public void addSession(HttpServletRequest request) throws StatusFailException {
+    public void addSession(SessionDTO sessionDTo, HttpServletRequest request) throws StatusFailException {
         // 获取当前用户信息
         AccountProfile accountProfile = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
@@ -232,6 +233,7 @@ public class PassportManager {
             sessionEntityService.save(new Session()
                     .setUid(userRolesVo.getUid())
                     .setIp(IpUtils.getUserIpAddr(request))
+                    .setRouteName(sessionDTo.getRouteName())
                     .setUserAgent(request.getHeader("User-Agent")));
         }
     }

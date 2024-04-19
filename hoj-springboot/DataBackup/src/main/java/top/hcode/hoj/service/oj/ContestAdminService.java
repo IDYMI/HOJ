@@ -9,6 +9,7 @@ import top.hcode.hoj.pojo.entity.contest.ContestPrint;
 import top.hcode.hoj.pojo.entity.contest.ContestRecord;
 import top.hcode.hoj.pojo.entity.contest.ContestSign;
 import top.hcode.hoj.pojo.vo.ContestSignVO;
+import top.hcode.hoj.pojo.vo.SessionVO;
 
 public interface ContestAdminService {
 
@@ -28,4 +29,8 @@ public interface ContestAdminService {
     public CommonResult<Void> checkContestSignStatus(Map<String, Object> params);
 
     public CommonResult<Void> updateContestSign(ContestSignVO contestSignVo);
+
+    public CommonResult<IPage<SessionVO>> getContestSession(Long cid, Integer currentPage, Integer limit,
+            String keyword, String unkeyword);
+
 }

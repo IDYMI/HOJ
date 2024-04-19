@@ -12,6 +12,7 @@ import top.hcode.hoj.pojo.entity.contest.ContestPrint;
 import top.hcode.hoj.pojo.entity.contest.ContestRecord;
 import top.hcode.hoj.pojo.entity.contest.ContestSign;
 import top.hcode.hoj.pojo.vo.ContestSignVO;
+import top.hcode.hoj.pojo.vo.SessionVO;
 import top.hcode.hoj.service.oj.ContestAdminService;
 
 import java.util.Map;
@@ -112,6 +113,17 @@ public class ContestAdminServiceImpl implements ContestAdminService {
             return CommonResult.successResponse();
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
+    }
+
+    @Override
+    public CommonResult<IPage<SessionVO>> getContestSession(Long cid, Integer currentPage, Integer limit,
+            String keyword, String unkeyword) {
+        try {
+            return CommonResult.successResponse(
+                    contestAdminManager.getContestSession(cid, currentPage, limit, keyword, unkeyword));
         } catch (StatusForbiddenException e) {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
         }

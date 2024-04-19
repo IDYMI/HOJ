@@ -826,6 +826,12 @@ const ojApi = {
       data,
     });
   },
+
+  getContestSession(params) {
+    return ajax('/api/get-contest-session', 'get', {
+      params,
+    });
+  },
   // 讨论页相关请求
   getCategoryList() {
     return ajax('/api/discussion-category', 'get');

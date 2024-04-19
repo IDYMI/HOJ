@@ -472,6 +472,10 @@ export const m = {
   Group_Contest_Tag: 'Group Contest',
   Contains_Submission_After_Contest: 'Contains Submission After Contest',
   To_Admin_Background: 'To Admin Background',
+  Admin_Session: 'Session Monitor',
+  routeName: 'Route Name',
+  Enter_Session_Keyword: 'Enter Keyword',
+  Enter_Session_Unkeyword: 'Enter Unkeyword',
 
   // /views/oj/contest/children/ACMContestRank.vue
   Contest_Rank: 'Contest Rank',

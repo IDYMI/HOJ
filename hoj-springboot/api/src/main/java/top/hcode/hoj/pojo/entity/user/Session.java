@@ -33,6 +33,8 @@ public class Session {
 
     private String ip;
 
+    private String routeName;
+
     @TableField(fill = FieldFill.INSERT)
     private Date gmtCreate;
 

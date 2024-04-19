@@ -11,6 +11,7 @@ import top.hcode.hoj.pojo.dto.ApplyResetPasswordDTO;
 import top.hcode.hoj.pojo.dto.LoginDTO;
 import top.hcode.hoj.pojo.dto.RegisterDTO;
 import top.hcode.hoj.pojo.dto.ResetPasswordDTO;
+import top.hcode.hoj.pojo.dto.SessionDTO;
 import top.hcode.hoj.pojo.vo.RegisterCodeVO;
 import top.hcode.hoj.pojo.vo.UserInfoVO;
 import top.hcode.hoj.service.oj.PassportService;
@@ -42,9 +43,9 @@ public class PassportServiceImpl implements PassportService {
     }
 
     @Override
-    public CommonResult<Void> addSession(HttpServletRequest request) {
+    public CommonResult<Void> addSession(SessionDTO sessionDTo, HttpServletRequest request) {
         try {
-            passportManager.addSession(request);
+            passportManager.addSession(sessionDTo, request);
             return CommonResult.successResponse();
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());

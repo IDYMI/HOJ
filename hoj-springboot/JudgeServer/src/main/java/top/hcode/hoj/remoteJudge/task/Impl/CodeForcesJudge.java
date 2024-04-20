@@ -487,8 +487,8 @@ public class CodeForcesJudge extends RemoteJudgeStrategy {
             return "32";
         } else if (language.startsWith("Haskell GHC")) {
             return "12";
-        } else if (language.startsWith("Java 11")) {
-            return "60";
+        } else if (language.startsWith("Java 21")) {
+            return "87";
         } else if (language.startsWith("Java 1.8")) {
             return "36";
         } else if (language.startsWith("Kotlin")) {

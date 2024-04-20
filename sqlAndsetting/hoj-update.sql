@@ -2001,3 +2001,31 @@ DELIMITER ;
 CALL judge_tag_Add_is_reset ;
 
 DROP PROCEDURE judge_tag_Add_is_reset;
+
+/*
+* 学校添加 name
+*/
+DROP PROCEDURE
+IF EXISTS add_file_name;
+DELIMITER $$
+
+CREATE PROCEDURE add_file_name ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'school'
+	AND column_name = 'file_name'
+) THEN
+	ALTER TABLE school ADD COLUMN `file_name` varchar(255) DEFAULT NULL COMMENT '文件名';
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_file_name ;
+
+DROP PROCEDURE add_file_name;

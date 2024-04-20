@@ -49,6 +49,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                                                                 + File.separator,
                                                 "file:" + Constants.File.PROBLEM_FILE_FOLDER.getPath() + File.separator,
                                                 "file:" + Constants.File.BOXFILE_BASE_FOLDER.getPath()
+                                                                + File.separator,
+                                                "file:" + Constants.File.SCHOOL_BASE_FOLDER.getPath()
                                                                 + File.separator);
         }
 

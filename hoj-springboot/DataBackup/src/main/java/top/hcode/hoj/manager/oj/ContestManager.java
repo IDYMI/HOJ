@@ -442,10 +442,6 @@ public class ContestManager {
                 throw new StatusFailException("错误：cid对应比赛还未结束, 对应错误 cid: " + input_cid + "无效");
             }
 
-            if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
-                throw new StatusForbiddenException("错误：您并非该比赛的管理员，对用cid：" + input_cid + "，无权下载榜单！");
-            }
-
             contestList.add(contest);
         }
 

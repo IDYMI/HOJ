@@ -975,7 +975,6 @@ export default {
             data.spjCode = "";
           }
           data.spjLanguage = data.spjLanguage || "C";
-          data.problemId = data.problemId.slice(this.group.shortName.length);
           this.spjRecord.spjLanguage = data.spjLanguage;
           this.spjRecord.spjCode = data.spjCode;
           this.judgeCaseModeRecord = data.judgeCaseModeRecord;

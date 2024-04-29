@@ -129,9 +129,6 @@ public class RemoteJudgeGetResult {
                         finalJudgeRes.setErrorMessage(errorInfo);
                     }
 
-                    // 设置排序后的submit_id
-                    finalJudgeRes = judgeContext.setSortedId(finalJudgeRes);
-
                     Integer score = null;
                     // 如果是比赛题目，需要特别适配OI比赛的得分 除AC给100 其它结果给0分
                     if (remoteJudgeDTO.getCid() != 0) {

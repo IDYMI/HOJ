@@ -54,6 +54,7 @@ public class JudgeServiceImpl implements JudgeService {
         UpdateWrapper<Judge> judgeUpdateWrapper = new UpdateWrapper<>();
         judgeUpdateWrapper.set("status", Constants.Judge.STATUS_COMPILING.getStatus())
                 .set("judger", name)
+                .set("sorted_id", getMaxSortedId(judge.getSubmitId()))
                 .eq("submit_id", judge.getSubmitId())
                 .ne("status", Constants.Judge.STATUS_CANCELLED.getStatus());
         boolean isUpdatedOk = judgeEntityService.update(judgeUpdateWrapper);
@@ -124,6 +125,7 @@ public class JudgeServiceImpl implements JudgeService {
         judgeUpdateWrapper.set("status", Constants.Judge.STATUS_PENDING.getStatus())
                 .set("judger", name)
                 .eq("submit_id", judge.getSubmitId())
+                .set("sorted_id", getMaxSortedId(judge.getSubmitId()))
                 .ne("status", Constants.Judge.STATUS_CANCELLED.getStatus());
         boolean isUpdatedOk = judgeEntityService.update(judgeUpdateWrapper);
         // 没更新成功，则可能表示该评测被取消 或者 judge记录被删除了，则结束评测
@@ -151,5 +153,25 @@ public class JudgeServiceImpl implements JudgeService {
     public Boolean compileInteractive(String code, Long pid, String interactiveLanguage,
             HashMap<String, String> extraFiles) throws SystemError {
         return judgeContext.compileInteractive(code, pid, interactiveLanguage, extraFiles);
+    }
+
+    public Long getMaxSortedId(Long submitId) {
+        QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
+        judgeQueryWrapper.eq("submit_id", submitId);
+
+        Judge judge = judgeEntityService.getOne(judgeQueryWrapper, false);
+
+        // 对应submitId 已经存在，且 sorted_id 存在
+        if (judge != null && judge.getSortedId() != null) {
+            return judge.getSortedId();
+        }
+
+        QueryWrapper<Judge> judgeQueryWrapper2 = new QueryWrapper<>();
+        judgeQueryWrapper2.select("sorted_id").orderByDesc("sorted_id").last("LIMIT 1");
+        Judge judge2 = judgeEntityService.getOne(judgeQueryWrapper, false);
+
+        return (judge2 != null && judge2.getSortedId() != null) ? judge2.getSortedId() + 1
+                : judgeEntityService.count() + 1;
+
     }
 }

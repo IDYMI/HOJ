@@ -76,9 +76,6 @@ public class JudgeContext {
         // oi_rank_score
         finalJudgeRes.setOiRankScore((Integer) judgeResult.getOrDefault("oiRankScore", null));
 
-        // 设置排序后的submit_id
-        finalJudgeRes = setSortedId(finalJudgeRes);
-
         return finalJudgeRes;
     }
 
@@ -124,28 +121,6 @@ public class JudgeContext {
         if (cid != 0) { // 如果是比赛提交
             contestRecordEntityService.updateContestRecord(score, status, submitId, useTime);
         }
-    }
-
-    public Judge setSortedId(Judge judge) {
-        QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
-        judgeQueryWrapper.select("sorted_id")
-                .eq("submit_id", judge.getSubmitId());
-        Judge search_judge = judgeEntityService.getOne(judgeQueryWrapper, false);
-
-        // 没有插入judge记录前
-        if (search_judge == null) {
-            judge.setSortedId(getMaxSortedId());
-        }
-        return judge;
-    }
-
-    public Long getMaxSortedId() {
-        QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
-        judgeQueryWrapper.select("sorted_id").orderByDesc("sorted_id").last("LIMIT 1");
-        Judge judge = judgeEntityService.getOne(judgeQueryWrapper, false);
-
-        return (judge != null && judge.getSortedId() != null) ? judge.getSortedId() + 1
-                : judgeEntityService.count() + 1;
     }
 
 }

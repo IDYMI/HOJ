@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -17,6 +18,7 @@ import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.dao.training.TrainingEntityService;
 import top.hcode.hoj.dao.training.TrainingProblemEntityService;
 import top.hcode.hoj.manager.admin.problem.RemoteProblemManager;
+import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.pojo.dto.TrainingProblemDTO;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.training.Training;
@@ -53,6 +55,9 @@ public class AdminTrainingProblemManager {
     @Resource
     private RemoteProblemManager remoteProblemManager;
 
+    @Autowired
+    private GroupManager groupManager;
+
     public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword,
             Boolean queryExisted, Long tid) throws StatusFailException, StatusForbiddenException {
 
@@ -65,8 +70,9 @@ public class AdminTrainingProblemManager {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        Long gid = training.getGid();
+
+        boolean isRoot = groupManager.getGroupAuthAdmin(gid);
 
         // 只有超级管理员和题目管理和训练拥有者才能操作
         if (!isRoot && !userRolesVo.getUsername().equals(training.getAuthor())) {

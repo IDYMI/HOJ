@@ -33,7 +33,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             Long cid, Integer problemType, String oj, Integer difficulty, Integer type) {
         try {
             HashMap<String, Object> problemList = adminContestProblemManager.getProblemList(limit, currentPage, keyword,
-                    cid, problemType, oj, difficulty, type);
+                    cid, problemType, oj, difficulty, type, null);
             return CommonResult.successResponse(problemList);
         } catch (StatusForbiddenException e) {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);

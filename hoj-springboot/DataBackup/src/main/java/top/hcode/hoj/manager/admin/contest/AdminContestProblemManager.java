@@ -20,6 +20,7 @@ import top.hcode.hoj.dao.contest.ContestProblemEntityService;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.manager.admin.problem.RemoteProblemManager;
+import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.pojo.dto.ContestProblemDTO;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
 import top.hcode.hoj.pojo.entity.contest.Contest;
@@ -57,15 +58,17 @@ public class AdminContestProblemManager {
     @Autowired
     private ContestEntityService contestEntityService;
 
+    @Autowired
+    private GroupManager groupManager;
+
     public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword,
-            Long cid, Integer problemType, String oj, Integer difficulty, Integer type)
+            Long cid, Integer problemType, String oj, Integer difficulty, Integer type, Long gid)
             throws StatusForbiddenException {
 
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(gid);
 
         // 获取本场比赛的信息
         Contest contest = contestEntityService.getById(cid);

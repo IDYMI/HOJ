@@ -60,12 +60,14 @@
             @click="publicPage = true"
             icon="el-icon-plus"
           >{{ $t('m.Add_From_Public_Problem') }}</el-button>
-          <el-button
-            type="success"
-            size="small"
-            @click="remotePage = true"
-            icon="el-icon-plus"
-          >{{ $t('m.Add_Rmote_OJ_Problem') }}</el-button>
+          <template v-if="isAdminRole">
+            <el-button
+              type="success"
+              size="small"
+              @click="remotePage = true"
+              icon="el-icon-plus"
+            >{{ $t('m.Add_Rmote_OJ_Problem') }}</el-button>
+          </template>
           <el-button
             type="success"
             size="small"
@@ -487,7 +489,12 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["isAuthenticated", "isMainAdminRole", "isGroupAdmin"]),
+    ...mapGetters([
+      "isAuthenticated",
+      "isMainAdminRole",
+      "isAdminRole",
+      "isGroupAdmin",
+    ]),
   },
 };
 </script>

@@ -94,12 +94,12 @@ public class GroupContestProblemManager {
             throw new StatusNotFoundException("获取比赛题目列表失败，该团队不存在或已被封禁！");
         }
 
-        if (!groupValidator.isGroupRoot(userRolesVo.getUid(), gid) && !userRolesVo.getUid().equals(contest.getUid())
-                && !isRoot) {
+        if (!userRolesVo.getUid().equals(contest.getUid()) && !isRoot) {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
 
-        return adminContestProblemManager.getProblemList(limit, currentPage, keyword, cid, problemType, oj, null, null);
+        return adminContestProblemManager.getProblemList(limit, currentPage, keyword, cid, problemType, oj, null, null,
+                gid);
     }
 
     public Map<Object, Object> addProblem(ProblemDTO problemDto)

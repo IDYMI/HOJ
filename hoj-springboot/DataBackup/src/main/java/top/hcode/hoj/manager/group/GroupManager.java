@@ -342,8 +342,8 @@ public class GroupManager {
 
         Group group = groupEntityService.getById(gid);
 
-        return isRoot && (group == null || group.getAuth().intValue() != Constants.Group.PROPOSITION.getAuth()
-                || groupValidator.isGroupAdmin(userRolesVo.getUid(), gid));
+        return (group == null || group.getAuth().intValue() != Constants.Group.PROPOSITION.getAuth()) ? isRoot
+                : groupValidator.isGroupAdmin(userRolesVo.getUid(), gid);
     }
 
 }

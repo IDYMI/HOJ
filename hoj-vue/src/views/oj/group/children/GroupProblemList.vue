@@ -13,13 +13,15 @@
             @click="handleCreatePage"
             :icon="createPage ? 'el-icon-back' : 'el-icon-plus'"
           >{{ createPage ? $t('m.Back_To_Problem_List') : $t('m.Create') }}</el-button>
-          <el-button
-            v-if="!createPage"
-            type="success"
-            size="small"
-            @click="remotePage = true"
-            icon="el-icon-plus"
-          >{{ $t('m.Add_Rmote_OJ_Problem') }}</el-button>
+          <template v-if="isAdminRole">
+            <el-button
+              v-if="!createPage"
+              type="success"
+              size="small"
+              @click="remotePage = true"
+              icon="el-icon-plus"
+            >{{ $t('m.Add_Rmote_OJ_Problem') }}</el-button>
+          </template>
           <el-button
             v-if="editPage && adminPage"
             type="primary"
@@ -312,7 +314,12 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["isAuthenticated", "isSuperAdmin", "isGroupAdmin"]),
+    ...mapGetters([
+      "isAuthenticated",
+      "isSuperAdmin",
+      "isAdminRole",
+      "isGroupAdmin",
+    ]),
     isContest() {
       return !(this.routeName == "GroupProblemList" && !this.contestId);
     },

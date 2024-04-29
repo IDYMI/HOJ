@@ -53,7 +53,7 @@ public class CodeForcesUtils {
         }
     }
 
-    public static void downloadPDF(String urlStr, String savePath) {
+    public static void downloadPDF(String urlStr, String savePath, Boolean isCF) {
         try {
             int byteRead;
             URL url = new URL(urlStr);
@@ -69,7 +69,8 @@ public class CodeForcesUtils {
             conn.setRequestProperty("Content-Encoding", "utf8");
             conn.setRequestProperty("Connection", "keep-alive");
             conn.setRequestProperty("Upgrade-Insecure-Requests", "1");
-            conn.setRequestProperty("cookie", "RCPC=" + getRCPC());
+            if (isCF)
+                conn.setRequestProperty("cookie", "RCPC=" + getRCPC());
             conn.setRequestProperty("Cache-Control", "max-age=0");
             conn.setRequestProperty("Content-Type", "application/pdf");
 

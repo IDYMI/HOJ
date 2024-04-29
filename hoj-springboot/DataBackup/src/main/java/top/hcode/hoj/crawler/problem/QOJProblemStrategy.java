@@ -113,7 +113,7 @@ public class QOJProblemStrategy extends ProblemStrategy {
 			String fileName = IdUtil.fastSimpleUUID() + ".pdf";
 			String filePath = Constants.File.PROBLEM_FILE_FOLDER.getPath() + File.separator + fileName;
 
-			CodeForcesUtils.downloadPDF(HOST + uri, filePath);
+			CodeForcesUtils.downloadPDF(HOST + uri, filePath, false);
 			String pdfURI = Constants.File.FILE_API.getPath() + fileName;
 
 			String[] split = uri.split("/");

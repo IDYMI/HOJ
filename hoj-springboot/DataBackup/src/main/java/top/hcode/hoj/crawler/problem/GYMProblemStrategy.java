@@ -132,7 +132,7 @@ public class GYMProblemStrategy extends CFProblemStrategy {
                 }
                 String fileName = IdUtil.fastSimpleUUID() + ".pdf";
                 String filePath = Constants.File.PROBLEM_FILE_FOLDER.getPath() + File.separator + fileName;
-                CodeForcesUtils.downloadPDF(IMAGE_HOST + uri, filePath);
+                CodeForcesUtils.downloadPDF(IMAGE_HOST + uri, filePath, true);
                 pdfURI = Constants.File.FILE_API.getPath() + fileName;
 
                 String[] split = uri.split("/");
@@ -145,7 +145,7 @@ public class GYMProblemStrategy extends CFProblemStrategy {
                 try {
                     String fileName = IdUtil.fastSimpleUUID() + ".pdf";
                     String filePath = Constants.File.PROBLEM_FILE_FOLDER.getPath() + File.separator + fileName;
-                    CodeForcesUtils.downloadPDF(HOST + "/gym/" + contestNum + "/problem/" + problemNum, filePath);
+                    CodeForcesUtils.downloadPDF(HOST + "/gym/" + contestNum + "/problem/" + problemNum, filePath, true);
                     pdfURI = Constants.File.FILE_API.getPath() + fileName;
                 } catch (Exception e2) {
                     pdfURI = HOST + matcher.group(0);

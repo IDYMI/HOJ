@@ -146,7 +146,7 @@ public class NSWOJProblemStrategy extends ProblemStrategy {
 			String fileName = IdUtil.fastSimpleUUID() + ".pdf";
 			String filePath = Constants.File.PROBLEM_FILE_FOLDER.getPath() + File.separator + fileName;
 
-			CodeForcesUtils.downloadPDF(uri, filePath);
+			CodeForcesUtils.downloadPDF(uri, filePath, false);
 			String pdfURI = Constants.File.FILE_API.getPath() + fileName;
 
 			String[] split = uri.split("/");

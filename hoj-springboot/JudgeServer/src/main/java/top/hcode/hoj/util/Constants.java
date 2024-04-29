@@ -95,6 +95,8 @@ public class Constants {
 
         NSWOJ_JUDGE("NSWOJ"),
 
+        NEWOJ_JUDGE("NEWOJ"),
+
         HDU_REMOTE_JUDGE_ACCOUNT("Hdu Remote Judge Account"),
 
         CF_REMOTE_JUDGE_ACCOUNT("Codeforces Remote Judge Account");

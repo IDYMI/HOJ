@@ -88,6 +88,7 @@
 | 2024-03-12 | 多平台 OJ 排行榜                                                     | IDYMI          |
 | 2024-03-24 | 添加 QOJ 远程评测                                                    | IDYMI          |
 | 2024-03-29 | 添加 NSWOJ 远程评测                                                  | IDYMI          |
+| 2024-04-07 | 添加 NEWOJ 远程评测                                                  | IDYMI          |
 
 ## 三、新功能部分截图
 
@@ -296,3 +297,11 @@
    ![image.png](docs/docs/.vuepress/public/f70bdbb4c9da4fb2ae8f81a2a615e63e.png)
 
 2024 年 3 月 29 日 15 点
+
+# 增加 NEWOJ 远程评测
+
+1. 增加 NEWOJ 远程评测
+   ![image.png](docs/docs/.vuepress/public/b36bff15da1f4678b40fceb4ee67ec98.png)
+   ![image.png](docs/docs/.vuepress/public/1e24284e09394d159a7a797427f86e97.png)
+
+2024 年 4 月 7 日 19 点

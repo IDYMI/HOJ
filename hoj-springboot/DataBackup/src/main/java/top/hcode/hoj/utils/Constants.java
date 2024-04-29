@@ -92,6 +92,7 @@ public class Constants {
         SCPC("SCPC"),
         QOJ("QOJ"),
         NSWOJ("NSWOJ"),
+        NEWOJ("NEWOJ"),
         MOSS("MOSS");
 
         private final String name;

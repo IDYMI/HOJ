@@ -219,6 +219,10 @@ export const REMOTE_OJ = [
     name: 'NSWOJ',
     key: 'NSWOJ',
   },
+  {
+    name: 'NEWOJ',
+    key: 'NEWOJ',
+  },
 ];
 
 export const CONTEST_STATUS = {

@@ -539,8 +539,23 @@
                   </div>
                   <div class="status" v-if="statusVisible">
                     <template v-if="result.status == JUDGE_STATUS_RESERVE['sf']">
-                      <span>{{ $t('m.Status') }}:</span>
+                      <el-tooltip
+                        v-if="problemID.includes('NSWOJ')"
+                        :content="$t('m.Check_Your_Code')"
+                        placement="top"
+                      >
+                        <span>{{ $t('m.Status') }}:</span>
+                        <el-tag
+                          effect="dark"
+                          :color="submissionStatus.color"
+                          @click.native="reSubmit(submissionId)"
+                        >
+                          <i class="el-icon-refresh"></i>
+                          {{ submissionStatus.text }}
+                        </el-tag>
+                      </el-tooltip>
                       <el-tag
+                        v-else
                         effect="dark"
                         :color="submissionStatus.color"
                         @click.native="reSubmit(submissionId)"

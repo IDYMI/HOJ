@@ -307,6 +307,7 @@ export const m = {
   Are_you_sure_you_want_to_get_your_recent_accepted_code: '你是否确定要获取最近通过的代码并填充至代码框内？注意：该操作会覆盖正在编辑的代码！',
   You_havenot_passed_the_problem_so_you_cannot_get_the_code_passed_recently: '你还未通过该题目，无法获取最近通过的代码！',
   Code_can_not_be_empty: '代码不能为空',
+  Check_Your_Code: '请注意你的语法错误或者行末多余符号，NSWOJ系统比较古老，对于语法错误也可能造成提交失败',
   Code_Length_can_not_exceed_65535: '代码的字符长度不能超过65535！',
   Submit_code_successfully: '提交代码成功',
   You_have_solved_the_problem: '你已经解决了该问题',
@@ -580,7 +581,7 @@ export const m = {
   Security: '安全性',
   Security_Desc: '判题沙盒使用cgroup隔离，网站权限控制完善',
   Diversity: '多样性',
-  Diversity_Desc: '支持Codefoces，HDU，POJ，GYM，AtCoder，SPOJ，LIBRE，SCPC，QOJ，NSWOJ的远程判题',
+  Diversity_Desc: '支持Codefoces，HDU，POJ，GYM，AtCoder，SPOJ，LIBRE，SCPC，QOJ，NSWOJ，NEWOJ的远程判题',
   Available: '有效',
   Faulty: '不完善',
 

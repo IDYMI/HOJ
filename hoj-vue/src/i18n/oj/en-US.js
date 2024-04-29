@@ -308,6 +308,7 @@ export const m = {
   Are_you_sure_you_want_to_get_your_recent_accepted_code: 'Are you sure you want to get the recently passed code and fill it in the code box? Note: This operation will overwrite the code being edited!',
   You_havenot_passed_the_problem_so_you_cannot_get_the_code_passed_recently: "You haven't passed the problem, so you can't get the code passed recently",
   Code_can_not_be_empty: 'Code can not be empty',
+  Check_Your_Code: 'Please note any syntax errors or extraneous characters at the end of lines, as the NSWOJ system is quite old and may fail submissions due to syntax errors.',
   Code_Length_can_not_exceed_65535: 'The code should contain no more than 65535 characters!',
   Submit_code_successfully: 'Submit code successfully',
   You_have_solved_the_problem: 'You have solved the problem',
@@ -580,7 +581,7 @@ export const m = {
   Security: 'Security',
   Security_Desc: 'The Sandbox is isolated by CGroup, and the website authority control is perfect',
   Diversity: 'Diversity',
-  Diversity_Desc: 'Support Codefoces, HDU, POJ, GYM, AtCoder, SPOJ, LIBRE, SCPC, QOJ, NSWOJ remote judge',
+  Diversity_Desc: 'Support Codefoces, HDU, POJ, GYM, AtCoder, SPOJ, LIBRE, SCPC, QOJ, NSWOJ, NEWOJ remote judge',
   Available: 'Available',
   Faulty: 'Faulty',
 
@@ -909,7 +910,7 @@ export const m = {
   StudentNumber_Check_OnlyDigits: 'The student Number must consist only of digits.',
   StudentNumber_Check_length: 'The length is between 6 and 15 digit characters',
   Enter_Your_School: 'Enter Your School',
-  Not_Find_School: 'Don\'t Find School',
+  Not_Find_School: "Don't Find School",
 
   // /components/oj/setting/MultiOj.vue
   Home_Multi_Oj: 'Multi Home Oj',

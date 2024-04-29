@@ -129,7 +129,7 @@ public class QOJProblemStrategy extends ProblemStrategy {
 					.get("<article class=\"uoj-article top-buffer-md\">([\\s\\S]*?)</article>", html,
 							1);
 			info.setDescription(
-					"<pp>" + HtmlUtil.unescape(description.trim()).replaceAll("src=\"../../", "src=\"" + HOST + "/")
+					"<pp>" + HtmlUtil.unescape(description.trim()).replaceAll("src=\"/", "src=\"" + HOST + "/")
 							.replaceAll("(?<=\\>)\\s+(?=\\<)", ""));
 		}
 

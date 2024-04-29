@@ -120,7 +120,7 @@ public class NSWOJProblemStrategy extends ProblemStrategy {
 				.setOpenCaseResult(false)
 				.setIsRemoveEndBlank(false)
 				.setIsGroup(false)
-				.setDifficulty(1); // 默认为简单
+				.setDifficulty(0); // 默认为简单
 
 		List<Tag> tagList = new LinkedList<>();
 		for (String tmp : allTags) {

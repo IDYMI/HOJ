@@ -128,6 +128,9 @@ public class RemoteJudgeContext {
             case "NSWOJ":
                 remoteJudgeDTO.setProblemNum(remoteJudgeDTO.getCompleteProblemId());
                 break;
+            case "NEWOJ":
+                remoteJudgeDTO.setProblemNum(remoteJudgeDTO.getCompleteProblemId());
+                break;
         }
     }
 

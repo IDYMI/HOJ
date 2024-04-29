@@ -51,6 +51,10 @@ public class SwitchConfig {
 
     private List<String> nswojPasswordList = new ArrayList<>();
 
+    private List<String> newojUsernameList = new ArrayList<>();
+
+    private List<String> newojPasswordList = new ArrayList<>();
+
     private List<String> mossUsernameList = new ArrayList<>();
 
     /**
@@ -152,6 +156,8 @@ public class SwitchConfig {
         this.setQojPasswordList(format2Unicode(this.qojPasswordList));
         this.setNswojUsernameList(format2Unicode(this.nswojUsernameList));
         this.setNswojPasswordList(format2Unicode(this.nswojPasswordList));
+        this.setNewojUsernameList(format2Unicode(this.newojUsernameList));
+        this.setNewojPasswordList(format2Unicode(this.newojPasswordList));
         this.setMossUsernameList(format2Unicode(this.mossUsernameList));
     }
 
@@ -174,6 +180,8 @@ public class SwitchConfig {
         this.setQojPasswordList(convertUnicode2Str(this.qojPasswordList));
         this.setNswojUsernameList(convertUnicode2Str(this.nswojUsernameList));
         this.setNswojPasswordList(convertUnicode2Str(this.nswojPasswordList));
+        this.setNewojUsernameList(convertUnicode2Str(this.newojUsernameList));
+        this.setNewojPasswordList(convertUnicode2Str(this.newojPasswordList));
         this.setMossUsernameList(convertUnicode2Str(this.mossUsernameList));
     }
 

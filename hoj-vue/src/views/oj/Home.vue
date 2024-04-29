@@ -404,6 +404,12 @@ export default {
           status: true,
         },
         {
+          url: "http://oj.ecustacm.cn/",
+          name: "NEWOJ",
+          logo: require("@/assets/newoj-logo.png"),
+          status: true,
+        },
+        {
           url: "/discussion-detail/28",
           name: "NSWOJ",
           logo: require("@/assets/nswoj-logo.png"),

@@ -24,14 +24,11 @@ public class ConfigUtils {
     public String buildYamlStr(ConfigVO configVo) {
         return "hoj:\n" +
                 "  jwt:\n" +
-                "    # 加密秘钥\n" +
                 "    secret: " + configVo.getTokenSecret() + "\n" +
-                "    # token有效时长，1天，单位秒\n" +
                 "    expire: " + configVo.getTokenExpire() + "\n" +
                 "    checkRefreshExpire: " + configVo.getCheckRefreshExpire() + "\n" +
                 "    header: token\n" +
                 "  judge:\n" +
-                "    # 调用判题服务器的token\n" +
                 "    token: " + configVo.getJudgeToken() + "\n" +
                 "  db:\n" +
                 "    host: " + configVo.getMysqlHost() + "\n" +

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
     <!-- 属性文件:在properties文件中找到对应的配置项 -->
-    <springProperty scope="context" name="logging.path" source="logging.file.path"/>
+    <springProperty scope="context" name="logging.path" source="logging.file.path" defaultValue=""/>
     <springProperty scope="context" name="logging.level.root" source="logging.level.root"/>
     <contextName>hoj</contextName>
     <property name="LOG_LEVEL" value="${logging.level.root}"/>
@@ -99,7 +99,7 @@
 
     <!--开发环境-->
     <springProfile name="dev">
-        <logger name="top.hcode.hoj" level="${LOG_LEVEL}" additivity="false">
+        <!-- <logger name="top.hcode.hoj" level="${LOG_LEVEL}" additivity="false">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="APPLICATION_ASYNC"/>
             <appender-ref ref="ERROR_ASYNC"/>
@@ -108,6 +108,15 @@
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="APPLICATION_ASYNC"/>
             <appender-ref ref="ERROR_ASYNC"/>
+        </root> -->
+        <!-- Remove file appenders in the dev environment -->
+        <logger name="top.hcode.hoj" level="${LOG_LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <!-- 注意这里将 APPLICATION_ASYNC 和 ERROR_ASYNC 移除 -->
+        </logger>
+        <root level="${LOG_LEVEL}">
+            <appender-ref ref="CONSOLE"/>
+            <!-- 注意这里将 APPLICATION_ASYNC 和 ERROR_ASYNC 移除 -->
         </root>
     </springProfile>
 

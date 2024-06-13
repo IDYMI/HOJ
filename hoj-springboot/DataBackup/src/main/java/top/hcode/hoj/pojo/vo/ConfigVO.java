@@ -15,22 +15,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConfigVO {
     // 数据库配置
-    @Value("${hoj.db.username}")
+    @Value("${hoj.db.username:root}")
     private String mysqlUsername;
 
-    @Value("${hoj.db.password}")
+    @Value("${hoj.db.password:hoj123456}")
     private String mysqlPassword;
 
-    @Value("${hoj.db.name}")
+    @Value("${hoj.db.name:hoj}")
     private String mysqlDBName;
 
-    @Value("${hoj.db.host}")
+    @Value("${hoj.db.host:172.20.0.3}")
     private String mysqlHost;
 
     @Value("${hoj.db.public-host:172.20.0.3}")
     private String mysqlPublicHost;
 
-    @Value("${hoj.db.port}")
+    @Value("${hoj.db.port:3306}")
     private Integer mysqlPort;
 
     @Value("${hoj.db.public-port:3306}")
@@ -41,22 +41,22 @@ public class ConfigVO {
     private String judgeToken;
 
     // 缓存配置
-    @Value("${hoj.redis.host}")
+    @Value("${hoj.redis.host:172.20.0.2}")
     private String redisHost;
 
-    @Value("${hoj.redis.port}")
+    @Value("${hoj.redis.port:6379}")
     private Integer redisPort;
 
-    @Value("${hoj.redis.password}")
+    @Value("${hoj.redis.password:hoj123456}")
     private String redisPassword;
 
     // jwt配置
-    @Value("${hoj.jwt.secret}")
+    @Value("${hoj.jwt.secret:default}")
     private String tokenSecret;
 
-    @Value("${hoj.jwt.expire}")
+    @Value("${hoj.jwt.expire:86400}")
     private String tokenExpire;
 
-    @Value("${hoj.jwt.checkRefreshExpire}")
+    @Value("${hoj.jwt.checkRefreshExpire:43200}")
     private String checkRefreshExpire;
 }

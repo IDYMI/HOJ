@@ -118,5 +118,3 @@ logging:
           client:
             naming: info
     root: info
-  file:
-    path: ./hoj_backend

@@ -8,6 +8,7 @@ import top.hcode.hoj.common.result.ResultStatus;
 import top.hcode.hoj.manager.oj.AccountManager;
 import top.hcode.hoj.pojo.dto.ChangeEmailDTO;
 import top.hcode.hoj.pojo.dto.ChangePasswordDTO;
+import top.hcode.hoj.pojo.dto.ChangeUsernameDTO;
 import top.hcode.hoj.pojo.dto.CheckUsernameOrEmailDTO;
 import top.hcode.hoj.pojo.vo.*;
 import top.hcode.hoj.service.oj.AccountService;
@@ -45,6 +46,17 @@ public class AccountServiceImpl implements AccountService {
             return CommonResult.successResponse(accountManager.getUserCalendarHeatmap(uid, username));
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<ChangeAccountVO> changeUsername(ChangeUsernameDTO changeUsernameDto) {
+        try {
+            return CommonResult.successResponse(accountManager.changeUsername(changeUsernameDto));
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusSystemErrorException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.SYSTEM_ERROR);
         }
     }
 

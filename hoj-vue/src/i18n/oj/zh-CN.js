@@ -131,6 +131,8 @@ export const m = {
   The_current_password_cannot_be_empty: '当前密码不能为空',
   The_new_password_cannot_be_empty: '新密码不能为空',
   The_new_email_cannot_be_empty: '新邮箱不能为空',
+  Update_Username: '更改用户名',
+  New_Username: '新用户名',
 
   // /components/oj/setting/UserInfo.vue
   Avatar_Setting: '头像设置',

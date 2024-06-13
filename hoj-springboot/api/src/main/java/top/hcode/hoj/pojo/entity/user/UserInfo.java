@@ -82,4 +82,7 @@ public class UserInfo implements Serializable {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
 
+    @ApiModelProperty(value = "上次修改用户名时间")
+    @TableField(fill = FieldFill.INSERT)
+    private Date lastGmtModified;
 }

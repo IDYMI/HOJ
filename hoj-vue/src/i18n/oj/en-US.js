@@ -131,6 +131,8 @@ export const m = {
   The_current_password_cannot_be_empty: 'The current password is required.',
   The_new_password_cannot_be_empty: 'The new password is required.',
   The_new_email_cannot_be_empty: 'The new email is required.',
+  Update_Username: 'Change Username',
+  New_Username: 'New Username',
 
   // /components/oj/setting/UserInfo.vue
   Avatar_Setting: 'Avatar Setting',

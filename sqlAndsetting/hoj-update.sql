@@ -2029,3 +2029,39 @@ DELIMITER ;
 CALL add_file_name ;
 
 DROP PROCEDURE add_file_name;
+
+/*
+* user_info 添加 last_gmt_modified
+*/
+DROP PROCEDURE
+IF EXISTS add_userInfo_lastGmtModified;
+DELIMITER $$
+
+CREATE PROCEDURE add_userInfo_lastGmtModified ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'user_info'
+	AND column_name = 'last_gmt_modified'
+) THEN
+	ALTER TABLE user_info ADD COLUMN `last_gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '上次修改用户名时间';
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_userInfo_lastGmtModified ;
+
+DROP PROCEDURE add_userInfo_lastGmtModified;
+
+/*
+* 批量复制 user_info 中的 last_gmt_modified 为 gmt_create
+
+*/
+UPDATE user_info
+SET last_gmt_modified = gmt_create
+WHERE 1 = 1;

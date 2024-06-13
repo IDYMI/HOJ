@@ -62,6 +62,19 @@ public class AccountController {
     }
 
     /**
+     * @MethodName changeUsername
+     * @Params * @param null
+     * @Description 修改账户名的操作，一个月只能更改一次
+     * @Return
+     */
+
+    @PostMapping("/change-username")
+    @RequiresAuthentication
+    public CommonResult<ChangeAccountVO> changeUsername(@RequestBody ChangeUsernameDTO changeUsernameDto) {
+        return accountService.changeUsername(changeUsernameDto);
+    }
+
+    /**
      * @MethodName changePassword
      * @Params * @param null
      * @Description 修改密码的操作，连续半小时内修改密码错误5次，则需要半个小时后才可以再次尝试修改密码

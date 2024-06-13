@@ -20,6 +20,7 @@ import top.hcode.hoj.dao.multiOj.UserMultiOjEntityService;
 import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.dao.user.*;
 import top.hcode.hoj.manager.email.EmailManager;
+import top.hcode.hoj.pojo.dto.ChangeUsernameDTO;
 import top.hcode.hoj.pojo.dto.ChangeEmailDTO;
 import top.hcode.hoj.pojo.dto.ChangePasswordDTO;
 import top.hcode.hoj.pojo.dto.CheckUsernameOrEmailDTO;
@@ -338,6 +339,65 @@ public class AccountManager {
         List<Contest> contestList = getUserContests(uid);
 
         return contestRankManager.getContestsRanking(contestList, uid, username);
+    }
+
+    /**
+     * @MethodName changeUsername
+     * @Description 修改账户名的操作，一个月只能更改一次
+     * @Return
+     */
+    public ChangeAccountVO changeUsername(ChangeUsernameDTO changeUsernameDto)
+            throws StatusSystemErrorException, StatusFailException {
+
+        // 获取当前登录的用户
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        String oldUsername = userRolesVo.getUsername();
+        String newUsername = changeUsernameDto.getNewUsername();
+
+        // 数据可用性判断
+        if (StringUtils.isEmpty(newUsername)) {
+            throw new StatusFailException("错误：新用户名不能为空！");
+        }
+        if (newUsername.length() > 20) {
+            throw new StatusFailException("新用户名长度不能超过20位!");
+        }
+
+        ChangeAccountVO resp = new ChangeAccountVO();
+
+        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
+        userInfoQueryWrapper.select("uuid", "username", "last_gmt_modified")
+                .eq("username", oldUsername);
+        UserInfo userInfo = userInfoEntityService.getOne(userInfoQueryWrapper, false);
+
+        if (userInfo != null) {
+            // 比较当前时间和上次修改时间的间隔
+            Date lastGmtModified = userInfo.getLastGmtModified();
+            Date now = new Date();
+
+            // 计算时间间隔
+            long diffInMillies = Math.abs(now.getTime() - lastGmtModified.getTime());
+            long diffInDays = diffInMillies / (1000 * 60 * 60 * 24);
+
+            if (diffInDays > 30) {
+                UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
+                updateWrapper.set("username", newUsername)
+                        .set("last_gmt_modified", now)
+                        .eq("uuid", userRolesVo.getUid());
+                boolean isOk = userInfoEntityService.update(updateWrapper);
+                if (isOk) {
+                    resp.setCode(200);
+                    resp.setMsg("修改用户名成功！您将于5秒钟后退出进行重新登录操作！");
+                    return resp;
+                } else {
+                    throw new StatusSystemErrorException("系统错误：修改用户名失败！");
+                }
+            } else {
+                throw new StatusSystemErrorException("修改失败：一个月只能修改一次用户名！");
+            }
+        } else {
+            throw new StatusSystemErrorException("系统错误：修改原始用户名不存在！");
+        }
     }
 
     /**

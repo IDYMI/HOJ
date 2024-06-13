@@ -3,6 +3,51 @@
     <el-row :gutter="20">
       <el-col :sm="24" :md="10" :lg="10">
         <div class="left">
+          <p class="section-title">{{ $t('m.Update_Username') }}</p>
+          <el-form
+            class="setting-content"
+            ref="formUsername"
+            :model="formUsername"
+            :rules="ruleUsername"
+          >
+            <el-form-item :label="$t('m.New_Username')" prop="newUsername">
+              <el-input v-model="formUsername.newUsername" />
+            </el-form-item>
+          </el-form>
+          <el-popover
+            placement="top"
+            width="350"
+            v-model="visible.usernameSlideBlock"
+            trigger="click"
+          >
+            <el-button
+              type="primary"
+              slot="reference"
+              :loading="loading.btnUsername"
+              :disabled="disabled.btnUsername"
+            >{{ $t('m.Update_Username') }}</el-button>
+            <slide-verify
+              :l="42"
+              :r="10"
+              :w="325"
+              :h="100"
+              :accuracy="3"
+              @success="changeUsername"
+              @again="onAgain('username')"
+              :slider-text="$t('m.Slide_Verify')"
+              ref="usernameSlideBlock"
+              v-show="!verify.usernameSuccess"
+            ></slide-verify>
+            <el-alert
+              :title="$t('m.Slide_Verify_Success')"
+              type="success"
+              :description="verify.usernameMsg"
+              v-show="verify.usernameSuccess"
+              :center="true"
+              :closable="false"
+              show-icon
+            ></el-alert>
+          </el-popover>
           <p class="section-title">{{ $t('m.Change_Password') }}</p>
           <el-form
             class="setting-content"
@@ -185,23 +230,53 @@ export default {
       }
       callback();
     };
+    const CheckUsernameNotExist = (rule, value, callback) => {
+      api.checkUsernameOrEmail(value, undefined).then(
+        (res) => {
+          if (res.data.data.username === true) {
+            callback(new Error(this.$i18n.t("m.The_username_already_exists")));
+          } else {
+            callback();
+          }
+        },
+        (_) => callback()
+      );
+    };
+    const checkUsernameFormat = (rule, value, callback) => {
+      // 使用正则表达式检查是否包含 '$' 字符
+      if (value && value.indexOf("$") !== -1) {
+        callback(new Error(this.$i18n.t("m.The_username_role")));
+      } else {
+        callback();
+      }
+    };
     return {
       loading: {
+        btnUsername: false,
         btnPassword: false,
         btnEmail: false,
         btnSendEmail: false,
       },
       disabled: {
+        btnUsername: false,
         btnPassword: false,
         btnEmail: false,
       },
       verify: {
+        usernameSuccess: false,
+        usernameMsg: "",
         passwordSuccess: false,
         passwordMsg: "",
         emailSuccess: false,
         emailMsg: "",
       },
       visible: {
+        usernameAlert: {
+          type: "success",
+          show: false,
+          title: "",
+          description: "",
+        },
         passwordAlert: {
           type: "success",
           show: false,
@@ -214,6 +289,7 @@ export default {
           title: "",
           description: "",
         },
+        usernameSlideBlock: false,
         passwordSlideBlock: false,
         emailSlideBlock: false,
       },
@@ -221,6 +297,9 @@ export default {
         oldPassword: "",
         newPassword: "",
         againPassword: "",
+      },
+      formUsername: {
+        newUsername: "",
       },
       formEmail: {
         password: "",
@@ -272,6 +351,30 @@ export default {
             required: true,
             message: this.$i18n.t("m.Code_Check_Required"),
             trigger: "blur",
+          },
+        ],
+      },
+      ruleUsername: {
+        newUsername: [
+          {
+            required: true,
+            message: this.$i18n.t("m.Username_Check_Required"),
+            trigger: "blur",
+          },
+          {
+            validator: CheckUsernameNotExist,
+            trigger: "blur",
+            message: this.$i18n.t("m.The_username_already_exists"),
+          },
+          {
+            max: 20,
+            message: this.$i18n.t("m.Username_Check_Max"),
+            trigger: "blur",
+          },
+          {
+            validator: checkUsernameFormat, // 使用自定义验证规则
+            trigger: "blur",
+            message: this.$i18n.t("m.The_username_role"),
           },
         ],
       },
@@ -416,10 +519,59 @@ export default {
     onAgain(type) {
       if ((type = "password")) {
         this.$refs.passwordSlideBlock.reset();
-      } else {
+      } else if ((type = "email")) {
         this.$refs.emailSlideBlock.reset();
+      } else {
+        this.$refs.usernameSlideBlock.reset();
       }
       myMessage.warning(this.$i18n.t("m.Guess_robot"));
+    },
+    changeUsername(times) {
+      this.verify.usernameSuccess = true;
+      let time = (times / 1000).toFixed(1);
+      this.verify.usernameMsg = "Total time " + time + "s";
+      setTimeout(() => {
+        this.visible.usernameSlideBlock = false;
+        this.verify.usernameSuccess = false;
+        // 无论后续成不成功，验证码滑动都要刷新
+        this.$refs.usernameSlideBlock.reset();
+      }, 1000);
+
+      this.$refs["formUsername"].validate((valid) => {
+        if (valid) {
+          this.loading.btnUsername = true;
+          let data = Object.assign({}, this.formUsername);
+          api.changeUsername(data).then(
+            (res) => {
+              this.loading.btnUsername = false;
+              if (res.data.data.code == 200) {
+                myMessage.success(this.$i18n.t("m.Update_Successfully"));
+                this.visible.usernameAlert = {
+                  show: true,
+                  title: this.$i18n.t("m.Update_Successfully"),
+                  type: "success",
+                  description: res.data.data.msg,
+                };
+                setTimeout(() => {
+                  this.visible.usernameAlert = false;
+                  this.$router.push({ name: "Logout" });
+                }, 5000);
+              } else {
+                myMessage.error(res.data.data.msg);
+                this.visible.usernameAlert = {
+                  show: true,
+                  title: this.$i18n.t("m.Update_Failed"),
+                  type: "warning",
+                  description: res.data.data.msg,
+                };
+              }
+            },
+            (err) => {
+              this.loading.btnUsername = false;
+            }
+          );
+        }
+      });
     },
   },
 };

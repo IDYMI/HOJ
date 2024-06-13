@@ -210,28 +210,28 @@
               </div>
             </div>
             <div style="text-align: center">
-              <span v-if="isSuperAdmin || isGroupRoot">
+              <span v-if="(isSuperAdmin && group.auth !== 4) || (isGroupOwner && group.auth === 4)">
                 <el-button
                   type="danger"
                   size="small"
                   @click="disbandGroup"
-                >{{ $t('m.Disband_Group') }}</el-button>
+                >{{ $t("m.Disband_Group") }}</el-button>
               </span>
               <span v-else-if="isGroupMember">
-                <el-button type="danger" size="small" @click="exitGroup">{{ $t('m.Exit_Group') }}</el-button>
+                <el-button type="danger" size="small" @click="exitGroup">{{ $t("m.Exit_Group") }}</el-button>
               </span>
               <span v-else-if="isAuthenticated && userAuth == 0">
                 <el-button
                   type="primary"
                   size="small"
                   @click="handleApply"
-                >{{ $t('m.Apply_Group') }}</el-button>
+                >{{ $t("m.Apply_Group") }}</el-button>
               </span>
               <span v-else-if="userAuth == 1">
-                <el-button type="warning" size="small">{{ $t('m.Applying') }}</el-button>
+                <el-button type="warning" size="small">{{ $t("m.Applying") }}</el-button>
               </span>
               <span v-else-if="userAuth == 2">
-                <el-button type="info" size="small">{{ $t('m.Refused') }}</el-button>
+                <el-button type="info" size="small">{{ $t("m.Refused") }}</el-button>
               </span>
             </div>
           </el-card>
@@ -252,7 +252,7 @@
         ref="apply"
       >
         <el-row>
-          <el-col :span="24" v-if="group.auth == 3">
+          <el-col :span="24" v-if="group.auth == 3 || group.auth == 4">
             <el-form-item :label="$t('m.Group_Code')" required prop="code">
               <el-input
                 v-model="appliaction.code"
@@ -370,7 +370,10 @@ export default {
     this.GROUP_TYPE = Object.assign({}, GROUP_TYPE);
     this.GROUP_TYPE_REVERSE = Object.assign({}, GROUP_TYPE_REVERSE);
     this.$store.dispatch("getGroup").then((res) => {
-      this.changeDomTitle({ title: res.data.data.name });
+      let title = res.data.data.name;
+      if (title !== undefined && title !== null && title !== "") {
+        this.changeDomTitle({ title });
+      }
     });
   },
   methods: {

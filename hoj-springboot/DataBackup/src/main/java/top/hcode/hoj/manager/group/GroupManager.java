@@ -104,8 +104,7 @@ public class GroupManager {
             throws StatusFailException, StatusNotFoundException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = getGroupAuthAdmin(gid);
 
         boolean access = false;
 
@@ -147,6 +146,12 @@ public class GroupManager {
         boolean isRoot = SecurityUtils.getSubject().hasRole("root")
                 || SecurityUtils.getSubject().hasRole("problem_admin")
                 || SecurityUtils.getSubject().hasRole("admin");
+
+        if (group.getAuth().intValue() == Constants.Group.PROPOSITION.getAuth()
+                && !(SecurityUtils.getSubject().hasRole("root")
+                        || SecurityUtils.getSubject().hasRole("admin"))) {
+            throw new StatusFailException("权限不足, 只有超管和普通管理能创建!");
+        }
 
         if (!isRoot) {
             QueryWrapper<UserAcproblem> queryWrapper = new QueryWrapper<>();
@@ -196,11 +201,12 @@ public class GroupManager {
             throw new StatusFailException("团队简介的长度应为 5 到 50！");
         }
 
-        if (group.getAuth() == null || group.getAuth() < 1 || group.getAuth() > 3) {
-            throw new StatusFailException("团队权限不能为空且应为1~3！");
+        Constants.Group gropAuth = Constants.Group.getGroup(group.getAuth());
+        if (gropAuth == null) {
+            throw new StatusFailException("团队权限错误!");
         }
 
-        if (group.getAuth() == 2 || group.getAuth() == 3) {
+        if (group.getAuth().intValue() != Constants.Group.PUBLIC.getAuth()) {
             if (StringUtils.isEmpty(group.getCode()) || group.getCode().length() != 6) {
                 throw new StatusFailException("团队邀请码不能为空且长度应为 6！");
             }
@@ -239,8 +245,7 @@ public class GroupManager {
     public void updateGroup(Group group) throws StatusFailException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = getGroupAuthAdmin(group.getId());
 
         if (!groupValidator.isGroupRoot(userRolesVo.getUid(), group.getId()) && !isRoot) {
             throw new StatusForbiddenException("对不起，您无权限操作！");
@@ -294,8 +299,7 @@ public class GroupManager {
     public void deleteGroup(Long gid) throws StatusFailException, StatusNotFoundException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = getGroupAuthAdmin(gid);
 
         Group group = groupEntityService.getById(gid);
 
@@ -324,4 +328,16 @@ public class GroupManager {
                     userRolesVo.getUsername());
         }
     }
+
+    public Boolean getGroupAuthAdmin(Long gid) {
+        // 对于命题团队开放root
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
+
+        Group group = groupEntityService.getById(gid);
+
+        return isRoot && (group == null
+                || (group != null && group.getAuth().intValue() != Constants.Group.PROPOSITION.getAuth()));
+    }
+
 }

@@ -20,6 +20,16 @@ import java.util.List;
 public class SwitchConfigDTO {
 
     /**
+     * SCPC 超管账号
+     */
+    private String scpcSuperAdminAccount;
+
+    /**
+     * SCPC 超管密码
+     */
+    private String scpcSuperAdminPassword;
+
+    /**
      * 是否开启公开评论区
      */
     private Boolean openPublicDiscussion;
@@ -115,5 +125,9 @@ public class SwitchConfigDTO {
     private List<String> libreojUsernameList;
 
     private List<String> libreojPasswordList;
+
+    private List<String> scpcUsernameList;
+
+    private List<String> scpcPasswordList;
 
 }

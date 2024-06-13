@@ -57,6 +57,22 @@ public class Constants {
         }
     }
 
+    public enum SCPC {
+        HOST("http://scpc.fun"),
+        Account("NYOJ"),
+        Password("NYOJNYOJ");
+
+        private final String mode;
+
+        SCPC(String mode) {
+            this.mode = mode;
+        }
+
+        public String getMode() {
+            return mode;
+        }
+    }
+
     public enum RemoteJudge {
 
         HDU_JUDGE("HDU"),
@@ -72,6 +88,8 @@ public class Constants {
         ATCODER_JUDGE("AC"),
 
         LIBRE_JUDGE("LIBRE"),
+
+        SCPC_JUDGE("SCPC"),
 
         HDU_REMOTE_JUDGE_ACCOUNT("Hdu Remote Judge Account"),
 

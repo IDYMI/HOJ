@@ -99,10 +99,20 @@ public class RemoteJudgeContext {
                 remoteJudgeDTO.setProblemNum(arr[1]);
                 break;
             case "LIBRE":
-                //libre oj 题目展示和实际提交id有可能不一样，例如LIBRE-6764(41180)
+                // libre oj 题目展示和实际提交id有可能不一样，例如LIBRE-6764(41180)
                 String realSubmitProblemId = ReUtil.get("\\d+\\((\\d+)\\)", remoteJudgeDTO.getCompleteProblemId(), 1);
                 if (realSubmitProblemId != null) {
                     remoteJudgeDTO.setCompleteProblemId(realSubmitProblemId);
+                }
+                break;
+            case "SCPC":
+                String[] arr2 = remoteJudgeDTO.getCompleteProblemId().split("_");
+                if (arr2.length == 1) {
+                    remoteJudgeDTO.setContestId("0");
+                    remoteJudgeDTO.setProblemNum(arr2[0]);
+                } else {
+                    remoteJudgeDTO.setContestId(arr2[0]);
+                    remoteJudgeDTO.setProblemNum(arr2[1]);
                 }
                 break;
         }

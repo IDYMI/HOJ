@@ -369,6 +369,12 @@ public class ConfigManager {
 
         SwitchConfig switchConfig = nacosSwitchConfig.getSwitchConfig();
 
+        if(config.getScpcSuperAdminAccount() != null){
+            switchConfig.setScpcSuperAdminAccount(config.getScpcSuperAdminAccount());
+        }
+        if(config.getScpcSuperAdminPassword() != null){
+            switchConfig.setScpcSuperAdminPassword(config.getScpcSuperAdminPassword());
+        }
         if (config.getOpenPublicDiscussion() != null) {
             switchConfig.setOpenPublicDiscussion(config.getOpenPublicDiscussion());
         }
@@ -467,6 +473,14 @@ public class ConfigManager {
             changeRemoteJudgeAccount(config.getAtcoderUsernameList(),
                     config.getAtcoderPasswordList(),
                     Constants.RemoteOJ.ATCODER.getName());
+        }
+        if (checkListDiff(config.getScpcUsernameList(), switchConfig.getScpcUsernameList()) ||
+                checkListDiff(config.getScpcPasswordList(), switchConfig.getScpcPasswordList())) {
+            switchConfig.setScpcUsernameList(config.getScpcUsernameList());
+            switchConfig.setScpcPasswordList(config.getScpcPasswordList());
+            changeRemoteJudgeAccount(config.getScpcUsernameList(),
+                    config.getScpcPasswordList(),
+                    Constants.RemoteOJ.SCPC.getName());
         }
 
         if (checkListDiff(config.getLibreojUsernameList(), switchConfig.getLibreojUsernameList()) ||

@@ -3,6 +3,18 @@
     <div slot="header">
       <span class="title">{{OJ}} {{$t('m.Account_Config')}}</span>
     </div>
+    <el-row v-if="OJ == 'SCPC'" :gutter="15">
+      <el-col :xs="24" :md="10">
+        <el-input v-model="superAccount" size="small" @blur="superAccountChange()" clearable>
+          <template slot="prepend">{{$t('m.Super_Account')}}</template>
+        </el-input>
+      </el-col>
+      <el-col :xs="24" :md="10">
+        <el-input v-model="superPassword" size="small" @blur="superPasswordChange()" show-password>
+          <template slot="prepend">{{$t('m.Password')}}</template>
+        </el-input>
+      </el-col>
+    </el-row>
     <el-row v-for="(value,index) in usernameListTmp" :key="index" :gutter="15" class="mg-top">
       <el-col :xs="24" :md="10">
         <el-input v-model="usernameListTmp[index]" size="small" clearable>
@@ -62,6 +74,12 @@ export default {
       type: Boolean,
       default: false,
     },
+    superAccount: {
+      type: String,
+    },
+    superPassword: {
+      type: String,
+    },
   },
   data() {
     return {
@@ -89,6 +107,12 @@ export default {
     saveSwitchConfig() {
       this.$emit("saveSwitchConfig");
     },
+    superAccountChange() {
+      this.$emit("update:superAccount", this.superAccount);
+    },
+    superPasswordChange() {
+      this.$emit("update:superPassword", this.superPassword);
+    },
   },
   watch: {
     usernameList(val) {
@@ -99,6 +123,16 @@ export default {
     passwordList(val) {
       if (this.passwordListTmp !== val) {
         this.passwordListTmp = val;
+      }
+    },
+    superAccount(val) {
+      if (this.superAccount !== val) {
+        this.superAccount = val;
+      }
+    },
+    superPassword(val) {
+      if (this.superPassword !== val) {
+        this.superPassword = val;
       }
     },
   },

@@ -204,6 +204,7 @@ export const m = {
   Number_of_AC_required_for_ordinary_users_to_create_group: 'Users can create group (Required AC)',
   Account_Config: 'Account Config',
   Account: 'Account',
+  Super_Account: 'Super Account',
   Add_Account: 'Add Account',
 
   // /views/admin/problem/ProblemList.vue

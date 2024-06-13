@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
+import top.hcode.hoj.config.NacosSwitchConfig;
+import top.hcode.hoj.config.SwitchConfig;
 import top.hcode.hoj.crawler.language.LanguageContext;
 import top.hcode.hoj.crawler.problem.*;
 import top.hcode.hoj.dao.judge.RemoteJudgeAccountEntityService;
@@ -46,6 +49,9 @@ public class RemoteProblemManager {
     @Autowired
     private RemoteJudgeAccountEntityService remoteJudgeAccountEntityService;
 
+    @Autowired
+    private NacosSwitchConfig nacosSwitchConfig;
+
     public ProblemStrategy.RemoteProblemInfo getOtherOJProblemInfo(String OJName, String problemId, String author)
             throws Exception {
 
@@ -72,13 +78,23 @@ public class RemoteProblemManager {
             case "LIBRE":
                 problemStrategy = new LibreProblemStrategy();
                 break;
+            case "SCPC":
+                problemStrategy = new SCPCProblemStrategy();
+                break;
             default:
                 throw new Exception("未知的OJ的名字，暂时不支持！");
         }
 
         ProblemContext problemContext = new ProblemContext(problemStrategy);
         try {
-            return problemContext.getProblemInfo(problemId, author);
+            if (Objects.equals("SCPC", OJName)) {
+                SwitchConfig switchConfig = nacosSwitchConfig.getSwitchConfig();
+                String username = switchConfig.getScpcSuperAdminAccount();
+                String password = switchConfig.getScpcSuperAdminPassword();
+                return problemContext.getProblemInfoByLogin(problemId, author, username, password);
+            } else {
+                return problemContext.getProblemInfo(problemId, author);
+            }
         } catch (IllegalStateException e) {
             if (Objects.equals("GYM", OJName)) {
                 QueryWrapper<RemoteJudgeAccount> queryWrapper = new QueryWrapper<>();

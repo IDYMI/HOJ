@@ -159,6 +159,12 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${libreoj-password-list}")
     private List<String> libreojPasswordList;
 
+    @Value("${scpc-username-list}")
+    private List<String> scpcUsernameList;
+
+    @Value("${scpc-password-list}")
+    private List<String> scpcPasswordList;
+
     @Value("${forced-update-remote-judge-account}")
     private Boolean forcedUpdateRemoteJudgeAccount;
 
@@ -330,6 +336,19 @@ public class StartupRunner implements CommandLineRunner {
             switchConfig.setSpojPasswordList(spojPasswordList);
             isChanged = true;
         }
+        if ((CollectionUtils.isEmpty(switchConfig.getScpcUsernameList())
+                && !CollectionUtils.isEmpty(scpcUsernameList))
+                || forcedUpdateRemoteJudgeAccount) {
+            switchConfig.setSpojUsernameList(scpcUsernameList);
+            isChanged = true;
+        }
+
+        if ((CollectionUtils.isEmpty(switchConfig.getScpcPasswordList())
+                && !CollectionUtils.isEmpty(scpcPasswordList))
+                || forcedUpdateRemoteJudgeAccount) {
+            switchConfig.setSpojPasswordList(scpcPasswordList);
+            isChanged = true;
+        }
 
         if ((CollectionUtils.isEmpty(switchConfig.getLibreojUsernameList())
                 && !CollectionUtils.isEmpty(libreojUsernameList))
@@ -370,6 +389,9 @@ public class StartupRunner implements CommandLineRunner {
             addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.LIBRE.getName(),
                     switchConfig.getLibreojUsernameList(),
                     switchConfig.getLibreojPasswordList());
+            addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.SCPC.getName(),
+                    switchConfig.getScpcUsernameList(),
+                    switchConfig.getScpcPasswordList());
             checkRemoteOJLanguage(Constants.RemoteOJ.SPOJ, Constants.RemoteOJ.ATCODER);
         }
     }

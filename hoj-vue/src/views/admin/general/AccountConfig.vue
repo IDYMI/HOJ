@@ -59,6 +59,17 @@
             OJ="LibreOJ"
           ></RemoteJudgeAccount>
         </el-col>
+        <el-col :xs="24" :md="12" style="margin-top: 15px;">
+          <RemoteJudgeAccount
+            :usernameList.sync="switchConfig.scpcUsernameList"
+            :passwordList.sync="switchConfig.scpcPasswordList"
+            :superAccount.sync="switchConfig.scpcSuperAdminAccount"
+            :superPassword.sync="switchConfig.scpcSuperAdminPassword"
+            :loading.sync="loading"
+            @saveSwitchConfig="saveSwitchConfig"
+            OJ="SCPC"
+          ></RemoteJudgeAccount>
+        </el-col>
       </el-row>
     </el-card>
   </div>

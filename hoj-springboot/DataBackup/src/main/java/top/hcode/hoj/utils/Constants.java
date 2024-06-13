@@ -88,7 +88,8 @@ public class Constants {
         POJ("POJ"),
         SPOJ("SPOJ"),
         ATCODER("AC"),
-        LIBRE("LIBRE");
+        LIBRE("LIBRE"),
+        SCPC("SCPC");
 
         private final String name;
 
@@ -481,5 +482,19 @@ public class Constants {
             return path;
         }
 
+    }
+
+    public enum SCPC {
+        HOST("http://scpc.fun");
+
+        private final String mode;
+
+        SCPC(String mode) {
+            this.mode = mode;
+        }
+
+        public String getMode() {
+            return mode;
+        }
     }
 }

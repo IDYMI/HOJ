@@ -207,6 +207,10 @@ export const REMOTE_OJ = [
     name: 'LIBREOJ',
     key: 'LIBRE',
   },
+  {
+    name: 'SCPC',
+    key: 'SCPC',
+  },
 ];
 
 export const CONTEST_STATUS = {

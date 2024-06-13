@@ -22,6 +22,8 @@ public class RemoteJudgeFactory {
                 return new AtCoderJudge();
             case LIBRE_JUDGE:
                 return new LibreJudge();
+            case SCPC_JUDGE:
+                return new SCPCJudge();
             default:
                 return null;
         }

@@ -39,6 +39,20 @@ public class SwitchConfig {
 
     private List<String> libreojPasswordList = new ArrayList<>();
 
+    private List<String> scpcUsernameList = new ArrayList<>();
+
+    private List<String> scpcPasswordList = new ArrayList<>();
+
+    /**
+     * SCPC 超管账号
+     */
+    private String scpcSuperAdminAccount;
+
+    /**
+     * SCPC 超管密码
+     */
+    private String scpcSuperAdminPassword;
+
     /**
      * 是否开启公开评论区
      */
@@ -122,6 +136,8 @@ public class SwitchConfig {
         this.setSpojPasswordList(format2Unicode(this.spojPasswordList));
         this.setLibreojUsernameList(format2Unicode(this.libreojUsernameList));
         this.setLibreojPasswordList(format2Unicode(this.libreojPasswordList));
+        this.setScpcUsernameList(format2Unicode(this.scpcUsernameList));
+        this.setScpcPasswordList(format2Unicode(this.scpcPasswordList));
     }
 
     public void convertUnicodeRemoteAccount2Str() {
@@ -137,6 +153,8 @@ public class SwitchConfig {
         this.setSpojPasswordList(convertUnicode2Str(this.spojPasswordList));
         this.setLibreojUsernameList(convertUnicode2Str(this.libreojUsernameList));
         this.setLibreojPasswordList(convertUnicode2Str(this.libreojPasswordList));
+        this.setScpcUsernameList(convertUnicode2Str(this.scpcUsernameList));
+        this.setScpcPasswordList(convertUnicode2Str(this.scpcPasswordList));
     }
 
     private List<String> format2Unicode(List<String> strList) {

@@ -204,6 +204,7 @@ export const m = {
   Number_of_AC_required_for_ordinary_users_to_create_group: '普通用户创建团队需要的AC题目数',
   Account_Config: '账号配置',
   Account: '账号',
+  Super_Account: '超管账号',
   Add_Account: '增加账号',
 
   // /views/admin/problem/ProblemList.vue

@@ -475,7 +475,11 @@ export const m = {
   Admin_Session: 'Session Monitor',
   routeName: 'Route Name',
   Enter_Session_Keyword: 'Enter Keyword',
-  Enter_Session_Unkeyword: 'Enter Unkeyword',
+  Enter_Session_Unkeyword: 'Enter Unkeyword(IP)',
+  Reset_Ip: 'Reset Submit Ip',
+  SubmitIp_List: 'Submit Ip List',
+  Contest_ResetIp_Tips: 'The operation will reset the user’s submission IP.',
+  Reset_successfully: 'Reset Successfully',
 
   // /views/oj/contest/children/ACMContestRank.vue
   Contest_Rank: 'Contest Rank',
@@ -985,5 +989,5 @@ export const m = {
   Filling: 'Filling',
   Decide: 'Decide',
   Selected_Answer: 'Selected Answer',
-  Filling_Answer:'Filling Answer',
+  Filling_Answer: 'Filling Answer',
 };

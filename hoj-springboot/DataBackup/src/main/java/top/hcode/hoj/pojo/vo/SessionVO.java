@@ -22,6 +22,9 @@ public class SessionVO {
     @ApiModelProperty(value = "网页")
     private String routeName;
 
+    @ApiModelProperty(value = "IP列表")
+    private String ipList;
+
     @ApiModelProperty(value = "生成时间")
     private Date gmtCreate;
 }

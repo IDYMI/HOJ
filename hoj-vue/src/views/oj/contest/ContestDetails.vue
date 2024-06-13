@@ -625,6 +625,22 @@
         </el-tab-pane>
 
         <el-tab-pane
+          name="ContestResetIP"
+          lazy
+          :disabled="contestMenuDisabled"
+          v-if="isContestAdmin"
+        >
+          <span slot="label">
+            <i class="el-icon-monitor" aria-hidden="true"></i>
+            &nbsp;{{
+            $t('m.Reset_Ip')
+            }}
+          </span>
+          <transition name="el-zoom-in-bottom">
+            <router-view v-if="route_name === 'ContestResetIP'"></router-view>
+          </transition>
+        </el-tab-pane>
+        <el-tab-pane
           name="ContestSession"
           lazy
           :disabled="contestMenuDisabled"

@@ -13,7 +13,7 @@
                 AND (ui.username like CONCAT("%",#{keyword},"%") OR us.realname like CONCAT("%",#{keyword},"%") OR s.ip like CONCAT("%",#{keyword},"%"))
             </if>
             <if test="unkeyword!=null">
-                AND (ui.username not like CONCAT("%",#{unkeyword},"%") AND us.realname not like CONCAT("%",#{unkeyword},"%") AND s.ip not like CONCAT("%",#{unkeyword},"%"))
+                AND s.ip not like CONCAT("%",#{unkeyword},"%")
             </if>
         </where>
         ORDER BY s.gmt_create DESC, ui.username, s.ip

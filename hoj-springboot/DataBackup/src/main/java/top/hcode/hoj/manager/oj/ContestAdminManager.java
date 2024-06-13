@@ -24,6 +24,7 @@ import top.hcode.hoj.dao.contest.ContestPrintEntityService;
 import top.hcode.hoj.dao.contest.ContestRecordEntityService;
 import top.hcode.hoj.dao.contest.ContestRegisterEntityService;
 import top.hcode.hoj.dao.contest.ContestSignEntityService;
+import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.user.UserSignEntityService;
 import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.mapper.SessionMapper;
@@ -33,6 +34,8 @@ import top.hcode.hoj.pojo.entity.contest.ContestPrint;
 import top.hcode.hoj.pojo.entity.contest.ContestRecord;
 import top.hcode.hoj.pojo.entity.contest.ContestRegister;
 import top.hcode.hoj.pojo.entity.contest.ContestSign;
+import top.hcode.hoj.pojo.entity.judge.Judge;
+import top.hcode.hoj.pojo.entity.judge.JudgeServer;
 import top.hcode.hoj.pojo.entity.user.UserSign;
 import top.hcode.hoj.pojo.vo.ContestSignVO;
 import top.hcode.hoj.pojo.vo.SessionVO;
@@ -66,6 +69,9 @@ public class ContestAdminManager {
 
     @Autowired
     private ContestRegisterEntityService contestRegisterEntityService;
+
+    @Autowired
+    private JudgeEntityService judgeEntityService;
 
     @Resource
     private SessionMapper sessionMapper;
@@ -419,6 +425,54 @@ public class ContestAdminManager {
         IPage<SessionVO> iPage = new Page<>(currentPage, limit);
         return sessionMapper.getContestSessionList(iPage, cid, keyword, unkeyword);
 
+    }
+
+    public List<SessionVO> getContestIpList(Long cid) throws StatusForbiddenException {
+
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        // 获取本场比赛的状态
+        Contest contest = contestEntityService.getById(cid);
+
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
+
+        if (!isRoot
+                && !contest.getUid().equals(userRolesVo.getUid())
+                && !(contest.getIsGroup() && groupValidator.isGroupRoot(userRolesVo.getUid(), contest.getGid()))) {
+            throw new StatusForbiddenException("对不起，您无权限操作！");
+        }
+
+        return judgeEntityService.getContestJudgeUserList(cid);
+    }
+
+    public void rejudgeContestIp(Long cid, String uid) throws StatusForbiddenException, StatusFailException {
+
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        // 获取本场比赛的状态
+        Contest contest = contestEntityService.getById(cid);
+
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
+
+        if (!isRoot
+                && !contest.getUid().equals(userRolesVo.getUid())
+                && !(contest.getIsGroup() && groupValidator.isGroupRoot(userRolesVo.getUid(), contest.getGid()))) {
+            throw new StatusForbiddenException("对不起，您无权限操作！");
+        }
+
+        QueryWrapper<Judge> judgeServerQueryWrapper = new QueryWrapper<>();
+        judgeServerQueryWrapper.eq("cid", cid).eq("uid", uid);
+        List<Judge> judgeServerList = judgeEntityService.list(judgeServerQueryWrapper);
+
+        // 将该用户所有的提交设置为已重置IP
+        for (Judge judge : judgeServerList) {
+            judge.setIsReset(true);
+        }
+
+        Boolean isOk = judgeEntityService.updateBatchById(judgeServerList);
+        if (!isOk) {
+            throw new StatusFailException("修改失败！");
+        }
     }
 
     public void addContestResigter(Long cid, UserSign userSign) {

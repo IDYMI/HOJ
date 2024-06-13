@@ -113,6 +113,9 @@ public class Judge implements Serializable {
     @ApiModelProperty(value = "是否人工评测")
     private Boolean isManual;
 
+    @ApiModelProperty(value = "是否重置IP")
+    private Boolean isReset;
+
     @TableField(fill = FieldFill.INSERT)
     private Date gmtCreate;
 

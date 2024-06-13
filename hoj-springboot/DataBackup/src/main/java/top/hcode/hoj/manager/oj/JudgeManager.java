@@ -24,6 +24,7 @@ import top.hcode.hoj.dao.judge.JudgeCaseEntityService;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.dao.user.UserAcproblemEntityService;
+import top.hcode.hoj.dao.user.UserRoleEntityService;
 import top.hcode.hoj.exception.AccessException;
 import top.hcode.hoj.judge.remote.RemoteJudgeDispatcher;
 import top.hcode.hoj.judge.self.JudgeDispatcher;
@@ -108,6 +109,9 @@ public class JudgeManager {
     @Autowired
     private GroupManager groupManager;
 
+    @Resource
+    private UserRoleEntityService userRoleEntityService;
+
     /**
      * @MethodName submitProblemJudge
      * @Description 核心方法 判题通过openfeign调用判题系统服务
@@ -119,14 +123,14 @@ public class JudgeManager {
         judgeValidator.validateSubmissionInfo(judgeDto);
 
         // 需要获取一下该token对应用户的数据
-        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+        AccountProfile accountProfile = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
         boolean isContestSubmission = judgeDto.getCid() != null && judgeDto.getCid() != 0;
         boolean isTrainingSubmission = judgeDto.getTid() != null && judgeDto.getTid() != 0;
 
         SwitchConfig switchConfig = nacosSwitchConfig.getSwitchConfig();
         if (!isContestSubmission && switchConfig.getDefaultSubmitInterval() > 0) { // 非比赛提交有限制限制
-            String lockKey = Constants.Account.SUBMIT_NON_CONTEST_LOCK.getCode() + userRolesVo.getUid();
+            String lockKey = Constants.Account.SUBMIT_NON_CONTEST_LOCK.getCode() + accountProfile.getUid();
             if (!redisUtils.isWithinRateLimit(lockKey, switchConfig.getDefaultSubmitInterval())) {
                 throw new StatusForbiddenException("对不起，您的提交频率过快，请稍后再尝试！");
             }
@@ -134,6 +138,40 @@ public class JudgeManager {
 
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes()))
                 .getRequest();
+
+        UserRolesVO userRolesVo = userRoleEntityService.getUserRoles(accountProfile.getUid(), null);
+
+        // 查询用户角色
+        List<String> rolesList = new LinkedList<>();
+        userRolesVo.getRoles().stream()
+                .forEach(role -> rolesList.add(role.getRole()));
+
+        QueryWrapper<Contest> queryWrapper = new QueryWrapper<>();
+        // 过滤密码
+        queryWrapper.select(Contest.class, info -> !info.getColumn().equals("pwd"));
+        queryWrapper.eq("status", 0); // 筛选正在进行的比赛
+        List<Contest> contestList = contestEntityService.list(queryWrapper);
+
+        // 当有比赛的时候，如果是比赛账号，限制提交的IP唯一
+        if (!CollectionUtils.isEmpty(contestList)
+                && (rolesList.contains("contest_account") || rolesList.contains("team_contest_account"))) {
+            QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
+
+            judgeQueryWrapper.select("ip", "cid", "uid", "is_reset")
+                    .eq("cid", judgeDto.getCid())
+                    .eq("uid", accountProfile.getUid())
+                    .isNull("is_reset"); // is_reset字段为null
+
+            Judge judge = judgeEntityService.getOne(judgeQueryWrapper, false);
+
+            String nowSubmitIp = IpUtils.getUserIpAddr(request);
+
+            // 判断当前提交的 IP 是否为同一
+            if (judge != null && !nowSubmitIp.equals(judge.getIp())) {
+                throw new StatusForbiddenException("对不起，提交与当前的IP不符，请在评论区联系比赛管理员并说明理由，重置提交IP！");
+            }
+        }
+
         // 将提交先写入数据库，准备调用判题服务器
         Judge judge = new Judge();
         judge.setShare(false) // 默认设置代码为单独自己可见
@@ -142,8 +180,8 @@ public class JudgeManager {
                 .setGid(judgeDto.getGid())
                 .setLanguage(judgeDto.getLanguage())
                 .setLength(judgeDto.getCode().length())
-                .setUid(userRolesVo.getUid())
-                .setUsername(userRolesVo.getUsername())
+                .setUid(accountProfile.getUid())
+                .setUsername(accountProfile.getUsername())
                 .setStatus(Constants.Judge.STATUS_PENDING.getStatus()) // 开始进入判题队列
                 .setSubmitTime(new Date())
                 .setVersion(0)
@@ -151,9 +189,11 @@ public class JudgeManager {
 
         // 如果比赛id不等于0，则说明为比赛提交
         if (isContestSubmission) {
-            beforeDispatchInitManager.initContestSubmission(judgeDto.getCid(), judgeDto.getPid(), userRolesVo, judge);
+            beforeDispatchInitManager.initContestSubmission(judgeDto.getCid(), judgeDto.getPid(), accountProfile,
+                    judge);
         } else if (isTrainingSubmission) {
-            beforeDispatchInitManager.initTrainingSubmission(judgeDto.getTid(), judgeDto.getPid(), userRolesVo, judge);
+            beforeDispatchInitManager.initTrainingSubmission(judgeDto.getTid(), judgeDto.getPid(), accountProfile,
+                    judge);
         } else { // 如果不是比赛提交和训练提交
             beforeDispatchInitManager.initCommonSubmission(judgeDto.getPid(), judgeDto.getGid(), judge);
 

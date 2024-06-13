@@ -832,6 +832,17 @@ const ojApi = {
       params,
     });
   },
+  getContestIpList(params) {
+    return ajax('/api/get-contest-ip-list', 'get', {
+      params,
+    });
+  },
+  // 比赛题目对应的重置比赛选手的提交 ip
+  ContestResetIp(params) {
+    return ajax('/api/rejudge-contest-ip', 'get', {
+      params,
+    });
+  },
   // 讨论页相关请求
   getCategoryList() {
     return ajax('/api/discussion-category', 'get');

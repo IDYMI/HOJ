@@ -475,7 +475,11 @@ export const m = {
   Admin_Session: '会话统计',
   routeName: '路由名称',
   Enter_Session_Keyword: '输入关键词',
-  Enter_Session_Unkeyword: '输入反选关键词',
+  Enter_Session_Unkeyword: '输入反选关键词（IP）',
+  Reset_Ip: '重置提交IP',
+  SubmitIp_List: '提交 Ip 列表',
+  Contest_ResetIp_Tips: '该操作会重置该用户的提交IP',
+  Reset_successfully: '重置成功',
 
   // /views/oj/contest/children/ACMContestRank.vue
   Contest_Rank: '比赛排名',

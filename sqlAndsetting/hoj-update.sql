@@ -1970,3 +1970,34 @@ DELIMITER ;
 CALL add_session_routName ;
 
 DROP PROCEDURE add_session_routName;
+
+
+/*
+* 比赛账号 IP 重置
+*/
+DROP PROCEDURE
+IF EXISTS judge_tag_Add_is_reset;
+DELIMITER $$
+
+CREATE PROCEDURE judge_tag_Add_is_reset ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'judge'
+	AND column_name = 'is_reset'
+) THEN
+
+	ALTER TABLE `hoj`.`judge`  ADD COLUMN `is_reset` tinyint(1) DEFAULT null COMMENT '是否重置IP';
+
+END
+IF ; END$$
+
+DELIMITER ;
+CALL judge_tag_Add_is_reset ;
+
+DROP PROCEDURE judge_tag_Add_is_reset;

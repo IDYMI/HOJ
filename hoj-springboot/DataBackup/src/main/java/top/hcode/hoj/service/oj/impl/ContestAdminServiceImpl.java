@@ -15,6 +15,7 @@ import top.hcode.hoj.pojo.vo.ContestSignVO;
 import top.hcode.hoj.pojo.vo.SessionVO;
 import top.hcode.hoj.service.oj.ContestAdminService;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -124,6 +125,27 @@ public class ContestAdminServiceImpl implements ContestAdminService {
         try {
             return CommonResult.successResponse(
                     contestAdminManager.getContestSession(cid, currentPage, limit, keyword, unkeyword));
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
+    }
+
+    @Override
+    public CommonResult<List<SessionVO>> getContestIpList(Long cid) {
+        try {
+            return CommonResult.successResponse(contestAdminManager.getContestIpList(cid));
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
+    }
+
+    @Override
+    public CommonResult<Void> rejudgeContestIp(Long cid, String uid) {
+        try {
+            contestAdminManager.rejudgeContestIp(cid, uid);
+            return CommonResult.successResponse();
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
         } catch (StatusForbiddenException e) {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
         }

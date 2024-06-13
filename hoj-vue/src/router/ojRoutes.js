@@ -28,6 +28,7 @@ import ContestAdminMossDetails from '@/views/oj/contest/moss/ContestAdminMossDet
 import ScrollBoard from '@/views/oj/contest/children/ScrollBoard.vue';
 import ContestRejudgeAdmin from '@/views/oj/contest/children/ContestRejudgeAdmin.vue';
 import ContestSession from '@/views/oj/contest/children/ContestSession.vue';
+import ContestResetIP from '@/views/oj/contest/children/ContestResetIP.vue';
 import DiscussionList from '@/views/oj/discussion/discussionList.vue';
 import Discussion from '@/views/oj/discussion/discussion.vue';
 import ExaminationRoom from '@/components/oj/common/ExaminationRoom.vue';
@@ -276,6 +277,12 @@ const ojRoutes = [
         path: 'contest-session',
         component: ContestSession,
         meta: { title: 'Contest Session', requireAuth: true },
+      },
+      {
+        name: 'ContestResetIP',
+        path: 'contest-reset-ip',
+        component: ContestResetIP,
+        meta: { title: 'Contest Reset IP', requireAuth: true },
       },
     ],
   },

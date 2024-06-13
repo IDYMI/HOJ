@@ -1,5 +1,6 @@
 package top.hcode.hoj.service.oj;
 
+import java.util.List;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -13,24 +14,28 @@ import top.hcode.hoj.pojo.vo.SessionVO;
 
 public interface ContestAdminService {
 
-    public CommonResult<IPage<ContestRecord>> getContestACInfo(Long cid, Integer currentPage, Integer limit);
+	public CommonResult<IPage<ContestRecord>> getContestACInfo(Long cid, Integer currentPage, Integer limit);
 
-    public CommonResult<Void> checkContestACInfo(CheckACDTO checkACDto);
+	public CommonResult<Void> checkContestACInfo(CheckACDTO checkACDto);
 
-    public CommonResult<IPage<ContestPrint>> getContestPrint(Long cid, Integer currentPage, Integer limit);
+	public CommonResult<IPage<ContestPrint>> getContestPrint(Long cid, Integer currentPage, Integer limit);
 
-    public CommonResult<Void> checkContestPrintStatus(Long id, Long cid);
+	public CommonResult<Void> checkContestPrintStatus(Long id, Long cid);
 
-    public CommonResult<IPage<ContestSign>> getContestSign(Long cid, Integer currentPage, Integer limit,
-            Boolean type, Boolean gender, Integer status, String keyword);
+	public CommonResult<IPage<ContestSign>> getContestSign(Long cid, Integer currentPage, Integer limit,
+			Boolean type, Boolean gender, Integer status, String keyword);
 
-    public CommonResult<ContestSignVO> getContestSignInfo(Long cid, Long id);
+	public CommonResult<ContestSignVO> getContestSignInfo(Long cid, Long id);
 
-    public CommonResult<Void> checkContestSignStatus(Map<String, Object> params);
+	public CommonResult<Void> checkContestSignStatus(Map<String, Object> params);
 
-    public CommonResult<Void> updateContestSign(ContestSignVO contestSignVo);
+	public CommonResult<Void> updateContestSign(ContestSignVO contestSignVo);
 
-    public CommonResult<IPage<SessionVO>> getContestSession(Long cid, Integer currentPage, Integer limit,
-            String keyword, String unkeyword);
+	public CommonResult<IPage<SessionVO>> getContestSession(Long cid, Integer currentPage, Integer limit,
+			String keyword, String unkeyword);
+
+	public CommonResult<List<SessionVO>> getContestIpList(Long cid);
+
+	public CommonResult<Void> rejudgeContestIp(Long cid, String uid);
 
 }

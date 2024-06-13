@@ -19,6 +19,7 @@ import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.vo.ContestScrollBoardSubmissionVO;
 import top.hcode.hoj.pojo.vo.JudgeVO;
 import top.hcode.hoj.pojo.vo.ProblemCountVO;
+import top.hcode.hoj.pojo.vo.SessionVO;
 import top.hcode.hoj.utils.Constants;
 
 import java.util.Date;
@@ -173,6 +174,10 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
 
     public List<ContestScrollBoardSubmissionVO> getContestScrollBoardSubmission(Long cid, List<String> removeUidList) {
         return judgeMapper.getContestScrollBoardSubmission(cid, removeUidList);
+    }
+
+    public List<SessionVO> getContestJudgeUserList(Long cid) {
+        return judgeMapper.getContestJudgeUserList(cid);
     }
 
 }

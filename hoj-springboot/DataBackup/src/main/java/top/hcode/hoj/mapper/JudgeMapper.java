@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import top.hcode.hoj.pojo.vo.ContestScrollBoardSubmissionVO;
 import top.hcode.hoj.pojo.vo.JudgeVO;
 import top.hcode.hoj.pojo.vo.ProblemCountVO;
+import top.hcode.hoj.pojo.vo.SessionVO;
 
 import java.util.Date;
 import java.util.List;
@@ -76,4 +77,6 @@ public interface JudgeMapper extends BaseMapper<Judge> {
 
     List<ContestScrollBoardSubmissionVO> getContestScrollBoardSubmission(@Param("cid") Long cid,
             @Param("uidList") List<String> uidList);
+
+    List<SessionVO> getContestJudgeUserList(@Param("cid") Long cid);
 }

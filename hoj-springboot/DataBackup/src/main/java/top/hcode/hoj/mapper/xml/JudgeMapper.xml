@@ -255,4 +255,13 @@
         where ju.submit_id is not null and (ju.submit_time - cp.start_time) > 0
         order by ju.submit_id DESC
     </select>
+
+    <select id="getContestJudgeUserList" resultType="top.hcode.hoj.pojo.vo.SessionVO" useCache="true">
+        SELECT us.uid, us.username AS username, us.realname AS realname, GROUP_CONCAT(DISTINCT j.ip) AS ip_list
+        FROM judge j
+        LEFT JOIN user_sign us ON us.uid = j.uid
+        WHERE j.cid = #{cid}
+        GROUP BY us.uid, us.username, us.realname
+        ORDER BY COUNT(DISTINCT j.ip) DESC
+    </select>
 </mapper>

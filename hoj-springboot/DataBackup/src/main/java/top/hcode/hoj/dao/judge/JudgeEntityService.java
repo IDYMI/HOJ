@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import top.hcode.hoj.pojo.vo.ContestScrollBoardSubmissionVO;
 import top.hcode.hoj.pojo.vo.JudgeVO;
 import top.hcode.hoj.pojo.vo.ProblemCountVO;
+import top.hcode.hoj.pojo.vo.SessionVO;
 
 import java.util.Date;
 import java.util.List;
@@ -74,4 +75,6 @@ public interface JudgeEntityService extends IService<Judge> {
 
     public List<ContestScrollBoardSubmissionVO> getContestScrollBoardSubmission(Long cid,
             List<String> removeUidList);
+
+    public List<SessionVO> getContestJudgeUserList(Long cid);
 }

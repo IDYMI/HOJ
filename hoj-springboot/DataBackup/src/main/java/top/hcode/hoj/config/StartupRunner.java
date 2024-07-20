@@ -165,6 +165,9 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${scpc-password-list}")
     private List<String> scpcPasswordList;
 
+    @Value("${moss-username-list}")
+    private List<String> mossUsernameList;
+
     @Value("${forced-update-remote-judge-account}")
     private Boolean forcedUpdateRemoteJudgeAccount;
 
@@ -364,6 +367,13 @@ public class StartupRunner implements CommandLineRunner {
             isChanged = true;
         }
 
+        if ((CollectionUtils.isEmpty(switchConfig.getMossUsernameList())
+                && !CollectionUtils.isEmpty(mossUsernameList))
+                || forcedUpdateRemoteJudgeAccount) {
+            switchConfig.setMossUsernameList(mossUsernameList);
+            isChanged = true;
+        }
+
         if (isChanged) {
             nacosSwitchConfig.publishWebConfig();
         }
@@ -392,6 +402,9 @@ public class StartupRunner implements CommandLineRunner {
             addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.SCPC.getName(),
                     switchConfig.getScpcUsernameList(),
                     switchConfig.getScpcPasswordList());
+            addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.MOSS.getName(),
+                    switchConfig.getMossUsernameList(),
+                    null);
             checkRemoteOJLanguage(Constants.RemoteOJ.SPOJ, Constants.RemoteOJ.ATCODER);
         }
     }
@@ -407,23 +420,33 @@ public class StartupRunner implements CommandLineRunner {
      */
     private void addRemoteJudgeAccountToMySQL(String oj, List<String> usernameList, List<String> passwordList) {
 
-        if (CollectionUtils.isEmpty(usernameList) || CollectionUtils.isEmpty(passwordList)
-                || usernameList.size() != passwordList.size()) {
-            log.error("[Init System Config] [{}]: There is no account or password configured for remote judge, " +
-                    "username list:{}, password list:{}", oj, Arrays.toString(usernameList.toArray()),
-                    Arrays.toString(passwordList.toArray()));
+        if (oj.equals(Constants.RemoteOJ.MOSS.getName())) {
+            if (CollectionUtils.isEmpty(usernameList)) {
+                log.error("[Init System Config] [{}]: There is no account or password configured for remote judge, " +
+                        "username list:{}", oj, Arrays.toString(usernameList.toArray()));
+            }
+        } else {
+            if (CollectionUtils.isEmpty(usernameList) || CollectionUtils.isEmpty(passwordList)
+                    || usernameList.size() != passwordList.size()) {
+                log.error("[Init System Config] [{}]: There is no account or password configured for remote judge, " +
+                        "username list:{}, password list:{}", oj, Arrays.toString(usernameList.toArray()),
+                        Arrays.toString(passwordList.toArray()));
+            }
         }
 
         List<RemoteJudgeAccount> remoteAccountList = new LinkedList<>();
         for (int i = 0; i < usernameList.size(); i++) {
-
-            remoteAccountList.add(new RemoteJudgeAccount()
+            RemoteJudgeAccount account = new RemoteJudgeAccount()
                     .setUsername(usernameList.get(i))
-                    .setPassword(passwordList.get(i))
                     .setStatus(true)
                     .setVersion(0L)
-                    .setOj(oj));
+                    .setOj(oj);
 
+            if (!CollectionUtils.isEmpty(passwordList)) {
+                account.setPassword(passwordList.get(i));
+            }
+
+            remoteAccountList.add(account);
         }
 
         if (remoteAccountList.size() > 0) {

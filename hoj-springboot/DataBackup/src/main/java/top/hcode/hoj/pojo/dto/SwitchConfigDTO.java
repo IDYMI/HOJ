@@ -130,4 +130,5 @@ public class SwitchConfigDTO {
 
     private List<String> scpcPasswordList;
 
+    private List<String> mossUsernameList;
 }

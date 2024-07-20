@@ -455,6 +455,7 @@ export const m = {
   Admin_Print: 'Admin Print',
   Admin_Sign: 'Admin Sign',
   Admin_Helper: 'AC Info',
+  Admin_Moss: 'Admin Moss',
   ScrollBoard: 'Scroll Board',
   Register_contest_successfully: 'Register contest successfully',
   Please_check_the_contest_announcement_for_details: 'Please check the contest announcement for details',
@@ -505,6 +506,16 @@ export const m = {
   Download: 'Download',
   Printed: 'Printed',
   Not_Printed: 'Not Printed',
+
+  // /views/oj/contest/children/ContestAdminMoss.vue
+  Plagiarism_Percentage: 'Plagiarism Percentage',
+  Plagiarism_Length: 'Plagiarism Length',
+  Plagiarism_Language: 'Language',
+  Plagiarism_Time: 'Time',
+  Plagiarism_LanguageList: 'Language List',
+  Add_Moss: 'Add Moss',
+  Enter_Mosskeyword: 'Enter keyword (Username)',
+  Moss_View: 'View',
 
   // /views/oj/contest/children/ContestRejudgeAdmin.vue
   Contest_Rejudge: 'Contest Rejudge',

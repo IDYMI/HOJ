@@ -369,10 +369,10 @@ public class ConfigManager {
 
         SwitchConfig switchConfig = nacosSwitchConfig.getSwitchConfig();
 
-        if(config.getScpcSuperAdminAccount() != null){
+        if (config.getScpcSuperAdminAccount() != null) {
             switchConfig.setScpcSuperAdminAccount(config.getScpcSuperAdminAccount());
         }
-        if(config.getScpcSuperAdminPassword() != null){
+        if (config.getScpcSuperAdminPassword() != null) {
             switchConfig.setScpcSuperAdminPassword(config.getScpcSuperAdminPassword());
         }
         if (config.getOpenPublicDiscussion() != null) {
@@ -482,6 +482,11 @@ public class ConfigManager {
                     config.getScpcPasswordList(),
                     Constants.RemoteOJ.SCPC.getName());
         }
+        if (checkListDiff(config.getMossUsernameList(), switchConfig.getMossUsernameList())) {
+            switchConfig.setMossUsernameList(config.getMossUsernameList());
+            changeRemoteJudgeAccount(config.getMossUsernameList(), null,
+                    Constants.RemoteOJ.MOSS.getName());
+        }
 
         if (checkListDiff(config.getLibreojUsernameList(), switchConfig.getLibreojUsernameList()) ||
                 checkListDiff(config.getLibreojPasswordList(), switchConfig.getLibreojPasswordList())) {
@@ -509,11 +514,20 @@ public class ConfigManager {
             List<String> passwordList,
             String oj) {
 
-        if (CollectionUtils.isEmpty(usernameList) || CollectionUtils.isEmpty(passwordList)
-                || usernameList.size() != passwordList.size()) {
-            log.error("[Change by Switch] [{}]: There is no account or password configured for remote judge, " +
-                    "username list:{}, password list:{}", oj, Arrays.toString(usernameList.toArray()),
-                    Arrays.toString(passwordList.toArray()));
+        if (oj.equals(Constants.RemoteOJ.MOSS.getName())) {
+            if (CollectionUtils.isEmpty(usernameList)) {
+                log.error("[Change by Switch] [{}]: There is no account or password configured for remote judge, " +
+                        "username list:{}", oj, Arrays.toString(usernameList.toArray()));
+            }
+            // Moss 账号即是密码
+            passwordList = new ArrayList<>(Collections.nCopies(usernameList.size(), " "));
+        } else {
+            if (CollectionUtils.isEmpty(usernameList) || CollectionUtils.isEmpty(passwordList)
+                    || usernameList.size() != passwordList.size()) {
+                log.error("[Change by Switch] [{}]: There is no account or password configured for remote judge, " +
+                        "username list:{}, password list:{}", oj, Arrays.toString(usernameList.toArray()),
+                        Arrays.toString(passwordList.toArray()));
+            }
         }
 
         QueryWrapper<RemoteJudgeAccount> remoteJudgeAccountQueryWrapper = new QueryWrapper<>();

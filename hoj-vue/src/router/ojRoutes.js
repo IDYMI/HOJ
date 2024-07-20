@@ -22,6 +22,8 @@ import ContestComment from '@/views/oj/contest/children/ContestComment.vue';
 import ContestPrint from '@/views/oj/contest/children/ContestPrint.vue';
 import ContestAdminPrint from '@/views/oj/contest/children/ContestAdminPrint.vue';
 import ContestAdminSign from '@/views/oj/contest/children/ContestAdminSign.vue';
+import ContestAdminMoss from '@/views/oj/contest/moss/ContestAdminMoss.vue';
+import ContestAdminMossDetails from '@/views/oj/contest/moss/ContestAdminMossDetails.vue';
 import ScrollBoard from '@/views/oj/contest/children/ScrollBoard.vue';
 import ContestRejudgeAdmin from '@/views/oj/contest/children/ContestRejudgeAdmin.vue';
 import DiscussionList from '@/views/oj/discussion/discussionList.vue';
@@ -172,6 +174,14 @@ const ojRoutes = [
         meta: { title: 'Contest Submission Details' },
       },
       {
+        name: 'ContestAdminMossDetails',
+        path: 'moss/:mossID/',
+        component: ContestAdminMossDetails,
+        meta: {
+          title: 'Contest Moss Details',
+        },
+      },
+      {
         name: 'ContestProblemList',
         path: 'problems',
         component: ContestProblemList,
@@ -231,6 +241,14 @@ const ojRoutes = [
         component: ContestAdminSign,
         meta: {
           title: 'Contest Admin Sign',
+        },
+      },
+      {
+        name: 'ContestAdminMoss',
+        path: 'admin-moss',
+        component: ContestAdminMoss,
+        meta: {
+          title: 'Contest Admin Moss',
         },
       },
       {

@@ -21,7 +21,7 @@
           <template slot="prepend">{{$t('m.Account')}}{{index+1}}</template>
         </el-input>
       </el-col>
-      <el-col :xs="24" :md="10">
+      <el-col v-if="OJ != 'MOSS'" :xs="24" :md="10">
         <el-input v-model="passwordListTmp[index]" size="small" show-password>
           <template slot="prepend">{{$t('m.Password')}}{{index+1}}</template>
         </el-input>

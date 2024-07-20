@@ -687,6 +687,40 @@ const ojApi = {
       data,
     });
   },
+  // 提交比赛查重
+  submitContestMoss(data) {
+    return ajax('/api/submit-contest-moss', 'post', {
+      data,
+    });
+  },
+  // 获取比赛查重列表
+  getContestMossList(params) {
+    return ajax('/api/get-contest-moss', 'get', {
+      params,
+    });
+  },
+  // 获取比赛提交代码的语言
+  getContestLanguage(params) {
+    return ajax('/api/get-contest-language', 'get', {
+      params,
+    });
+  },
+  // 获取moss查重的结果列表
+  getMossList(params) {
+    return ajax('/api/get-moss-list', 'get', {
+      params,
+    });
+  },
+  // 获取比赛查重详情
+  getContestMossResult(id, cid) {
+    return ajax('/api/get-contest-moss-result', 'get', {
+      params: {
+        id,
+        cid,
+      },
+    });
+  },
+
   // 比赛题目对应的提交重判
   ContestRejudgeProblem(params) {
     return ajax('/api/admin/judge/rejudge-contest-problem', 'get', {

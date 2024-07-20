@@ -89,7 +89,8 @@ public class Constants {
         SPOJ("SPOJ"),
         ATCODER("AC"),
         LIBRE("LIBRE"),
-        SCPC("SCPC");
+        SCPC("SCPC"),
+        MOSS("MOSS");
 
         private final String name;
 

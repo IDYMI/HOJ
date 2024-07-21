@@ -1,5 +1,6 @@
 package top.hcode.hoj.controller.admin;
 
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -21,6 +22,7 @@ import javax.annotation.Resource;
 
 @RestController
 @RequestMapping("/api/admin/judge")
+@RequiresRoles(value = { "root", "admin", "problem_admin" }, logical = Logical.OR)
 public class AdminJudgeController {
 
     @Resource
@@ -28,7 +30,6 @@ public class AdminJudgeController {
 
     @GetMapping("/rejudge")
     @RequiresAuthentication
-    @RequiresRoles("root") // 只有超级管理员能操作
     @RequiresPermissions("rejudge")
     public CommonResult<Judge> rejudge(@RequestParam("submitId") Long submitId) {
         return rejudgeService.rejudge(submitId);
@@ -36,7 +37,6 @@ public class AdminJudgeController {
 
     @GetMapping("/rejudge-contest-problem")
     @RequiresAuthentication
-    @RequiresRoles("root") // 只有超级管理员能操作
     @RequiresPermissions("rejudge")
     public CommonResult<Void> rejudgeContestProblem(@RequestParam("cid") Long cid, @RequestParam("pid") Long pid) {
         return rejudgeService.rejudgeContestProblem(cid, pid);
@@ -44,7 +44,6 @@ public class AdminJudgeController {
 
     @GetMapping("/manual-judge")
     @RequiresAuthentication
-    @RequiresRoles("root") // 只有超级管理员能操作
     @RequiresPermissions("rejudge")
     public CommonResult<Judge> manualJudge(@RequestParam("submitId") Long submitId,
             @RequestParam("status") Integer status,
@@ -54,7 +53,6 @@ public class AdminJudgeController {
 
     @GetMapping("/cancel-judge")
     @RequiresAuthentication
-    @RequiresRoles("root") // 只有超级管理员能操作
     @RequiresPermissions("rejudge")
     public CommonResult<Judge> cancelJudge(@RequestParam("submitId") Long submitId) {
         return rejudgeService.cancelJudge(submitId);

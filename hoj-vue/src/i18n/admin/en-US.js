@@ -41,7 +41,7 @@ export const m = {
   // /views/admin/Dashboard.vue
   Last_Login: 'Last Login',
   Super_Admin: 'Super Admin',
-  Admin: 'Admin',
+  Admin: 'Normal Admin',
   All_Problem_Admin: 'Problem Admin',
   Total_Users: 'Total Users',
   Today_Submissions: 'Today Submissions',

@@ -272,7 +272,7 @@
           name="ContestRejudgeAdmin"
           lazy
           :disabled="contestMenuDisabled"
-          v-if="isSuperAdmin"
+          v-if="isContestAdmin"
         >
           <span slot="label">
             <i class="el-icon-refresh" aria-hidden="true"></i>
@@ -470,7 +470,6 @@ export default {
       "isShowContestSetting",
       "BeginToNowDuration",
       "isContestAdmin",
-      "isSuperAdmin",
       "ContestRealTimePermission",
       "passwordFormVisible",
       "userInfo",

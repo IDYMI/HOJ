@@ -58,7 +58,22 @@ public class AdminContestProblemManager {
     private ContestEntityService contestEntityService;
 
     public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword,
-            Long cid, Integer problemType, String oj) {
+            Long cid, Integer problemType, String oj)
+            throws StatusForbiddenException {
+
+        // 获取当前登录的用户
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
+
+        // 获取本场比赛的信息
+        Contest contest = contestEntityService.getById(cid);
+        // 只有超级管理员和题目管理员、题目创建者才能操作
+        if (!isRoot && !userRolesVo.getUsername().equals(contest.getAuthor())) {
+            throw new StatusForbiddenException("对不起，你无权限查看题目！");
+        }
+
         if (currentPage == null || currentPage < 1)
             currentPage = 1;
         if (limit == null || limit < 1)
@@ -86,7 +101,6 @@ public class AdminContestProblemManager {
                     .and(wrapper -> wrapper.eq("type", problemType)
                             .or().eq("is_remote", true))
                     .ne("auth", 2); // 同时需要与比赛相同类型的题目，权限需要是公开的（隐藏的不可加入！）
-            Contest contest = contestEntityService.getById(cid);
             if (contest.getGid() != null) { // 团队比赛不能查看公共题库的隐藏题目
                 problemQueryWrapper.ne("auth", 3);
             }
@@ -155,10 +169,10 @@ public class AdminContestProblemManager {
             // 获取当前登录的用户
             AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-            boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-            boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
+            boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                    || SecurityUtils.getSubject().hasRole("admin");
             // 只有超级管理员和题目管理员、题目创建者才能操作
-            if (!isRoot && !isProblemAdmin && !userRolesVo.getUsername().equals(problem.getAuthor())) {
+            if (!isRoot && !userRolesVo.getUsername().equals(problem.getAuthor())) {
                 throw new StatusForbiddenException("对不起，你无权限查看题目！");
             }
 
@@ -168,7 +182,20 @@ public class AdminContestProblemManager {
         }
     }
 
-    public void deleteProblem(Long pid, Long cid) {
+    public void deleteProblem(Long pid, Long cid) throws StatusForbiddenException {
+        // 获取当前登录的用户
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
+
+        // 获取本场比赛的信息
+        Contest contest = contestEntityService.getById(cid);
+        // 只有超级管理员和题目管理员、题目创建者才能操作
+        if (!isRoot && !userRolesVo.getUsername().equals(contest.getAuthor())) {
+            throw new StatusForbiddenException("对不起，你无权限删除题目！");
+        }
+
         // 比赛id不为null，表示就是从比赛列表移除而已
         if (cid != null) {
             QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
@@ -179,9 +206,6 @@ public class AdminContestProblemManager {
             judgeUpdateWrapper.eq("cid", cid).eq("pid", pid);
             judgeEntityService.remove(judgeUpdateWrapper);
 
-            // 获取当前登录的用户
-            AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-
             log.info("[{}],[{}],cid:[{}],pid:[{}],operatorUid:[{}],operatorUsername:[{}]",
                     "Admin_Contest", "Remove_Problem", cid, pid, userRolesVo.getUid(), userRolesVo.getUsername());
         } else {
@@ -190,9 +214,6 @@ public class AdminContestProblemManager {
              */
             problemEntityService.removeById(pid);
             FileUtil.del(new File(Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + pid));
-
-            // 获取当前登录的用户
-            AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
             log.info("[{}],[{}],cid:[{}],pid:[{}],operatorUid:[{}],operatorUsername:[{}]",
                     "Admin_Contest", "Delete_Problem", cid, pid, userRolesVo.getUid(), userRolesVo.getUsername());
@@ -222,10 +243,10 @@ public class AdminContestProblemManager {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
         // 只有超级管理员和题目管理员、题目创建者才能操作
-        if (!isRoot && !isProblemAdmin && !userRolesVo.getUsername().equals(problemDto.getProblem().getAuthor())) {
+        if (!isRoot && !userRolesVo.getUsername().equals(problemDto.getProblem().getAuthor())) {
             throw new StatusForbiddenException("对不起，你无权限修改题目！");
         }
 

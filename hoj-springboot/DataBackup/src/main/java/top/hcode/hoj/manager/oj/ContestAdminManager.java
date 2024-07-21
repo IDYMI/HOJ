@@ -48,7 +48,8 @@ public class ContestAdminManager {
         Contest contest = contestEntityService.getById(cid);
 
         // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         if (!isRoot
                 && !contest.getUid().equals(userRolesVo.getUid())
@@ -80,7 +81,8 @@ public class ContestAdminManager {
         Contest contest = contestEntityService.getById(checkACDto.getCid());
 
         // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         if (!isRoot
                 && !contest.getUid().equals(userRolesVo.getUid())
@@ -105,7 +107,8 @@ public class ContestAdminManager {
         Contest contest = contestEntityService.getById(cid);
 
         // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         if (!isRoot
                 && !contest.getUid().equals(userRolesVo.getUid())
@@ -138,7 +141,8 @@ public class ContestAdminManager {
         Contest contest = contestEntityService.getById(cid);
 
         // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())
                 && !(contest.getIsGroup() && groupValidator.isGroupRoot(userRolesVo.getUid(), contest.getGid()))) {

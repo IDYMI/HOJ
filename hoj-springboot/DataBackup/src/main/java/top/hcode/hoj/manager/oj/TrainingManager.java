@@ -118,7 +118,8 @@ public class TrainingManager {
             throws StatusFailException, StatusAccessDeniedException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         Training training = trainingEntityService.getById(tid);
         if (training == null || !training.getStatus()) {

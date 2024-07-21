@@ -55,13 +55,13 @@ const adminRoutes = [
         path: 'announcement',
         name: 'admin-announcement',
         component: Announcement,
-        meta: { title: 'Announcement Admin' },
+        meta: { requireMainRoleAdmin: true, title: 'Announcement Admin' },
       },
       {
         path: 'notice',
         name: 'admin-notice',
         component: SysNotice,
-        meta: { title: 'Notice Admin' },
+        meta: { requireMainRoleAdmin: true, title: 'Notice Admin' },
       },
       {
         path: 'conf',
@@ -85,7 +85,7 @@ const adminRoutes = [
         path: 'file',
         name: 'admin-file',
         component: File,
-        meta: { title: 'File Admin' },
+        meta: { requireMainRoleAdmin: true, title: 'File Admin' },
       },
       {
         path: 'problems',
@@ -199,7 +199,7 @@ const adminRoutes = [
         path: 'discussion',
         name: 'admin-discussion-list',
         component: DiscussionList,
-        meta: { title: 'Discussion Admin' },
+        meta: { requireMainRoleAdmin: true, title: 'Discussion Admin' },
       },
     ],
   },

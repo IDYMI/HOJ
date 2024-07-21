@@ -835,7 +835,7 @@ export default {
     },
     disabledManualJudge(status) {
       return (
-        !this.isSuperAdmin ||
+        !this.isAdminRole ||
         status == JUDGE_STATUS_RESERVE["Judging"] ||
         status == JUDGE_STATUS_RESERVE["Compiling"] ||
         status == JUDGE_STATUS_RESERVE["ce"]
@@ -921,11 +921,11 @@ export default {
     ...mapGetters([
       "isAuthenticated",
       "userInfo",
-      "isSuperAdmin",
       "isAdminRole",
       "contestRuleType",
       "contestStatus",
       "ContestRealTimePermission",
+      "isAdminRole",
     ]),
     title() {
       if (!this.contestID) {
@@ -944,7 +944,7 @@ export default {
         : this.$i18n.t("m.Status");
     },
     rejudgeColumnVisible() {
-      return this.isSuperAdmin;
+      return this.isAdminRole;
     },
     scoreColumnVisible() {
       return (

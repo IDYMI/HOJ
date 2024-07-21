@@ -93,8 +93,8 @@ public class ContestFileManager {
             throw new StatusFailException("错误：该比赛不存在！");
         }
 
-        // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         Long gid = contest.getGid();
 
@@ -164,7 +164,8 @@ public class ContestFileManager {
 
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
         // 除非是root 其它管理员只能下载自己的比赛ac记录
 
         Long gid = contest.getGid();
@@ -343,7 +344,8 @@ public class ContestFileManager {
     public void downloadContestPrintText(Long id, HttpServletResponse response) throws StatusForbiddenException {
         ContestPrint contestPrint = contestPrintEntityService.getById(id);
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         Long cid = contestPrint.getCid();
 

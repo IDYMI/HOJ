@@ -214,7 +214,8 @@ public class HomeManager {
         SubmissionStatisticsVO submissionStatisticsVO = (SubmissionStatisticsVO) redisUtils
                 .get(SUBMISSION_STATISTICS_KEY);
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
         forceRefresh = forceRefresh && isRoot;
 
         if (submissionStatisticsVO == null || forceRefresh) {

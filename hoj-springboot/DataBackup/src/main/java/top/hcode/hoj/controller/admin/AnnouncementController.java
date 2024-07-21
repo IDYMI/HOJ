@@ -1,6 +1,8 @@
 package top.hcode.hoj.controller.admin;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -19,6 +21,7 @@ import top.hcode.hoj.service.admin.announcement.AdminAnnouncementService;
 @RestController
 @RequiresAuthentication
 @RequestMapping("/api/admin")
+@RequiresRoles(value = { "root", "admin", "problem_admin" }, logical = Logical.OR)
 public class AnnouncementController {
 
     @Autowired
@@ -39,7 +42,6 @@ public class AnnouncementController {
     }
 
     @PostMapping("/announcement")
-    @RequiresRoles("root") // 只有超级管理员能操作
     @RequiresPermissions("announcement_admin")
     public CommonResult<Void> addAnnouncement(@RequestBody Announcement announcement) {
         return adminAnnouncementService.addAnnouncement(announcement);

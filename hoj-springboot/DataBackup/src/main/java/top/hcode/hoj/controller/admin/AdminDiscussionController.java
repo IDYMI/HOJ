@@ -23,27 +23,25 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/admin")
+@RequiresRoles(value = { "root", "admin" }, logical = Logical.OR)
 public class AdminDiscussionController {
 
     @Autowired
     private AdminDiscussionService adminDiscussionService;
 
     @PutMapping("/discussion")
-    @RequiresRoles(value = { "root", "admin", "problem_admin" }, logical = Logical.OR)
     @RequiresAuthentication
     public CommonResult<Void> updateDiscussion(@RequestBody Discussion discussion) {
         return adminDiscussionService.updateDiscussion(discussion);
     }
 
     @DeleteMapping("/discussion")
-    @RequiresRoles(value = { "root", "admin", "problem_admin" }, logical = Logical.OR)
     @RequiresAuthentication
     public CommonResult<Void> removeDiscussion(@RequestBody List<Integer> didList) {
         return adminDiscussionService.removeDiscussion(didList);
     }
 
     @GetMapping("/discussion-report")
-    @RequiresRoles(value = { "root", "admin", "problem_admin" }, logical = Logical.OR)
     @RequiresAuthentication
     public CommonResult<IPage<DiscussionReportVO>> getDiscussionReport(
             @RequestParam(value = "limit", defaultValue = "10") Integer limit,
@@ -52,7 +50,6 @@ public class AdminDiscussionController {
     }
 
     @PutMapping("/discussion-report")
-    @RequiresRoles(value = { "root", "admin", "problem_admin" }, logical = Logical.OR)
     @RequiresAuthentication
     public CommonResult<Void> updateDiscussionReport(@RequestBody DiscussionReport discussionReport) {
         return adminDiscussionService.updateDiscussionReport(discussionReport);

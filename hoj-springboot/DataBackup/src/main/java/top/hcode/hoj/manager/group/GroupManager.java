@@ -73,7 +73,8 @@ public class GroupManager {
         boolean isRoot = false;
         if (userRolesVo != null) {
             uid = userRolesVo.getUid();
-            isRoot = SecurityUtils.getSubject().hasRole("root");
+            isRoot = SecurityUtils.getSubject().hasRole("root")
+                    || SecurityUtils.getSubject().hasRole("admin");
         }
         return groupEntityService.getGroupList(limit, currentPage, keyword, auth, uid, onlyMine, isRoot);
     }
@@ -81,7 +82,8 @@ public class GroupManager {
     public Group getGroup(Long gid) throws StatusNotFoundException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         Group group = groupEntityService.getById(gid);
         if (group == null || group.getStatus() == 1 && !isRoot) {
@@ -102,7 +104,8 @@ public class GroupManager {
             throws StatusFailException, StatusNotFoundException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         boolean access = false;
 
@@ -141,12 +144,11 @@ public class GroupManager {
     public void addGroup(Group group) throws StatusFailException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
-        boolean isAdmin = SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("problem_admin")
+                || SecurityUtils.getSubject().hasRole("admin");
 
-        if (!isRoot && !isAdmin && !isProblemAdmin) {
-
+        if (!isRoot) {
             QueryWrapper<UserAcproblem> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("uid", userRolesVo.getUid()).select("distinct pid");
             int userAcProblemCount = userAcproblemEntityService.count(queryWrapper);
@@ -237,7 +239,8 @@ public class GroupManager {
     public void updateGroup(Group group) throws StatusFailException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         if (!groupValidator.isGroupRoot(userRolesVo.getUid(), group.getId()) && !isRoot) {
             throw new StatusForbiddenException("对不起，您无权限操作！");
@@ -291,7 +294,8 @@ public class GroupManager {
     public void deleteGroup(Long gid) throws StatusFailException, StatusNotFoundException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         Group group = groupEntityService.getById(gid);
 

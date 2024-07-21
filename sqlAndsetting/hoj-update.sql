@@ -1168,3 +1168,9 @@ CALL add_User_Info_Preferences_Setting;
 
 DROP PROCEDURE add_User_Info_Preferences_Setting;
 
+/*
+* 修改管理员权限
+
+*/
+insert  into `role_auth`(`auth_id`,`role_id`) values (4,1001),(5,1001),(4,1008);
+

@@ -15,6 +15,7 @@ import top.hcode.hoj.pojo.entity.discussion.Discussion;
 import top.hcode.hoj.pojo.entity.discussion.DiscussionReport;
 import top.hcode.hoj.pojo.vo.DiscussionVO;
 import top.hcode.hoj.service.oj.DiscussionService;
+import org.apache.shiro.authz.annotation.Logical;
 
 import java.util.List;
 
@@ -91,7 +92,7 @@ public class DiscussionController {
 
     @PostMapping("/discussion-category")
     @RequiresAuthentication
-    @RequiresRoles("root")
+    @RequiresRoles(value = { "root", "problem_admin", "admin" }, logical = Logical.OR)
     public CommonResult<List<Category>> upsertDiscussionCategory(@RequestBody List<Category> categoryList) {
         return discussionService.upsertDiscussionCategory(categoryList);
     }

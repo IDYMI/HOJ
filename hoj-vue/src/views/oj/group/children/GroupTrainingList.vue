@@ -9,7 +9,7 @@
           :md="18"
           :xs="24"
           v-if="
-            (isSuperAdmin || isGroupAdmin) && !problemPage && !editProblemPage
+            (isMainAdminRole || isGroupAdmin) && !problemPage && !editProblemPage
           "
         >
           <el-button
@@ -38,7 +38,7 @@
           :md="18"
           :xs="24"
           v-else-if="
-            (isSuperAdmin || isGroupAdmin) && problemPage && !editProblemPage
+            (isMainAdminRole || isGroupAdmin) && problemPage && !editProblemPage
           "
         >
           <el-button
@@ -60,7 +60,7 @@
             icon="el-icon-back"
           >{{ $t('m.Back_To_Admin_Training_List') }}</el-button>
         </el-col>
-        <el-col :md="18" :xs="24" v-else-if="(isSuperAdmin || isGroupAdmin) && editProblemPage">
+        <el-col :md="18" :xs="24" v-else-if="(isMainAdminRole || isGroupAdmin) && editProblemPage">
           <el-button
             type="primary"
             size="small"
@@ -335,7 +335,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["isAuthenticated", "isSuperAdmin", "isGroupAdmin"]),
+    ...mapGetters(["isAuthenticated", "isMainAdminRole", "isGroupAdmin"]),
   },
 };
 </script>

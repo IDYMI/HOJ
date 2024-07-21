@@ -39,22 +39,18 @@ public class MarkDownFileManager {
             throws StatusFailException, StatusSystemErrorException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
-        boolean isAdmin = SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
-        if (!isRoot
-                && !isProblemAdmin
-                && !isAdmin
-                && !(gid != null && groupValidator.isGroupAdmin(userRolesVo.getUid(), gid))) {
+        if (!isRoot && !(gid != null && groupValidator.isGroupAdmin(userRolesVo.getUid(), gid))) {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
 
         if (image == null) {
             throw new StatusFailException("上传的图片不能为空！");
         }
-        if (image.getSize() > 1024 * 1024 * 4) {
-            throw new StatusFailException("上传的图片文件大小不能大于4M！");
+        if (image.getSize() > 1024 * 1024 * 10) {
+            throw new StatusFailException("上传的图片文件大小不能大于10M！");
         }
         // 获取文件后缀
         String suffix = image.getOriginalFilename().substring(image.getOriginalFilename().lastIndexOf(".") + 1);
@@ -103,15 +99,13 @@ public class MarkDownFileManager {
             throw new StatusForbiddenException("错误：不支持删除！");
         }
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         Long gid = file.getGid();
 
         if (!file.getUid().equals(userRolesVo.getUid())
-                && !isRoot
-                && !isProblemAdmin
-                && !(gid != null && groupValidator.isGroupAdmin(userRolesVo.getUid(), gid))) {
+                && !isRoot && !(gid != null && groupValidator.isGroupAdmin(userRolesVo.getUid(), gid))) {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
 
@@ -127,12 +121,10 @@ public class MarkDownFileManager {
             throws StatusFailException, StatusSystemErrorException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
-        boolean isAdmin = SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
-        if (!isRoot && !isProblemAdmin && !isAdmin
-                && !(gid != null && groupValidator.isGroupAdmin(userRolesVo.getUid(), gid))) {
+        if (!isRoot && !(gid != null && groupValidator.isGroupAdmin(userRolesVo.getUid(), gid))) {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
 

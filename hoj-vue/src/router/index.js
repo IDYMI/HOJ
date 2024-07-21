@@ -42,6 +42,7 @@ router.beforeEach((to, from, next) => {
     // 判断该路由是否需要登录权限
     const token = localStorage.getItem('token') || '';
     const isSuperAdmin = store.getters.isSuperAdmin;
+    const isMainRoleAdmin = store.getters.isMainAdminRole;
     const isAmdin = store.getters.isAdminRole;
     if (token) {
       // 判断当前的token是否存在 ； 登录存入的token
@@ -62,6 +63,27 @@ router.beforeEach((to, from, next) => {
             mMessage.error(i18n.t('m.Please_login_first_by_admin_account'));
           } else {
             // oj端
+            next({
+              path: '/home',
+            });
+            store.commit('changeModalStatus', { mode: 'Login', visible: true });
+            mMessage.error(i18n.t('m.Please_login_first'));
+            store.commit('clearUserInfoAndToken');
+          }
+        }
+      } else if (to.matched.some((record) => record.meta.requireMainRoleAdmin)) {
+        //判断是否需要管理员权限
+        if (isMainRoleAdmin) {
+          next();
+        } else {
+          // 没有管理员权限 全部返回登录页，并且清除缓存
+          if (to.path.split('/')[1] === 'admin') {
+            // 管理端
+            next({
+              path: '/admin/login',
+            });
+            mMessage.error(i18n.t('m.Please_login_first_by_admin_account'));
+          } else {
             next({
               path: '/home',
             });

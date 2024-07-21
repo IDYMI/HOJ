@@ -96,7 +96,8 @@ public class BeforeDispatchInitManager {
             throw new StatusForbiddenException("错误！当前题目不可提交！");
         }
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         if (problem.getIsGroup()) {
             if (gid == null) {
@@ -132,8 +133,9 @@ public class BeforeDispatchInitManager {
             }
         }
 
-        // 是否为超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 超级管理员或者该比赛的创建者，则为比赛管理者
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
         if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())
                 && !(contest.getIsGroup() && groupValidator.isGroupRoot(userRolesVo.getUid(), contest.getGid()))) {
             if (contest.getStatus().intValue() == Constants.Contest.STATUS_SCHEDULED.getCode()) {

@@ -64,14 +64,10 @@
             <el-select
               v-model="row.auth"
               @change="changeProblemAuth(row)"
-              :disabled="!isSuperAdmin && !isProblemAdmin"
+              :disabled="!isAdminRole"
               size="small"
             >
-              <el-option
-                :label="$t('m.Public_Problem')"
-                :value="1"
-                :disabled="!isSuperAdmin && !isProblemAdmin"
-              ></el-option>
+              <el-option :label="$t('m.Public_Problem')" :value="1" :disabled="!isAdminRole"></el-option>
               <el-option :label="$t('m.Private_Problem')" :value="2"></el-option>
               <el-option :label="$t('m.Contest_Problem')" :value="3" :disabled="true"></el-option>
             </el-select>
@@ -83,11 +79,7 @@
               effect="dark"
               :content="$t('m.Edit')"
               placement="top"
-              v-if="
-                isSuperAdmin ||
-                  isProblemAdmin ||
-                  row.author == userInfo.username
-              "
+              v-if="isMainAdminRole || row.author == userInfo.username"
             >
               <el-button
                 icon="el-icon-edit-outline"
@@ -101,7 +93,7 @@
               effect="dark"
               :content="$t('m.Download_Testcase')"
               placement="top"
-              v-if="isSuperAdmin || isProblemAdmin"
+              v-if="isMainAdminRole || row.author == userInfo.username"
             >
               <el-button
                 icon="el-icon-download"
@@ -117,20 +109,6 @@
                 size="mini"
                 @click.native="removeProblem(row.id)"
                 type="warning"
-              ></el-button>
-            </el-tooltip>
-
-            <el-tooltip
-              effect="dark"
-              :content="$t('m.Delete')"
-              placement="top"
-              v-if="isSuperAdmin || isProblemAdmin"
-            >
-              <el-button
-                icon="el-icon-delete-solid"
-                size="mini"
-                @click.native="deleteProblem(row.id)"
-                type="danger"
               ></el-button>
             </el-tooltip>
           </template>
@@ -234,7 +212,7 @@ export default {
     this.init();
   },
   computed: {
-    ...mapGetters(["userInfo", "isSuperAdmin", "isProblemAdmin"]),
+    ...mapGetters(["userInfo", "isAdminRole", "isMainAdminRole"]),
   },
   methods: {
     init() {

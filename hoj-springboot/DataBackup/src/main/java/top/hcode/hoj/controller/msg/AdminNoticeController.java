@@ -1,6 +1,8 @@
 package top.hcode.hoj.controller.msg;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,7 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping("/api/admin/msg")
+@RequiresRoles(value = { "root", "admin" }, logical = Logical.OR)
 public class AdminNoticeController {
 
     @Resource
@@ -25,7 +28,6 @@ public class AdminNoticeController {
 
     @GetMapping("/notice")
     @RequiresAuthentication
-    @RequiresRoles("root")
     public CommonResult<IPage<AdminSysNoticeVO>> getSysNotice(
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage,
@@ -36,7 +38,6 @@ public class AdminNoticeController {
 
     @PostMapping("/notice")
     @RequiresAuthentication
-    @RequiresRoles("root")
     public CommonResult<Void> addSysNotice(@RequestBody AdminSysNotice adminSysNotice) {
 
         return adminNoticeService.addSysNotice(adminSysNotice);
@@ -44,7 +45,6 @@ public class AdminNoticeController {
 
     @DeleteMapping("/notice")
     @RequiresAuthentication
-    @RequiresRoles("root")
     public CommonResult<Void> deleteSysNotice(@RequestParam("id") Long id) {
 
         return adminNoticeService.deleteSysNotice(id);
@@ -52,7 +52,6 @@ public class AdminNoticeController {
 
     @PutMapping("/notice")
     @RequiresAuthentication
-    @RequiresRoles("root")
     public CommonResult<Void> updateSysNotice(@RequestBody AdminSysNotice adminSysNotice) {
 
         return adminNoticeService.updateSysNotice(adminSysNotice);

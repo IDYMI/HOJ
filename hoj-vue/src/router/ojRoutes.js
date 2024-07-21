@@ -202,7 +202,7 @@ const ojRoutes = [
         name: 'ContestRejudgeAdmin',
         path: 'rejudge',
         component: ContestRejudgeAdmin,
-        meta: { title: 'Contest Rejudge', requireSuperAdmin: true },
+        meta: { title: 'Contest Rejudge' },
       },
       {
         name: 'ContestComment',

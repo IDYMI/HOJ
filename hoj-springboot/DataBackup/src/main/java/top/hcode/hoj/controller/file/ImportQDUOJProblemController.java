@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.service.file.ImportQDUOJProblemService;
+import org.apache.shiro.authz.annotation.Logical;
 
 /**
  * @Author: Himit_ZH
@@ -20,6 +21,7 @@ import top.hcode.hoj.service.file.ImportQDUOJProblemService;
 
 @Controller
 @RequestMapping("/api/file")
+@RequiresRoles(value = { "root", "problem_admin", "admin" }, logical = Logical.OR)
 public class ImportQDUOJProblemController {
 
     @Autowired
@@ -28,11 +30,11 @@ public class ImportQDUOJProblemController {
     /**
      * @param file
      * @MethodName importQDOJProblem
-     * @Description zip文件导入题目 仅超级管理员可操作
+     * @Description zip文件导入题目
      * @Return
      * @Since 2021/5/27
      */
-    @RequiresRoles("root")
+
     @RequiresAuthentication
     @ResponseBody
     @PostMapping("/import-qdoj-problem")

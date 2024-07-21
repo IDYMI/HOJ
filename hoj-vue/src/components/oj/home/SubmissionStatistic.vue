@@ -1,11 +1,11 @@
 <template>
-  <el-card>
+  <el-card v-if="isMainAdminRole" class="card-top">
     <div shadow slot="header" :padding="10">
       <span class="home-title panel-title">
         <i class="el-icon-data-line"></i>
         {{$t('m.Statistics_Submissions_In_The_Last_Week')}}
       </span>
-      <span v-if="isSuperAdmin">
+      <span>
         <el-button
           type="primary"
           icon="el-icon-refresh"
@@ -135,7 +135,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["isSuperAdmin", "webLanguage", "webTheme"]),
+    ...mapGetters(["isMainAdminRole", "webLanguage", "webTheme"]),
   },
   watch: {
     webLanguage(newVal, oldVal) {

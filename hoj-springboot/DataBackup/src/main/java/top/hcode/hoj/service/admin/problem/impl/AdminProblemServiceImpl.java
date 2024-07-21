@@ -54,6 +54,8 @@ public class AdminProblemServiceImpl implements AdminProblemService {
             return CommonResult.successResponse();
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
         }
     }
 
@@ -81,9 +83,12 @@ public class AdminProblemServiceImpl implements AdminProblemService {
 
     @Override
     public CommonResult<List<ProblemCase>> getProblemCases(Long pid, Boolean isUpload) {
-
-        List<ProblemCase> problemCaseList = adminProblemManager.getProblemCases(pid, isUpload);
-        return CommonResult.successResponse(problemCaseList);
+        try {
+            List<ProblemCase> problemCaseList = adminProblemManager.getProblemCases(pid, isUpload);
+            return CommonResult.successResponse(problemCaseList);
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
     }
 
     @Override

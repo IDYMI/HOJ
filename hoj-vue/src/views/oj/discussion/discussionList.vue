@@ -298,7 +298,7 @@
               <i class="el-icon-folder-opened"></i>
               {{ $t('m.Category') }}
             </a>
-            <span style="float:right" v-if="isSuperAdmin">
+            <span style="float:right" v-if="isAdminRole">
               <a @click="upsertCategoryList">
                 <i class="el-icon-edit" v-if="isViewCategoryList">{{$t('m.Edit')}}</i>
                 <i class="el-icon-check" v-if="!isViewCategoryList">{{$t('m.OK')}}</i>
@@ -801,7 +801,6 @@ export default {
       "isAuthenticated",
       "userInfo",
       "isAdminRole",
-      "isSuperAdmin",
     ]),
   },
 };

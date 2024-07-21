@@ -21,6 +21,7 @@ import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.contest.ContestRegister;
 import top.hcode.hoj.pojo.vo.AdminContestVO;
 import top.hcode.hoj.pojo.vo.ContestAwardConfigVO;
+import top.hcode.hoj.pojo.vo.ContestFileConfigVO;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
 import top.hcode.hoj.validator.ContestValidator;
@@ -76,8 +77,8 @@ public class AdminContestManager {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         // 只有超级管理员和比赛拥有者才能操作
         if (!isRoot && !userRolesVo.getUid().equals(contest.getUid())) {
@@ -111,7 +112,22 @@ public class AdminContestManager {
         return adminContestVo;
     }
 
-    public void deleteContest(Long cid) throws StatusFailException {
+    public void deleteContest(Long cid) throws StatusFailException, StatusForbiddenException {
+        Contest contest = contestEntityService.getById(cid);
+        if (contest == null) { // 查询不存在
+            throw new StatusFailException("查询失败：该比赛不存在,请检查参数cid是否准确！");
+        }
+        // 获取当前登录的用户
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
+
+        // 只有超级管理员和题目管理和训练拥有者才能操作
+        if (!isRoot && !userRolesVo.getUid().equals(contest.getUid())) {
+            throw new StatusForbiddenException("对不起，你无权限操作！");
+        }
+
         boolean isOk = contestEntityService.removeById(cid);
         /*
          * contest的id为其他表的外键的表中的对应数据都会被一起删除！
@@ -119,7 +135,6 @@ public class AdminContestManager {
         if (!isOk) { // 删除成功
             throw new StatusFailException("删除失败");
         }
-        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
         log.info("[{}],[{}],cid:[{}],operatorUid:[{}],operatorUsername:[{}]",
                 "Admin_Contest", "Delete", cid, userRolesVo.getUid(), userRolesVo.getUsername());
     }
@@ -173,8 +188,9 @@ public class AdminContestManager {
 
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
         // 只有超级管理员和比赛拥有者才能操作
         if (!isRoot && !userRolesVo.getUid().equals(adminContestVo.getUid())) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
@@ -212,8 +228,9 @@ public class AdminContestManager {
             throws StatusFailException, StatusForbiddenException {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
         // 只有超级管理员和比赛拥有者才能操作
         if (!isRoot && !userRolesVo.getUid().equals(uid)) {
             throw new StatusForbiddenException("对不起，你无权限操作！");

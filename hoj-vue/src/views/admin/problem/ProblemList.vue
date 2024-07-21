@@ -156,15 +156,11 @@
               v-model="row.auth"
               @change="changeProblemAuth(row)"
               size="small"
-              :disabled="!isSuperAdmin && !isProblemAdmin && !query.contestId"
+              :disabled="!isAdminRole && !query.contestId"
             >
-              <el-option
-                :label="$t('m.Public_Problem')"
-                :value="1"
-                :disabled="!isSuperAdmin && !isProblemAdmin"
-              ></el-option>
+              <el-option :label="$t('m.Public_Problem')" :value="1" :disabled="!isAdminRole"></el-option>
               <el-option :label="$t('m.Private_Problem')" :value="2"></el-option>
-              <el-option :label="$t('m.Contest_Problem')" :value="3" :disabled="!query.contestId"></el-option>
+              <el-option :label="$t('m.Contest_Problem')" :value="3"></el-option>
             </el-select>
           </template>
         </vxe-table-column>
@@ -174,11 +170,7 @@
               effect="dark"
               :content="$t('m.Edit')"
               placement="top"
-              v-if="
-                isSuperAdmin ||
-                  isProblemAdmin ||
-                  row.author == userInfo.username
-              "
+              v-if=" isMainAdminRole || row.author == userInfo.username"
             >
               <el-button
                 icon="el-icon-edit-outline"
@@ -192,7 +184,7 @@
               effect="dark"
               :content="$t('m.Download_Testcase')"
               placement="top"
-              v-if="isSuperAdmin || isProblemAdmin"
+              v-if="isMainAdminRole || row.author == userInfo.username"
             >
               <el-button
                 icon="el-icon-download"
@@ -220,7 +212,7 @@
               effect="dark"
               :content="$t('m.Delete')"
               placement="top"
-              v-if="isSuperAdmin || isProblemAdmin"
+              v-if="!query.contestId && (isSuperAdmin || row.author == userInfo.username)"
             >
               <el-button
                 icon="el-icon-delete-solid"
@@ -354,7 +346,12 @@ export default {
     this.init();
   },
   computed: {
-    ...mapGetters(["userInfo", "isSuperAdmin", "isProblemAdmin"]),
+    ...mapGetters([
+      "userInfo",
+      "isSuperAdmin",
+      "isAdminRole",
+      "isMainAdminRole",
+    ]),
     isContest() {
       return !(this.routeName == "admin-problem-list" && !this.query.contestId);
     },

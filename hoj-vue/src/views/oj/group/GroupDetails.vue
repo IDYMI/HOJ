@@ -68,10 +68,10 @@
                 }}
               </span>
             </el-tab-pane>
-            <el-tab-pane lazy name="GroupSetting" v-if="isGroupRoot">
+            <el-tab-pane lazy name="GroupSetting" v-if="isMainAdminRole">
               <span slot="label">
                 <i class="el-icon-s-tools"></i>
-                &nbsp;{{ $t('m.Group_Setting') }}
+                &nbsp;{{ $t("m.Group_Setting") }}
               </span>
             </el-tab-pane>
             <el-tab-pane lazy name="GroupRank" :disabled="groupMenuDisabled">
@@ -107,7 +107,7 @@
           </transition>
           <el-card v-show="$route.name === 'GroupDetails'">
             <el-row>
-              <el-col :md="isGroupMember || isSuperAdmin ? 12 : 24" :sm="24" :xs="24">
+              <el-col :md="isGroupMember || isGroupRoot ? 12 : 24" :sm="24" :xs="24">
                 <div class="description-body">
                   <Markdown
                     v-if="group.description"
@@ -119,11 +119,11 @@
                   </div>
                 </div>
               </el-col>
-              <el-col v-if="isGroupMember || isSuperAdmin" :md="1" :lg="1">
+              <el-col v-if="isGroupMember || isGroupRoot" :md="1" :lg="1">
                 <div class="separator hidden-sm-and-down"></div>
                 <p></p>
               </el-col>
-              <el-col v-if="isGroupMember || isSuperAdmin" :md="11" :sm="24" :xs="24">
+              <el-col v-if="isGroupMember || isGroupRoot" :md="11" :sm="24" :xs="24">
                 <Announcement></Announcement>
               </el-col>
             </el-row>
@@ -210,7 +210,7 @@
               </div>
             </div>
             <div style="text-align: center">
-              <span v-if="isGroupOwner || isSuperAdmin">
+              <span v-if="isSuperAdmin || isGroupRoot">
                 <el-button
                   type="danger"
                   size="small"
@@ -483,6 +483,8 @@ export default {
       "userAuth",
       "isSuperAdmin",
       "websiteConfig",
+      "isMainAdminRole",
+      "isGroupRoot",
     ]),
   },
   filters: {

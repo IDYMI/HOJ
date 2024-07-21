@@ -21,6 +21,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/admin/dashboard")
+@RequiresRoles(value = { "root", "problem_admin", "admin" }, logical = Logical.OR)
 public class DashboardController {
 
     @Autowired
@@ -28,7 +29,7 @@ public class DashboardController {
 
     @PostMapping("/get-sessions")
     @RequiresAuthentication
-    @RequiresRoles(value = { "root", "admin", "problem_admin" }, logical = Logical.OR)
+
     public CommonResult<Session> getRecentSession() {
 
         return dashboardService.getRecentSession();
@@ -36,7 +37,6 @@ public class DashboardController {
 
     @GetMapping("/get-dashboard-info")
     @RequiresAuthentication
-    @RequiresRoles(value = { "root", "admin", "problem_admin" }, logical = Logical.OR)
     public CommonResult<Map<Object, Object>> getDashboardInfo() {
 
         return dashboardService.getDashboardInfo();

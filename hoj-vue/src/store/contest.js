@@ -34,7 +34,7 @@ const getters = {
     return state.contest.type;
   },
   isContestAdmin: (state, getters, _, rootGetters) => {
-    return rootGetters.isAuthenticated && (state.contest.author === rootGetters.userInfo.username || rootGetters.isSuperAdmin || state.groupContestAuth == 5);
+    return rootGetters.isAuthenticated && (state.contest.author === rootGetters.userInfo.username || rootGetters.isMainAdminRole  || state.groupContestAuth == 5);
   },
   isContainsAfterContestJudge: (state, getters) => {
     return state.isContainsAfterContestJudge;

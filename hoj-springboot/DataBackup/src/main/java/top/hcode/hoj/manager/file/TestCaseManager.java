@@ -55,12 +55,10 @@ public class TestCaseManager {
             throws StatusFailException, StatusSystemErrorException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
-        boolean isAdmin = SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
-        if (!isRoot && !isProblemAdmin && !isAdmin
-                && !(gid != null && groupValidator.isGroupAdmin(userRolesVo.getUid(), gid))) {
+        if (!isRoot && !(gid != null && groupValidator.isGroupAdmin(userRolesVo.getUid(), gid))) {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
 
@@ -169,8 +167,8 @@ public class TestCaseManager {
             throws StatusFailException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         Problem problem = problemEntityService.getById(pid);
 
@@ -182,7 +180,7 @@ public class TestCaseManager {
                 throw new StatusForbiddenException("对不起，您无权限操作！");
             }
         } else {
-            if (!isRoot && !isProblemAdmin && !problem.getAuthor().equals(userRolesVo.getUsername())) {
+            if (!isRoot && !problem.getAuthor().equals(userRolesVo.getUsername())) {
                 throw new StatusForbiddenException("对不起，您无权限操作！");
             }
         }

@@ -9,7 +9,7 @@
           :md="18"
           :xs="24"
           v-if="
-            (isSuperAdmin || isGroupAdmin) &&
+            (isMainAdminRole || isGroupAdmin) &&
               !problemPage &&
               !editProblemPage &&
               !announcementPage
@@ -41,7 +41,7 @@
           :md="18"
           :xs="24"
           v-else-if="
-            (isSuperAdmin || isGroupAdmin) &&
+            (isMainAdminRole || isGroupAdmin) &&
               problemPage &&
               !editProblemPage &&
               !createProblemPage &&
@@ -77,7 +77,7 @@
           :md="18"
           :xs="24"
           v-else-if="
-            (isSuperAdmin || isGroupAdmin) &&
+            (isMainAdminRole || isGroupAdmin) &&
               (editProblemPage || createProblemPage)
           "
         >
@@ -96,7 +96,7 @@
             icon="el-icon-back"
           >{{ $t('m.Back_Admin_Contest_Problem_List') }}</el-button>`
         </el-col>
-        <el-col :md="18" :xs="24" v-else-if="(isSuperAdmin || isGroupAdmin) && announcementPage">
+        <el-col :md="18" :xs="24" v-else-if="(isMainAdminRole || isGroupAdmin) && announcementPage">
           <el-button
             type="primary"
             size="small"
@@ -462,7 +462,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["isAuthenticated", "isSuperAdmin", "isGroupAdmin"]),
+    ...mapGetters(["isAuthenticated", "isMainAdminRole", "isGroupAdmin"]),
   },
 };
 </script>

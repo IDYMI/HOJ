@@ -58,7 +58,7 @@
           <template v-slot="{ row }">
             <el-switch
               v-model="row.visible"
-              :disabled="!isSuperAdmin && userInfo.uid != row.uid"
+              :disabled="!isContestAdmin && userInfo.uid != row.uid"
               @change="changeContestVisible(row.id, row.visible, row.uid)"
             ></el-switch>
           </template>
@@ -73,7 +73,7 @@
         </vxe-table-column>
         <vxe-table-column min-width="150" :title="$t('m.Option')">
           <template v-slot="{ row }">
-            <template v-if="isSuperAdmin || userInfo.uid == row.uid">
+            <template v-if="isMainAdminRole || userInfo.uid == row.uid">
               <div style="margin-bottom:10px">
                 <el-tooltip effect="dark" :content="$t('m.Edit')" placement="top">
                   <el-button
@@ -124,7 +124,12 @@
                 </el-tooltip>
               </div>
             </template>
-            <el-tooltip effect="dark" :content="$t('m.Delete')" placement="top" v-if="isSuperAdmin">
+            <el-tooltip
+              effect="dark"
+              :content="$t('m.Delete')"
+              placement="top"
+              v-if="isSuperAdmin  || userInfo.uid == row.uid"
+            >
               <el-button
                 icon="el-icon-delete"
                 size="mini"
@@ -207,7 +212,12 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["isSuperAdmin", "userInfo"]),
+    ...mapGetters([
+      "isMainAdminRole",
+      "isSuperAdmin",
+      "userInfo",
+      "isContestAdmin",
+    ]),
   },
   methods: {
     // 切换页码回调

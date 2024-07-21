@@ -345,8 +345,8 @@
             <el-form-item :label="$t('m.User_Type')">
               <el-select v-model="selectUser.type" size="small">
                 <el-option label="超级管理员" :value="1000" :key="1000"></el-option>
-                <el-option label="题目管理员" :value="1008" :key="1008"></el-option>
                 <el-option label="普通管理员" :value="1001" :key="1001"></el-option>
+                <el-option label="题目管理员" :value="1008" :key="1008"></el-option>
                 <el-option label="用户(默认)" :value="1002" :key="1002"></el-option>
                 <el-option label="用户(禁止提交)" :value="1003" :key="1003"></el-option>
                 <el-option label="用户(禁止发讨论)" :value="1004" :key="1004"></el-option>

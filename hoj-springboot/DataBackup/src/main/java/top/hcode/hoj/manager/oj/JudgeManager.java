@@ -416,12 +416,6 @@ public class JudgeManager {
             }
         }
 
-        // 只允许用户查看ce错误,sf错误，se错误信息提示
-        if (judge.getStatus().intValue() != Constants.Judge.STATUS_COMPILE_ERROR.getStatus() &&
-                judge.getStatus().intValue() != Constants.Judge.STATUS_SYSTEM_ERROR.getStatus() &&
-                judge.getStatus().intValue() != Constants.Judge.STATUS_SUBMITTED_FAILED.getStatus()) {
-            judge.setErrorMessage("The error message does not support viewing.");
-        }
         submissionInfoVo.setSubmission(judge);
         submissionInfoVo.setCodeShare(problem.getCodeShare());
 

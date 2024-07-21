@@ -13,6 +13,7 @@ import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.common.exception.StatusForbiddenException;
@@ -163,31 +164,41 @@ public class TestCaseManager {
                 .map();
     }
 
-    public void downloadTestcase(Long pid, HttpServletResponse response)
+    public void downloadTestcase(Long pid, String name, String fileListDir, HttpServletResponse response)
             throws StatusFailException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
         boolean isRoot = SecurityUtils.getSubject().hasRole("root")
                 || SecurityUtils.getSubject().hasRole("admin");
 
-        Problem problem = problemEntityService.getById(pid);
+        if (pid != null) {
+            Problem problem = problemEntityService.getById(pid);
 
-        Long gid = problem.getGid();
+            Long gid = problem.getGid();
 
-        if (gid != null) {
-            if (!isRoot && !problem.getAuthor().equals(userRolesVo.getUsername())
-                    && !groupValidator.isGroupMember(userRolesVo.getUid(), gid)) {
-                throw new StatusForbiddenException("对不起，您无权限操作！");
+            if (gid != null) {
+                if (!isRoot && !problem.getAuthor().equals(userRolesVo.getUsername())
+                        && !groupValidator.isGroupMember(userRolesVo.getUid(), gid)) {
+                    throw new StatusForbiddenException("对不起，您无权限操作！");
+                }
+            } else {
+                if (!isRoot && !problem.getAuthor().equals(userRolesVo.getUsername())) {
+                    throw new StatusForbiddenException("对不起，您无权限操作！");
+                }
             }
         } else {
-            if (!isRoot && !problem.getAuthor().equals(userRolesVo.getUsername())) {
-                throw new StatusForbiddenException("对不起，您无权限操作！");
+            if (StringUtils.isEmpty(fileListDir)) {
+                throw new StatusFailException("对不起，请传入文件位置！");
             }
         }
 
-        String workDir = Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + pid;
+        String workDir = (pid != null
+                ? (Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + pid)
+                : fileListDir);
+
         File file = new File(workDir);
-        if (!file.exists()) { // 本地为空 尝试去数据库查找
+
+        if (pid != null && !file.exists()) { // 本地为空 尝试去数据库查找
             QueryWrapper<ProblemCase> problemCaseQueryWrapper = new QueryWrapper<>();
             problemCaseQueryWrapper.eq("pid", pid);
             List<ProblemCase> problemCaseList = problemCaseEntityService.list(problemCaseQueryWrapper);
@@ -219,7 +230,34 @@ public class TestCaseManager {
             }
         }
 
-        String fileName = "problem_" + pid + "_testcase_" + System.currentTimeMillis() + ".zip";
+        String fileNamePrefix = (pid != null ? "problem_" + pid + "_testcase_" : "testcase_");
+        String fileName = fileNamePrefix + System.currentTimeMillis() + ".zip";
+
+        Boolean flag = false;
+        // 判断对应的文件是否有对应名称的文件
+        if (!StringUtils.isEmpty(name) && file.isDirectory()) {
+            File[] files = file.listFiles();
+
+            if (files != null) {
+                for (File f : files) {
+                    if (f.isFile() && f.getName().equals(name)) {
+                        workDir += File.separator + name;
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+            if (!flag) {
+                throw new StatusFailException("对不起，没有找到对应名称的测试数据！");
+            } else {
+                String[] nameParts = name.split("\\.");
+
+                fileName = fileNamePrefix +
+                        nameParts[0] + nameParts[nameParts.length - 1] + "_"
+                        + System.currentTimeMillis() + ".zip";
+            }
+        }
+
         // 将对应文件夹的文件压缩成zip
         File_.zip(new File(workDir),
                 new File(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName));
@@ -269,8 +307,11 @@ public class TestCaseManager {
             }
             // 清空临时文件
             FileUtil.del(new File(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName));
-            log.info("[{}],[{}],pid:[{}],operatorUid:[{}],operatorUsername:[{}]",
-                    "Test_Case", "Download", pid, userRolesVo.getUid(), userRolesVo.getUsername());
+
+            log.info("[{}],[{}],{}:[{}],operatorUid:[{}],operatorUsername:[{}]",
+                    "Test_Case", "Download", pid != null ? "pid" : "fileListDir",
+                    pid != null ? pid : fileListDir,
+                    userRolesVo.getUid(), userRolesVo.getUsername());
         }
     }
 }

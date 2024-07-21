@@ -467,6 +467,7 @@
                   :action="uploadFileUrl+'?mode='+problem.judgeCaseMode"
                   name="file"
                   :show-file-list="true"
+                  :before-upload="beforeUpload"
                   :on-success="uploadSucceeded"
                   :on-error="uploadFailed"
                 >
@@ -475,31 +476,111 @@
                     type="primary"
                     icon="el-icon-upload"
                   >{{ $t('m.Choose_File') }}</el-button>
+                  <span style="margin: 0 10px;"></span>
+                  <el-switch
+                    v-if="problem.testCaseScore.length > 0"
+                    v-model="showAllTestCase"
+                    :active-text="$t('m.Show_All')"
+                    style="margin: 10px 0"
+                    @click.native.stop
+                  ></el-switch>
                 </el-upload>
               </el-form-item>
             </el-col>
+
+            <!-- 上传的测试数据 -->
             <el-col :span="24">
-              <vxe-table
+              <vxe-grid
                 ref="xTable"
                 stripe
                 auto-resize
-                :data="problem.testCaseScore"
-                :sort-config="{trigger: 'cell',
-                defaultSort: {field: 'groupNum', order: 'asc'},
-                orders: ['desc', 'asc', null],
-                sortMethod: customSortMethod}"
+                :data="showAllTestCase ? problem.testCaseScore : testCase"
+                :key="showAllTestCase"
+                :sort-config="{
+                  trigger: 'cell',
+                  defaultSort: { field: 'groupNum', order: 'asc' },
+                  orders: ['desc', 'asc', null],
+                  sortMethod: customSortMethod,
+                }"
                 align="center"
+                :loading="tableLoading"
+                :show-overflow="false"
+                :show-header="true"
+                :show-overflow-ellipsis="true"
+                :column-overflow-ellipsis="true"
+                :edit-config="{trigger: 'click'}"
+                :edit-rules="{required: true}"
+                :checkbox-config="{ highlight: true }"
               >
                 <vxe-table-column field="index" title="#" width="60"></vxe-table-column>
-                <vxe-table-column field="input" :title="$t('m.Sample_Input_File')" min-width="100"></vxe-table-column>
+
+                <!-- 输入文件 -->
+                <vxe-table-column field="input" :title="$t('m.Sample_Input_File')" min-width="100">
+                  <template v-slot="{ row }">
+                    <span>
+                      {{ row.input }}
+                      <a class="copy" @click="downloadTestCase(row.input)">
+                        <i class="el-icon-download"></i>
+                      </a>
+                    </span>
+                  </template>
+                </vxe-table-column>
                 <vxe-table-column
-                  field="output"
-                  :title="$t('m.Sample_Output_File')"
-                  min-width="100"
-                ></vxe-table-column>
+                  field="inputContent"
+                  :title="$t('m.Sample_Input')"
+                  min-width="200"
+                >
+                  <template v-slot="{ row }">
+                    <span>
+                      {{ row.inputContent }}
+                      <a
+                        v-if="row.inputContent"
+                        class="copy"
+                        v-clipboard:copy="getContent(row.input)"
+                        v-clipboard:success="onCopy"
+                        v-clipboard:error="onCopyError"
+                      >
+                        <i class="el-icon-document-copy"></i>
+                      </a>
+                    </span>
+                  </template>
+                </vxe-table-column>
+
+                <!-- 输出文件 -->
+                <vxe-table-column :title="$t('m.Sample_Output_File')" min-width="100">
+                  <template v-slot="{ row }">
+                    <span>
+                      {{ row.output }}
+                      <a class="copy" @click="downloadTestCase(row.output)">
+                        <i class="el-icon-download"></i>
+                      </a>
+                    </span>
+                  </template>
+                </vxe-table-column>
                 <vxe-table-column
-                  v-if="problem.judgeCaseMode == JUDGE_CASE_MODE.SUBTASK_LOWEST
-                    || problem.judgeCaseMode == JUDGE_CASE_MODE.SUBTASK_AVERAGE"
+                  field="outputContent"
+                  :title="$t('m.Sample_Output')"
+                  min-width="200"
+                >
+                  <template v-slot="{ row }">
+                    <span>
+                      {{ row.outputContent }}
+                      <a
+                        class="copy"
+                        v-if="row.outputContent"
+                        v-clipboard:copy="getContent(row.output)"
+                        v-clipboard:success="onCopy"
+                        v-clipboard:error="onCopyError"
+                      >
+                        <i class="el-icon-document-copy"></i>
+                      </a>
+                    </span>
+                  </template>
+                </vxe-table-column>
+
+                <vxe-table-column
+                  v-if="problem.judgeCaseMode == JUDGE_CASE_MODE.SUBTASK_LOWEST ||
+                        problem.judgeCaseMode == JUDGE_CASE_MODE.SUBTASK_AVERAGE"
                   field="groupNum"
                   :title="$t('m.Sample_Group_Num')"
                   sortable
@@ -530,7 +611,7 @@
                     ></el-input>
                   </template>
                 </vxe-table-column>
-              </vxe-table>
+              </vxe-grid>
             </el-col>
           </div>
 
@@ -718,7 +799,7 @@ export default {
         stackLimit: 128,
         difficulty: 0,
         auth: 1,
-        codeShare: true,
+        codeShare: false,
         examples: [], // 题面上的样例输入输出
         spjLanguage: "",
         spjCode: "",
@@ -729,12 +810,12 @@ export default {
         isUploadCase: true,
         type: 0,
         hint: "",
-        source: "",
+        source: "NYOJ",
         cid: null,
-        isRemoveEndBlank: false,
+        isRemoveEndBlank: true,
         openCaseResult: true,
         judgeMode: "default",
-        judgeCaseMode: "default",
+        judgeCaseMode: "ergodic_without_error",
         userExtraFile: "",
         judgeExtraFile: "",
         isFileIO: false,
@@ -777,6 +858,10 @@ export default {
       judgeExtraFile: null,
       judgeCaseModeRecord: "default",
       sampleIndex: 1,
+      caseContentDir: {},
+      tableLoading: true,
+      showAllTestCase: false,
+      testCase: [],
     };
   },
   mounted() {
@@ -821,8 +906,8 @@ export default {
         memoryLimit: 256,
         stackLimit: 128,
         difficulty: 0,
-        auth: 1,
-        codeShare: true,
+        auth: 3,
+        codeShare: false,
         examples: [],
         spjLanguage: "",
         spjCode: "",
@@ -833,12 +918,12 @@ export default {
         contestProblem: {},
         type: 0,
         hint: "",
-        source: "",
+        source: "NYOJ",
         cid: null,
-        isRemoveEndBlank: false,
+        isRemoveEndBlank: true,
         openCaseResult: true,
         judgeMode: "default",
-        judgeCaseMode: "default",
+        judgeCaseMode: "ergodic_without_error",
         userExtraFile: null,
         judgeExtraFile: null,
         isFileIO: false,
@@ -877,7 +962,7 @@ export default {
         this.mode = "change";
       }
       // 清除表单
-      // this.$refs.form.resetFields();
+      // this.$refs.problem.resetFields();
       this.problem = this.reProblem;
       this.problemTags = []; //指定问题的标签列表
       this.problemLanguages = []; //指定问题的编程语言列表
@@ -970,31 +1055,11 @@ export default {
             this.addJudgeExtraFile = true;
             this.judgeExtraFile = JSON.parse(this.problem.judgeExtraFile);
           }
-          api
-            .admin_getProblemCases(this.pid, this.problem.isUploadCase)
-            .then((res) => {
-              if (this.problem.isUploadCase) {
-                this.problem.testCaseScore = res.data.data;
-                this.problem.testCaseScore.forEach((item, index) => {
-                  item.index = index + 1;
-                });
-                if (this.$refs.xTable != undefined) {
-                  this.$refs.xTable.sort("groupNum", "asc");
-                }
-              } else {
-                this.problemSamples = res.data.data;
-                if (
-                  this.problemSamples != null &&
-                  this.problemSamples.length > 0
-                ) {
-                  this.problemSamples[0]["isOpen"] = true;
-                  this.problemSamples.forEach((item, index) => {
-                    item.index = index + 1;
-                  });
-                  this.sampleIndex = this.problemSamples.length + 1;
-                }
-              }
-            });
+
+          utils.readTestCase(this.pid).then((result) => {
+            this.caseContentDir = result;
+            this.getProblemCases();
+          });
         });
         if (funcName === "admin_getContestProblem") {
           api
@@ -1016,6 +1081,7 @@ export default {
           this.problemLanguages.push(item.name);
         }
         this.getProblemLastId();
+        this.tableLoading = false;
       }
     },
     getProblemLastId() {
@@ -1182,7 +1248,7 @@ export default {
 
     // 添加题目样例
     addExample() {
-      if (this.problem.examples && this.problem.examples.length === 0) {
+      if (this.problem.examples.length === 0) {
         this.problem.examples.push({ input: "", output: "", isOpen: true });
       }
     },
@@ -1251,11 +1317,20 @@ export default {
         fileList[i].pid = this.problem.id;
       }
       this.problem.testCaseScore = fileList;
-      this.problem.testCaseScore.forEach((item, index) => {
-        item.index = index + 1;
-      });
       this.testCaseUploaded = true;
-      this.problem.uploadTestcaseDir = response.data.fileListDir;
+      let fileListDir = response.data.fileListDir;
+      this.problem.uploadTestcaseDir = fileListDir;
+      utils.readTestCase(this.pid, null, fileListDir).then((result) => {
+        this.caseContentDir = result;
+        this.problem.testCaseScore.forEach((item, index) => {
+          item.index = index + 1;
+          item.inputContent =
+            this.getShorterContent(this.caseContentDir[item.input]) || null;
+          item.outputContent =
+            this.getShorterContent(this.caseContentDir[item.output]) || null;
+        });
+        this.testCase = this.getTopTestCase(this.problem.testCaseScore);
+      });
     },
     uploadFailed() {
       myMessage.error(this.$i18n.t("m.Upload_Testcase_Failed"));
@@ -1728,6 +1803,89 @@ export default {
         })
         .catch(() => {});
     },
+    getTopTestCase(data) {
+      if (data.length > 5) {
+        return data.slice(0, 5); // 默认展示前 5 行;
+      } else {
+        this.showAllTestCase = true;
+        return data;
+      }
+    },
+    getProblemCases() {
+      api
+        .admin_getProblemCases(this.pid, this.problem.isUploadCase)
+        .then((res) => {
+          if (this.problem.isUploadCase) {
+            this.problem.testCaseScore = res.data.data;
+            this.problem.testCaseScore.forEach((item, index) => {
+              item.index = index + 1;
+              item.inputContent =
+                this.getShorterContent(this.caseContentDir[item.input]) || null;
+              item.outputContent =
+                this.getShorterContent(this.caseContentDir[item.output]) ||
+                null;
+            });
+            this.testCase = this.getTopTestCase(this.problem.testCaseScore);
+            if (this.$refs.xTable != undefined) {
+              this.$refs.xTable.sort("groupNum", "asc");
+            }
+            this.tableLoading = false;
+          } else {
+            this.problemSamples = res.data.data;
+            if (this.problemSamples != null && this.problemSamples.length > 0) {
+              this.problemSamples[0]["isOpen"] = true;
+              this.problemSamples.forEach((item, index) => {
+                item.index = index + 1;
+              });
+              this.sampleIndex = this.problemSamples.length + 1;
+            }
+            this.tableLoading = false;
+          }
+        });
+    },
+    downloadTestCase(name) {
+      if (name !== null && name !== "" && name !== undefined) {
+        let problemID = this.pid;
+        let fileListDir = this.problem.uploadTestcaseDir;
+        let url = "/api/file/download-testcase";
+        if (problemID !== null || fileListDir !== "") {
+          url += `?${problemID !== null ? `pid=${problemID}` : ""}${
+            problemID !== null && fileListDir !== "" ? "&" : ""
+          }${fileListDir !== "" ? `fileListDir=${fileListDir}` : ""}`;
+        }
+        url += `&name=${name}`;
+        utils.downloadFile(url).then(() => {
+          this.$alert(this.$i18n.t("m.Download_Testcase_Success"), "Tips");
+        });
+      }
+    },
+    getContent(name) {
+      return this.caseContentDir[name] || null;
+    },
+    getShorterContent(content) {
+      if (content !== null && content !== "" && content !== undefined) {
+        // 取前十行
+        let content_10r = content.split("\n").slice(0, 10).join("\n");
+        // 保留前1000个字符串
+        let content_1000 = content_10r.substring(0, 500);
+        return content_1000;
+      }
+    },
+    onCopy(event) {
+      myMessage.success(this.$i18n.t("m.Copied_successfully"));
+    },
+    onCopyError(e) {
+      myMessage.success(this.$i18n.t("m.Copied_failed"));
+    },
+    beforeUpload(file) {
+      const fileName = file.name;
+      const fileType = fileName.substring(fileName.lastIndexOf("."));
+      if (fileType === ".zip") {
+      } else {
+        myMessage.warning(this.$i18n.t("m.Upload_NotSupport"));
+        return false;
+      }
+    },
   },
   computed: {
     ...mapGetters(["userInfo"]),
@@ -1807,5 +1965,8 @@ export default {
   width: auto;
   max-width: 80%;
   overflow-x: scroll;
+}
+.copy {
+  padding-left: 8px;
 }
 </style>

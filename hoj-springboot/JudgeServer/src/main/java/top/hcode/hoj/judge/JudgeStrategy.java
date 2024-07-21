@@ -384,6 +384,8 @@ public class JudgeStrategy {
             Integer seq = jsonObject.getInt("seq", 0);
             String inputFileName = jsonObject.getStr("inputFileName");
             String outputFileName = jsonObject.getStr("outputFileName");
+            String inputContent = jsonObject.getStr("inputContent");
+            String outputContent = jsonObject.getStr("outputContent");
             String msg = jsonObject.getStr("errMsg");
             JudgeCase judgeCase = new JudgeCase();
             judgeCase.setTime(time)
@@ -391,6 +393,8 @@ public class JudgeStrategy {
                     .setStatus(status)
                     .setInputData(inputFileName)
                     .setOutputData(outputFileName)
+                    .setInputContent(inputContent)
+                    .setOutputContent(outputContent)
                     .setPid(problem.getId())
                     .setUid(judge.getUid())
                     .setCaseId(caseId)
@@ -454,6 +458,7 @@ public class JudgeStrategy {
             result.put("errMsg", errorTestCaseList.get(0).getStr("errMsg", ""));
         } else {
             result.put("code", Constants.Judge.STATUS_PARTIAL_ACCEPTED.getStatus());
+            result.put("errMsg", errorTestCaseList.get(0).getStr("errMsg", ""));
         }
         return result;
     }

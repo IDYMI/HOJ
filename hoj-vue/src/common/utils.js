@@ -5,6 +5,7 @@ import myMessage from '@/common/message';
 import api from '@/common/api';
 import store from '@/store';
 import i18n from '@/i18n';
+import JSZip from 'jszip';
 
 // function submissionMemoryFormat (memory) {
 //   if (memory === undefined || memory ===null || memory === '') return '--'
@@ -179,6 +180,35 @@ function downloadFileByText(fileName, fileContent) {
   });
 }
 
+async function readTestCase(problemID, name = null, fileListDir = null) {
+  const query = [];
+  if (problemID) query.push(`pid=${problemID}`);
+  if (fileListDir) query.push(`fileListDir=${fileListDir}`);
+  const url = `/api/file/download-testcase${query.length ? `?${query.join('&')}` : ''}`;
+
+  let fileContents = {};
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Failed to fetch test case. Status: ${response.status}`);
+
+    const blob = await response.blob();
+    const zip = await JSZip.loadAsync(blob);
+
+    const filesToRead = name ? [zip.file(name)] : Object.values(zip.files).filter((file) => !file.dir && file.name.includes('.'));
+    const filePromises = filesToRead.map(async (file) => {
+      const content = await file.async('text');
+      const shortName = file.name.substring(file.name.lastIndexOf('/') + 1);
+      fileContents[shortName] = content;
+    });
+
+    await Promise.all(filePromises);
+  } catch (error) {
+    fileContents = {};
+    console.error('Error reading test case:', error.message);
+  }
+  return fileContents;
+}
+
 function getLanguages(all = true) {
   return new Promise((resolve, reject) => {
     let languages = storage.get(STORAGE_KEY.languages);
@@ -317,4 +347,5 @@ export default {
   supportFocusMode: supportFocusMode,
   getSwitchFoceusModeRouteName: getSwitchFoceusModeRouteName,
   getValidateField: getValidateField,
+  readTestCase: readTestCase,
 };

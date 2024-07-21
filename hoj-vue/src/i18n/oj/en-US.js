@@ -900,4 +900,9 @@ export const m = {
   ClothesSize_Check_length: 'The length is between 1 and 2 the specific size',
   StudentNumber_Check_OnlyDigits: 'The student Number must consist only of digits.',
   StudentNumber_Check_length: 'The length is between 6 and 15 digit characters',
+
+  // TestCase
+  TestCase_Copied_failed: 'Copied failed, Has Too Much Memory, Please Download it !',
+  Upload_NotSupport: 'Not Support Such File',
+  TestCase_Copied_successfully: 'TestCase copied successfully (Only Views Parts!)',
 };

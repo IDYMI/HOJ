@@ -901,4 +901,9 @@ export const m = {
   ClothesSize_Check_Required: '衣服尺寸不能为空',
   StudentNumber_Check_OnlyDigits: '学号必须全是数字',
   StudentNumber_Check_length: '长度在 6 到 15 的数字',
+
+  // TestCase
+  TestCase_Copied_failed: '复制失败，内容过多，请前往下载！',
+  Upload_NotSupport: '不支持对应的格式',
+  TestCase_Copied_successfully: '复制成功（仅支持部分查看！）',
 };

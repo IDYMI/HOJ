@@ -59,10 +59,16 @@ public class JudgeCase implements Serializable {
     @ApiModelProperty(value = "样例输入，输入文件名")
     private String inputData;
 
+    @ApiModelProperty(value = "样例输入")
+    private String inputContent;
+
     @ApiModelProperty(value = "样例输出，输出文件名")
     private String outputData;
 
-    @ApiModelProperty(value = "用户样例输出，暂不使用，当前用于记录对单个测试点的输出或信息提示")
+    @ApiModelProperty(value = "样例输出")
+    private String outputContent;
+
+    @ApiModelProperty(value = "当前用于记录对单个测试点的输出或信息提示")
     private String userOutput;
 
     @ApiModelProperty(value = "subtask分组的组号")

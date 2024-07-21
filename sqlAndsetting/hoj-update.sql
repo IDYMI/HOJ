@@ -1417,10 +1417,10 @@ IF NOT EXISTS (
 	  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 	  `cid` bigint(20) unsigned DEFAULT NULL COMMENT '比赛id',
 	  `html` varchar(255) DEFAULT NULL COMMENT '查重预览页',
-	  `username1` varchar(100) DEFAULT NULL COMMENT '用户名',
+	  `username1` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '用户名',
 	  `uid1` varchar(32) DEFAULT NULL COMMENT '用户id',
 	  `percent1` bigint(20) DEFAULT NULL COMMENT '重复片段占代码总长度百分比',
-	  `username2` varchar(100) DEFAULT NULL COMMENT '用户名',
+	  `username2` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '用户名',
 	  `uid2` varchar(32) DEFAULT NULL COMMENT '用户id',
 	  `percent2` bigint(20) DEFAULT NULL COMMENT '重复片段占代码总长度百分比',
 	  `length` bigint DEFAULT NULL COMMENT '重复片段长度',
@@ -1439,6 +1439,7 @@ DELIMITER ;
 CALL Add_contest_moss ;
 
 DROP PROCEDURE Add_contest_moss;
+
 
 /*
 * 增加查重的结果表
@@ -1620,3 +1621,35 @@ CALL add_UserAcproblem_uid_pid_gmtCreateIndex ;
 
 DROP PROCEDURE add_UserAcproblem_uid_pid_gmtCreateIndex;
 
+
+/*
+* 增加 judge_case 表的 input_content
+
+*/
+DROP PROCEDURE
+IF EXISTS add_JudgeCase_Content;
+DELIMITER $$
+
+CREATE PROCEDURE add_JudgeCase_Content ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'judge_case'
+	AND column_name = 'input_content'
+) THEN
+
+	ALTER TABLE `hoj`.`judge_case`  ADD COLUMN `input_content` longtext COMMENT '样例输入';
+	ALTER TABLE `hoj`.`judge_case`  ADD COLUMN `output_content` longtext COMMENT '样例输出';
+
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_JudgeCase_Content;
+
+DROP PROCEDURE add_JudgeCase_Content;

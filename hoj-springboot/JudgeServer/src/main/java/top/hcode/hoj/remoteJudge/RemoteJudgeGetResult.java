@@ -121,9 +121,14 @@ public class RemoteJudgeGetResult {
                     if (status.intValue() == Constants.Judge.STATUS_COMPILE_ERROR.getStatus()) {
                         finalJudgeRes.setErrorMessage(errorInfo);
                     } else if (status.intValue() == Constants.Judge.STATUS_SYSTEM_ERROR.getStatus()) {
-                        finalJudgeRes.setErrorMessage("There is something wrong with the " + remoteJudgeDTO.getOj()
-                                + ", please try again later");
+                        finalJudgeRes.setErrorMessage("There is something wrong with the " +
+                                remoteJudgeDTO.getOj() + ", please try again later");
+                    } else {
+                        finalJudgeRes.setErrorMessage(errorInfo);
                     }
+
+                    // 设置排序后的submit_id
+                    finalJudgeRes = judgeContext.setSortedId(finalJudgeRes);
 
                     // 如果是比赛题目，需要特别适配OI比赛的得分 除AC给100 其它结果给0分
                     if (remoteJudgeDTO.getCid() != 0) {

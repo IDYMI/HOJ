@@ -555,4 +555,21 @@ export const m = {
   Cloc_Query: 'Cloc Query',
   Query_User_Tips: 'Used to query the number of codes writed by users within a specific time period.',
   To_Query: 'Query',
+
+  // honor
+  Honor_Admin: 'Honor Admin',
+  Honor_List: 'Honor List',
+  Create_Honor: 'Create Honor',
+  Edit_Honor: 'Edit Honor',
+  Honor_Description: 'Honor Description',
+  Honor_Award: 'Award',
+  Honor_Gold: 'Gold',
+  Honor_Silver: 'Silver',
+  Honor_Bronze: 'Bronze',
+  Honor_Date: 'Honor Date',
+  Honor_TeamMember: 'Honor TeamMember',
+  All_Honor: 'All Honor',
+  Delete_Honor_Tips: 'This operation will delete the honor and related announcements and other data. Do you want to continue?',
+  Create_Honor_Tips: '* Add a description to create an announcement',
+  Level: 'Level',
 };

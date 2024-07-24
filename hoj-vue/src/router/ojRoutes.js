@@ -31,6 +31,7 @@ import ContestRejudgeAdmin from '@/views/oj/contest/children/ContestRejudgeAdmin
 import ContestSession from '@/views/oj/contest/children/ContestSession.vue';
 import ContestResetIP from '@/views/oj/contest/children/ContestResetIP.vue';
 import DiscussionList from '@/views/oj/discussion/discussionList.vue';
+import Honor from '@/views/oj/honor/Honor.vue';
 import Discussion from '@/views/oj/discussion/discussion.vue';
 import ExaminationRoom from '@/components/oj/common/ExaminationRoom.vue';
 import SearchExamination from '@/components/oj/common/SearchExamination.vue';
@@ -512,6 +513,12 @@ const ojRoutes = [
     path: '/developer',
     meta: { title: 'Developer' },
     component: Developer,
+  },
+  {
+    path: '/honor',
+    name: 'AllHonor',
+    meta: { title: 'Honor' },
+    component: Honor,
   },
   {
     name: 'Message',

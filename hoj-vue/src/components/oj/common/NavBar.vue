@@ -50,12 +50,14 @@
               <i class="el-icon-s-comment"></i>
               {{ $t("m.NavBar_Discussion") }}
             </el-menu-item>
+            <el-menu-item index="/honor">
+              <i class="el-icon-medal"></i>
+              {{ $t("m.NavBar_Honor") }}
+            </el-menu-item>
             <el-submenu index="rank">
               <template slot="title">
-                <span @click="goRank()">
-                  <i class="el-icon-s-data"></i>
-                  {{ $t("m.NavBar_Rank") }}
-                </span>
+                <i class="el-icon-s-data"></i>
+                <span @click="goRank()">{{ $t("m.NavBar_Rank") }}</span>
               </template>
               <el-menu-item index="/acm-rank">
                 {{
@@ -481,6 +483,21 @@
               <mu-list-item-title>
                 {{
                 $t("m.Announcement")
+                }}
+              </mu-list-item-title>
+            </mu-list-item>
+            <mu-list-item
+              button
+              to="/honor"
+              @click="opendrawer = !opendrawer"
+              active-class="mobile-menu-active"
+            >
+              <mu-list-item-action>
+                <mu-icon value=":el-icon-medal" size="24"></mu-icon>
+              </mu-list-item-action>
+              <mu-list-item-title>
+                {{
+                $t("m.NavBar_Honor")
                 }}
               </mu-list-item-title>
             </mu-list-item>

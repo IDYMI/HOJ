@@ -278,6 +278,21 @@ export const TRAINING_TYPE = {
   },
 };
 
+export const HONOR_TYPE = {
+  Gold: {
+    color: '#FFD700',
+    name: 'Honor_Gold',
+  },
+  Silver: {
+    color: '#C0C0C0',
+    name: 'Honor_Silver',
+  },
+  Bronze: {
+    color: '#CD7F32',
+    name: 'Honor_Bronze',
+  },
+};
+
 export const GROUP_TYPE = {
   PUBLIC: 1,
   PROTECTED: 2,

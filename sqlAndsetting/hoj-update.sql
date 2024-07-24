@@ -2137,3 +2137,49 @@ CALL add_user_cloc ;
 
 DROP PROCEDURE add_user_cloc;
 
+/*
+* 添加 Honor 统计获奖
+
+*/
+DROP PROCEDURE
+IF EXISTS add_honor;
+DELIMITER $$
+
+CREATE PROCEDURE add_honor ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'honor'
+) THEN
+	CREATE TABLE `honor` (
+	  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+	  `title` varchar(255) NOT NULL COMMENT '荣誉名称',
+	  `description` longtext COMMENT '荣誉简介',
+	  `author` varchar(255) NOT NULL COMMENT '荣誉创建者用户名',
+	  `type` varchar(255) NOT NULL COMMENT '荣誉权限类型：Gold、Silver、Bronze',
+	  `level` varchar(255) DEFAULT NULL COMMENT '荣誉的等级（全球赛，国赛，省赛，校赛）',
+	  `date` datetime NULL DEFAULT NULL comment '荣誉的时间',
+	  `team_member` varchar(255) DEFAULT NULL COMMENT '荣誉的队员',
+	  `link` varchar(255) DEFAULT NULL COMMENT '跳转链接',
+	  `status` tinyint(1) DEFAULT '1' COMMENT '是否可用',
+	  `is_group` tinyint(1) DEFAULT '0',
+	  `gid` bigint(20) unsigned DEFAULT NULL,
+	  `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	  `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	  PRIMARY KEY (`id`),
+	  KEY `gid` (`gid`),
+	  CONSTRAINT `honor_ibfk_1` FOREIGN KEY (`gid`) REFERENCES `group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_honor ;
+
+DROP PROCEDURE add_honor;
+

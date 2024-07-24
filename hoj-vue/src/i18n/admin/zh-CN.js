@@ -554,4 +554,21 @@ export const m = {
   Cloc_Query: '题量查询',
   Query_User_Tips: '用于查询特定时间段内用户的做题量',
   To_Query: '查询',
+
+  // honor
+  Honor_Admin: '荣誉管理',
+  Honor_List: '荣誉列表',
+  Create_Honor: '创建荣誉',
+  Edit_Honor: '编辑荣誉',
+  Honor_Description: '荣誉描述',
+  Honor_Award: '奖项',
+  Honor_Gold: '金牌',
+  Honor_Silver: '银牌',
+  Honor_Bronze: '铜牌',
+  Honor_Date: '获奖日期',
+  Honor_TeamMember: '获奖队员',
+  All_Honor: '全部荣誉',
+  Delete_Honor_Tips: '此操作将删除该荣誉,和相关公告等数据, 是否继续?',
+  Create_Honor_Tips: '* 添加描述则创建公告',
+  Level: '等级',
 };

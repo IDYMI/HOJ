@@ -26,6 +26,8 @@ const ExaminationRoomList = () => import('@/views/admin/examination/ExaminationR
 const ExaminationSeat = () => import('@/views/admin/examination/ExaminationSeat');
 const ExaminationList = () => import('@/views/admin/examination/ExaminationList');
 const Cloc = () => import('@/views/admin/cloc/Cloc');
+const HonorList = () => import('@/views/admin/honor/HonorList');
+const Honor = () => import('@/views/admin/honor/Honor');
 
 const adminRoutes = [
   {
@@ -242,6 +244,24 @@ const adminRoutes = [
         name: 'admin-cloc',
         component: Cloc,
         meta: { requireMainRoleAdmin: true, title: 'Cloc Admin' },
+      },
+      {
+        path: 'honor',
+        name: 'admin-honor-list',
+        component: HonorList,
+        meta: { requireMainRoleAdmin: true, title: 'Honor List' },
+      },
+      {
+        path: 'honor/create',
+        name: 'admin-create-honor',
+        component: Honor,
+        meta: { requireMainRoleAdmin: true, title: 'Create Honor' },
+      },
+      {
+        path: 'honor/:honorId/edit',
+        name: 'admin-edit-honor',
+        component: Honor,
+        meta: { requireMainRoleAdmin: true, title: 'Edit Honor' },
       },
     ],
   },

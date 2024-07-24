@@ -45,6 +45,7 @@ export const m = {
   NavBar_Contest_Own_Submission: 'My Submission',
   NavBar_Contest_Rank: 'Contest Rank',
   NavBar_Group_Home: 'Group Home',
+  NavBar_Honor: 'Honor',
 
   //  /components/oj/common/Login.vue 登录弹窗
   Login_Username: 'Username',

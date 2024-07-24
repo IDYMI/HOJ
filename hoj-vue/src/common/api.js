@@ -1452,6 +1452,24 @@ const ojApi = {
     });
   },
 
+  // 获取荣誉列表
+  getHonorList(currentPage, limit, query) {
+    let params = {
+      currentPage,
+      limit,
+    };
+    if (query !== undefined) {
+      Object.keys(query).forEach((element) => {
+        if (query[element]) {
+          params[element] = query[element];
+        }
+      });
+    }
+    return ajax('/api/get-honor-list', 'get', {
+      params: params,
+    });
+  },
+
   // 站内消息
 
   getUnreadMsgCount() {
@@ -2231,6 +2249,35 @@ const adminApi = {
   },
   getUserCodeRecord(data) {
     return ajax('/api/get-user-code-record', 'post', { data });
+  },
+  admin_createHonor(data) {
+    return ajax('/api/admin/honor', 'post', { data });
+  },
+  admin_getHonor(hid) {
+    return ajax('/api/admin/honor', 'get', { params: { hid } });
+  },
+  admin_editHonor(data) {
+    return ajax('/api/admin/honor', 'put', { data });
+  },
+  admin_deleteHonor(hid) {
+    return ajax('/api/admin/honor', 'delete', { params: { hid } });
+  },
+  admin_getHonorList(currentPage, limit, keyword, type, year) {
+    let params = {
+      currentPage,
+      limit,
+      keyword: keyword || null,
+      type: type === 'All' ? null : type,
+      year: year === 'All' ? null : year,
+    };
+    return ajax('/api/admin/honor/get-honor-list', 'get', {
+      params: params,
+    });
+  },
+  admin_changeHonorStatus(hid, status, author) {
+    return ajax('/api/admin/honor/change-honor-status', 'put', {
+      params: { hid, status, author },
+    });
   },
 };
 

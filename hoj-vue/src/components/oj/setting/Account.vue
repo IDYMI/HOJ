@@ -14,40 +14,24 @@
               <el-input v-model="formUsername.newUsername" />
             </el-form-item>
           </el-form>
-          <el-popover
-            placement="top"
-            width="350"
-            v-model="visible.usernameSlideBlock"
-            trigger="click"
-          >
-            <el-button
-              type="primary"
-              slot="reference"
-              :loading="loading.btnUsername"
-              :disabled="disabled.btnUsername"
-            >{{ $t('m.Update_Username') }}</el-button>
-            <slide-verify
-              :l="42"
-              :r="10"
-              :w="325"
-              :h="100"
-              :accuracy="3"
-              @success="changeUsername"
-              @again="onAgain('username')"
-              :slider-text="$t('m.Slide_Verify')"
-              ref="usernameSlideBlock"
-              v-show="!verify.usernameSuccess"
-            ></slide-verify>
-            <el-alert
-              :title="$t('m.Slide_Verify_Success')"
-              type="success"
-              :description="verify.usernameMsg"
-              v-show="verify.usernameSuccess"
-              :center="true"
-              :closable="false"
-              show-icon
-            ></el-alert>
-          </el-popover>
+
+          <el-button
+            type="primary"
+            slot="reference"
+            :loading="loading.btnUsername"
+            :disabled="disabled.btnUsername"
+            @click="verify.usernameSuccess = false"
+          >{{ $t('m.Update_Username') }}</el-button>
+          <Vcode :show="verify.usernameSuccess === false" @success="changeUsername" />
+          <el-alert
+            :title="$t('m.Slide_Verify_Success')"
+            type="success"
+            v-show="verify.usernameSuccess"
+            :center="true"
+            :closable="false"
+            show-icon
+          ></el-alert>
+
           <p class="section-title">{{ $t('m.Change_Password') }}</p>
           <el-form
             class="setting-content"
@@ -65,40 +49,22 @@
               <el-input v-model="formPassword.againPassword" type="password" show-password />
             </el-form-item>
           </el-form>
-          <el-popover
-            placement="top"
-            width="350"
-            v-model="visible.passwordSlideBlock"
-            trigger="click"
-          >
-            <el-button
-              type="primary"
-              slot="reference"
-              :loading="loading.btnPassword"
-              :disabled="disabled.btnPassword"
-            >{{ $t('m.Update_Password') }}</el-button>
-            <slide-verify
-              :l="42"
-              :r="10"
-              :w="325"
-              :h="100"
-              :accuracy="3"
-              @success="changePassword"
-              @again="onAgain('password')"
-              :slider-text="$t('m.Slide_Verify')"
-              ref="passwordSlideBlock"
-              v-show="!verify.passwordSuccess"
-            ></slide-verify>
-            <el-alert
-              :title="$t('m.Slide_Verify_Success')"
-              type="success"
-              :description="verify.passwordMsg"
-              v-show="verify.passwordSuccess"
-              :center="true"
-              :closable="false"
-              show-icon
-            ></el-alert>
-          </el-popover>
+          <el-button
+            type="primary"
+            slot="reference"
+            :loading="loading.btnPassword"
+            :disabled="disabled.btnPassword"
+            @click="verify.passwordSuccess = false"
+          >{{ $t('m.Update_Password') }}</el-button>
+          <Vcode :show="verify.passwordSuccess === false" @success="changePassword" />
+          <el-alert
+            :title="$t('m.Slide_Verify_Success')"
+            type="success"
+            v-show="verify.passwordSuccess"
+            :center="true"
+            :closable="false"
+            show-icon
+          ></el-alert>
         </div>
         <el-alert
           v-show="visible.passwordAlert.show"
@@ -139,35 +105,24 @@
               <el-input v-model="formEmail.code" />
             </el-form-item>
           </el-form>
-          <el-popover placement="top" width="350" v-model="visible.emailSlideBlock" trigger="click">
-            <el-button
-              type="primary"
-              slot="reference"
-              :loading="loading.btnEmailLoading"
-              :disabled="disabled.btnEmail"
-            >{{ $t('m.Update_Email') }}</el-button>
-            <slide-verify
-              :l="42"
-              :r="10"
-              :w="325"
-              :h="100"
-              :accuracy="3"
-              @success="changeEmail"
-              @again="onAgain('email')"
-              :slider-text="$t('m.Slide_Verify')"
-              ref="emailSlideBlock"
-              v-show="!verify.emailSuccess"
-            ></slide-verify>
-            <el-alert
-              :title="$t('m.Slide_Verify_Success')"
-              type="success"
-              :description="verify.emailMsg"
-              v-show="verify.emailSuccess"
-              :center="true"
-              :closable="false"
-              show-icon
-            ></el-alert>
-          </el-popover>
+
+          <el-button
+            type="primary"
+            slot="reference"
+            :loading="loading.btnEmailLoading"
+            :disabled="disabled.btnEmail"
+            @click="verify.emailSuccess = false"
+          >{{ $t('m.Update_Email') }}</el-button>
+          <Vcode :show="verify.emailSuccess === false" @success="changeEmail" />
+          <el-alert
+            :title="$t('m.Slide_Verify_Success')"
+            type="success"
+            :description="verify.emailMsg"
+            v-show="verify.emailSuccess"
+            :center="true"
+            :closable="false"
+            show-icon
+          ></el-alert>
         </div>
         <el-alert
           v-show="visible.emailAlert.show"
@@ -188,7 +143,12 @@
 import api from "@/common/api";
 import myMessage from "@/common/message";
 import "element-ui/lib/theme-chalk/display.css";
+
+import Vcode from "vue-puzzle-vcode";
 export default {
+  components: {
+    Vcode,
+  },
   data() {
     const oldPasswordCheck = [
       {
@@ -263,11 +223,9 @@ export default {
         btnEmail: false,
       },
       verify: {
-        usernameSuccess: false,
-        usernameMsg: "",
-        passwordSuccess: false,
-        passwordMsg: "",
-        emailSuccess: false,
+        usernameSuccess: null,
+        passwordSuccess: null,
+        emailSuccess: null,
         emailMsg: "",
       },
       visible: {
@@ -289,9 +247,6 @@ export default {
           title: "",
           description: "",
         },
-        usernameSlideBlock: false,
-        passwordSlideBlock: false,
-        emailSlideBlock: false,
       },
       formPassword: {
         oldPassword: "",
@@ -384,16 +339,8 @@ export default {
     this.formEmail.oldEmail = this.$store.getters.userInfo.email || "";
   },
   methods: {
-    changePassword(times) {
+    changePassword() {
       this.verify.passwordSuccess = true;
-      let time = (times / 1000).toFixed(1);
-      this.verify.passwordMsg = "Total time " + time + "s";
-      setTimeout(() => {
-        this.visible.passwordSlideBlock = false;
-        this.verify.passwordSuccess = false;
-        // 无论后续成不成功，验证码滑动都要刷新
-        this.$refs.passwordSlideBlock.reset();
-      }, 1000);
 
       this.$refs["formPassword"].validate((valid) => {
         if (valid) {
@@ -403,6 +350,10 @@ export default {
           api.changePassword(data).then(
             (res) => {
               this.loading.btnPassword = false;
+              setTimeout(() => {
+                this.verify.passwordSuccess = null;
+              }, 1000);
+
               if (res.data.data.code == 200) {
                 myMessage.success(this.$i18n.t("m.Update_Successfully"));
                 this.visible.passwordAlert = {
@@ -414,7 +365,7 @@ export default {
                 setTimeout(() => {
                   this.visible.passwordAlert = false;
                   this.$router.push({ name: "Logout" });
-                }, 5000);
+                }, 1000);
               } else {
                 myMessage.error(res.data.data.msg);
                 this.visible.passwordAlert = {
@@ -431,6 +382,9 @@ export default {
             },
             (err) => {
               this.loading.btnPassword = false;
+              setTimeout(() => {
+                this.verify.passwordSuccess = null;
+              }, 1000);
             }
           );
         }
@@ -466,16 +420,9 @@ export default {
         }
       );
     },
-    changeEmail(times) {
+    changeEmail() {
       this.verify.emailSuccess = true;
-      let time = (times / 1000).toFixed(1);
-      this.verify.emailMsg = "Total time " + time + "s";
-      setTimeout(() => {
-        this.visible.emailSlideBlock = false;
-        this.verify.emailSuccess = false;
-        // 无论后续成不成功，验证码滑动都要刷新
-        this.$refs.emailSlideBlock.reset();
-      }, 1000);
+
       this.$refs["formEmail"].validate((valid) => {
         if (valid) {
           this.loading.btnEmail = true;
@@ -483,6 +430,9 @@ export default {
           api.changeEmail(data).then(
             (res) => {
               this.loading.btnEmail = false;
+              setTimeout(() => {
+                this.verify.emailSuccess = null;
+              }, 1000);
               if (res.data.data.code == 200) {
                 myMessage.success(this.$i18n.t("m.Update_Successfully"));
                 this.visible.emailAlert = {
@@ -511,31 +461,16 @@ export default {
             },
             (err) => {
               this.loading.btnEmail = false;
+              setTimeout(() => {
+                this.verify.emailSuccess = null;
+              }, 1000);
             }
           );
         }
       });
     },
-    onAgain(type) {
-      if ((type = "password")) {
-        this.$refs.passwordSlideBlock.reset();
-      } else if ((type = "email")) {
-        this.$refs.emailSlideBlock.reset();
-      } else {
-        this.$refs.usernameSlideBlock.reset();
-      }
-      myMessage.warning(this.$i18n.t("m.Guess_robot"));
-    },
-    changeUsername(times) {
+    changeUsername() {
       this.verify.usernameSuccess = true;
-      let time = (times / 1000).toFixed(1);
-      this.verify.usernameMsg = "Total time " + time + "s";
-      setTimeout(() => {
-        this.visible.usernameSlideBlock = false;
-        this.verify.usernameSuccess = false;
-        // 无论后续成不成功，验证码滑动都要刷新
-        this.$refs.usernameSlideBlock.reset();
-      }, 1000);
 
       this.$refs["formUsername"].validate((valid) => {
         if (valid) {
@@ -544,6 +479,9 @@ export default {
           api.changeUsername(data).then(
             (res) => {
               this.loading.btnUsername = false;
+              setTimeout(() => {
+                this.verify.usernameSuccess = null;
+              }, 1000);
               if (res.data.data.code == 200) {
                 myMessage.success(this.$i18n.t("m.Update_Successfully"));
                 this.visible.usernameAlert = {
@@ -555,7 +493,7 @@ export default {
                 setTimeout(() => {
                   this.visible.usernameAlert = false;
                   this.$router.push({ name: "Logout" });
-                }, 5000);
+                }, 1000);
               } else {
                 myMessage.error(res.data.data.msg);
                 this.visible.usernameAlert = {
@@ -568,6 +506,9 @@ export default {
             },
             (err) => {
               this.loading.btnUsername = false;
+              setTimeout(() => {
+                this.verify.usernameSuccess = null;
+              }, 1000);
             }
           );
         }

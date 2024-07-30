@@ -39,6 +39,7 @@
     "vue-m-message": "^3.1.0",
     "vue-monoplasty-slide-verify": "^1.3.1",
     "vue-particles": "^1.0.9",
+    "vue-puzzle-vcode": "^1.1.10",
     "vue-router": "^3.2.0",
     "vue-template-compiler": "^2.6.12",
     "vuex": "^3.4.0",

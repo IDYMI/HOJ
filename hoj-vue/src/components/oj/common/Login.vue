@@ -28,39 +28,23 @@
         @click="handleLogin"
         :loading="btnLoginLoading"
       >{{ $t('m.Login_Btn') }}</el-button>
-      <el-popover
-        placement="bottom"
-        width="350"
-        v-model="loginSlideBlockVisible"
-        trigger="click"
-        v-else
-      >
-        <el-button type="primary" :loading="btnLoginLoading" slot="reference">
-          {{
-          $t('m.Login_Btn')
-          }}
-        </el-button>
-        <slide-verify
-          :l="42"
-          :r="10"
-          :w="325"
-          :h="100"
-          :accuracy="3"
-          @success="handleLogin"
-          :slider-text="$t('m.Slide_Verify')"
-          ref="slideBlock"
-          v-if="!verify.loginSuccess"
-        ></slide-verify>
+      <template v-else>
+        <el-button
+          type="primary"
+          :loading="btnLoginLoading"
+          slot="reference"
+          @click="verify.loginSuccess = false"
+        >{{ $t('m.Login_Btn') }}</el-button>
+        <Vcode :show="verify.loginSuccess === false" style="z-index: 9999;" @success="handleLogin" />
         <el-alert
           :title="$t('m.Slide_Verify_Success')"
           type="success"
-          :description="verify.loginMsg"
           v-show="verify.loginSuccess"
           :center="true"
           :closable="false"
           show-icon
         ></el-alert>
-      </el-popover>
+      </template>
       <el-link
         v-if="websiteConfig.register"
         type="primary"
@@ -78,7 +62,12 @@
 import { mapGetters, mapActions } from "vuex";
 import api from "@/common/api";
 import mMessage from "@/common/message";
+import Vcode from "vue-puzzle-vcode";
+
 export default {
+  components: {
+    Vcode,
+  },
   data() {
     return {
       formProfile: {
@@ -87,15 +76,13 @@ export default {
       },
       btnLoginLoading: false,
       verify: {
-        loginSuccess: false,
-        loginMsg: "",
+        loginSuccess: null,
       },
       needVerify: false,
       formLogin: {
         username: "",
         password: "",
       },
-      loginSlideBlockVisible: false,
       rules: {
         username: [
           {
@@ -140,15 +127,9 @@ export default {
         this.handleLogin();
       }
     },
-    handleLogin(times) {
+    handleLogin() {
       if (this.needVerify) {
         this.verify.loginSuccess = true;
-        let time = (times / 1000).toFixed(1);
-        this.verify.loginMsg = "Total time " + time + "s";
-        setTimeout(() => {
-          this.loginSlideBlockVisible = false;
-          this.verify.loginSuccess = false;
-        }, 1000);
       }
       this.$refs["formLogin"].validate((valid) => {
         if (valid) {
@@ -157,6 +138,9 @@ export default {
           api.login(formData).then(
             (res) => {
               this.btnLoginLoading = false;
+              setTimeout(() => {
+                this.verify.loginSuccess = null;
+              }, 1000);
               this.changeModalStatus({ visible: false });
               const jwt = res.headers["authorization"];
               this.$store.commit("changeUserToken", jwt);
@@ -185,6 +169,9 @@ export default {
               }
               this.$store.dispatch("incrLoginFailNum", false);
               this.btnLoginLoading = false;
+              setTimeout(() => {
+                this.verify.loginSuccess = null;
+              }, 1000);
             }
           );
         }

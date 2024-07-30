@@ -44,7 +44,6 @@ import VueECharts from 'vue-echarts';
 Vue.component('ECharts', VueECharts);
 
 import VueParticles from 'vue-particles';
-import SlideVerify from 'vue-monoplasty-slide-verify';
 
 //  markdown编辑器
 import mavonEditor from 'mavon-editor'; //引入markdown编辑器
@@ -86,7 +85,9 @@ Vue.use(Element, {
 Vue.use(VueCropper); // 图像剪切
 Vue.use(Message, { name: 'msg' }); // `Vue.prototype.$msg` 全局消息提示
 
-Vue.use(SlideVerify); // 滑动验证码组件
+import Vcode from "vue-puzzle-vcode";
+
+Vue.use(Vcode); // 滑动验证码组件
 
 Vue.prototype.$axios = axios;
 

@@ -465,6 +465,12 @@ export const m = {
   Synchronous_Link: 'Synchronous Link',
   Synchronous_Username: 'Synchronous Username (used for web scraping)',
   Synchronous_Password: 'Synchronous Password (used for web scraping)',
+  Sign_Start_Time: 'Sign Start Time',
+  Sign_End_Time: 'Sign End Time',
+  Max_Participants: 'Max Participants (Up To Three)',
+  Sign_Duration: 'Sign Duration',
+  Sign_Duration_Check: 'The duration of the sign cannot be less than or equal to zero!',
+  Sign_EndTime_Check: 'The EndTime of the sign cannot after the EndTime of the contest',
 
   // /views/admin/discussion/Discussion.vue
   Discussion_ID: 'Discussion ID',

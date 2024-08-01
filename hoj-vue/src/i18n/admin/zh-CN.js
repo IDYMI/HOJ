@@ -464,6 +464,12 @@ export const m = {
   Synchronous_Link: '同步赛的链接',
   Synchronous_Username: '同步赛的账号 （用于爬取信息）',
   Synchronous_Password: '同步赛的密码 （用于爬取信息）',
+  Sign_Start_Time: '报名开始时间',
+  Sign_End_Time: '报名结束时间',
+  Max_Participants: '队员上限 （最大为3）',
+  Sign_Duration: '报名时长',
+  Sign_Duration_Check: '报名时长不能小于0',
+  Sign_EndTime_Check: '报名结束时间不能晚于比赛结束时间',
 
   // /views/admin/discussion/Discussion.vue
   Discussion_ID: '讨论ID',

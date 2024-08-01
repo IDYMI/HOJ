@@ -21,6 +21,7 @@ import Announcements from '@/components/oj/common/Announcements.vue';
 import ContestComment from '@/views/oj/contest/children/ContestComment.vue';
 import ContestPrint from '@/views/oj/contest/children/ContestPrint.vue';
 import ContestAdminPrint from '@/views/oj/contest/children/ContestAdminPrint.vue';
+import ContestAdminSign from '@/views/oj/contest/children/ContestAdminSign.vue';
 import ScrollBoard from '@/views/oj/contest/children/ScrollBoard.vue';
 import ContestRejudgeAdmin from '@/views/oj/contest/children/ContestRejudgeAdmin.vue';
 import DiscussionList from '@/views/oj/discussion/discussionList.vue';
@@ -29,6 +30,7 @@ import Introduction from '@/views/oj/about/Introduction.vue';
 import Developer from '@/views/oj/about/Developer.vue';
 import Message from '@/views/oj/message/message.vue';
 import UserMsg from '@/views/oj/message/UserMsg.vue';
+import InventMsg from '@/views/oj/message/InventMsg.vue';
 import SysMsg from '@/views/oj/message/SysMsg.vue';
 import TrainingList from '@/views/oj/training/TrainingList.vue';
 import TrainingDetails from '@/views/oj/training/TrainingDetails.vue';
@@ -222,6 +224,14 @@ const ojRoutes = [
         path: 'admin-print',
         component: ContestAdminPrint,
         meta: { title: 'Contest Admin Print' },
+      },
+      {
+        name: 'ContestAdminSign',
+        path: 'admin-sign',
+        component: ContestAdminSign,
+        meta: {
+          title: 'Contest Admin Sign',
+        },
       },
       {
         name: 'ScrollBoard',
@@ -456,6 +466,15 @@ const ojRoutes = [
         path: 'like',
         component: UserMsg,
         meta: { requireAuth: true, title: 'Like Message' },
+      },
+      {
+        name: 'InventMsg',
+        path: 'invent',
+        component: InventMsg,
+        meta: {
+          requireAuth: true,
+          title: 'Invent Message',
+        },
       },
       {
         name: 'SysMsg',

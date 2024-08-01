@@ -220,6 +220,14 @@ public class AdminContestManager {
             contest.setSynchronousConfig(awardConfigJson.toString());
         }
 
+        // 正式赛
+        if (adminContestVo.getAuth().intValue() == Constants.Contest.AUTH_OFFICIAL.getCode()) {
+            contest.setSignStartTime(adminContestVo.getSignStartTime());
+            contest.setSignEndTime(adminContestVo.getSignEndTime());
+            contest.setSignDuration(adminContestVo.getSignDuration());
+            contest.setMaxParticipants(adminContestVo.getMaxParticipants());
+        }
+
         boolean isOk = contestEntityService.save(contest);
         if (!isOk) { // 删除成功
             throw new StatusFailException("添加失败");
@@ -285,6 +293,14 @@ public class AdminContestManager {
             JSONObject awardConfigJson = new JSONObject();
             awardConfigJson.set("config", synchronousConfigList);
             contest.setSynchronousConfig(awardConfigJson.toString());
+        }
+
+        // 正式赛
+        if (adminContestVo.getAuth().intValue() == Constants.Contest.AUTH_OFFICIAL.getCode()) {
+            contest.setSignStartTime(adminContestVo.getSignStartTime());
+            contest.setSignEndTime(adminContestVo.getSignEndTime());
+            contest.setSignDuration(adminContestVo.getSignDuration());
+            contest.setMaxParticipants(adminContestVo.getMaxParticipants());
         }
 
         Contest oldContest = contestEntityService.getById(contest.getId());

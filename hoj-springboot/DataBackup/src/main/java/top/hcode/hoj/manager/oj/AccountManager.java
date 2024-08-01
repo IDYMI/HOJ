@@ -31,6 +31,7 @@ import top.hcode.hoj.pojo.entity.user.Session;
 import top.hcode.hoj.pojo.entity.user.UserAcproblem;
 import top.hcode.hoj.pojo.entity.user.UserInfo;
 import top.hcode.hoj.pojo.entity.user.UserPreferences;
+import top.hcode.hoj.pojo.entity.user.UserSign;
 import top.hcode.hoj.pojo.vo.*;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
@@ -88,6 +89,9 @@ public class AccountManager {
 
     @Autowired
     private ContestRankManager contestRankManager;
+
+    @Autowired
+    private UserSignEntityService userSignEntityService;
 
     /**
      * @MethodName checkUsernameOrEmail
@@ -547,29 +551,21 @@ public class AccountManager {
 
     public UserInfoVO changeUserInfo(UserInfoVO userInfoVo) throws StatusFailException {
 
-        commonValidator.validateContentLength(userInfoVo.getRealname(), "真实姓名", 50);
         commonValidator.validateContentLength(userInfoVo.getNickname(), "昵称", 20);
         commonValidator.validateContentLength(userInfoVo.getSignature(), "个性简介", 65535);
         commonValidator.validateContentLength(userInfoVo.getBlog(), "博客", 255);
         commonValidator.validateContentLength(userInfoVo.getGithub(), "Github", 255);
-        commonValidator.validateContentLength(userInfoVo.getSchool(), "学校", 100);
-        commonValidator.validateContentLength(userInfoVo.getNumber(), "学号", 200);
-        commonValidator.validateContentLength(userInfoVo.getCfUsername(), "Codeforces用户名", 255);
 
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
         UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("uuid", userRolesVo.getUid())
-                .set("cf_username", userInfoVo.getCfUsername())
-                .set("realname", userInfoVo.getRealname())
                 .set("nickname", userInfoVo.getNickname())
                 .set("signature", userInfoVo.getSignature())
                 .set("blog", userInfoVo.getBlog())
                 .set("gender", userInfoVo.getGender())
-                .set("github", userInfoVo.getGithub())
-                .set("school", userInfoVo.getSchool())
-                .set("number", userInfoVo.getNumber());
+                .set("github", userInfoVo.getGithub());
 
         boolean isOk = userInfoEntityService.update(updateWrapper);
 
@@ -611,6 +607,40 @@ public class AccountManager {
                 .setCodeSize(userInfoVo.getCodeSize())
                 .setIdeTheme(userInfoVo.getIdeTheme())
                 .setCodeTemplate(userInfoVo.getCodeTemplate()));
+
+        if (isOk) {
+            UserRolesVO userRoles = userRoleEntityService.getUserRoles(userRolesVo.getUid(), null);
+            // 更新session
+            BeanUtil.copyProperties(userRoles, userRolesVo);
+            UserInfoVO userInfoVO = new UserInfoVO();
+            BeanUtil.copyProperties(userRoles, userInfoVO, "roles");
+            userInfoVO.setRoleList(userRoles.getRoles().stream().map(Role::getRole).collect(Collectors.toList()));
+            return userInfoVO;
+        } else {
+            throw new StatusFailException("更新个人信息失败！");
+        }
+    }
+
+    public UserInfoVO changeUserRace(UserSignVO userSignVO) throws StatusFailException {
+
+        commonValidator.validateContentLength(userSignVO.getRealname(), "真实姓名", 20);
+        commonValidator.validateContentLength(userSignVO.getSchool(), "学校", 20);
+        commonValidator.validateContentLength(userSignVO.getCourse(), "专业/班级", 20);
+        commonValidator.validateContentLength(userSignVO.getNumber(), "学号", 20);
+        commonValidator.validateContentLength(userSignVO.getClothesSize(), "衣服尺寸", 5);
+        commonValidator.validateContentLength(userSignVO.getPhoneNumber(), "联系方式", 20);
+
+        // 获取当前登录的用户
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        boolean isOk = userSignEntityService.saveOrUpdate(new UserSign().setUid(userRolesVo.getUid())
+                .setUsername(userRolesVo.getUsername())
+                .setRealname(userSignVO.getRealname())
+                .setSchool(userSignVO.getSchool())
+                .setCourse(userSignVO.getCourse())
+                .setNumber(userSignVO.getNumber())
+                .setClothesSize(userSignVO.getClothesSize() != null ? userSignVO.getClothesSize().toUpperCase() : null)
+                .setPhoneNumber(userSignVO.getPhoneNumber()));
 
         if (isOk) {
             UserRolesVO userRoles = userRoleEntityService.getUserRoles(userRolesVo.getUid(), null);

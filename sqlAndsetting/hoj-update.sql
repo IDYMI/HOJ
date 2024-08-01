@@ -1260,3 +1260,136 @@ INSERT INTO `language`(`content_type`,`description`,`name`,`compile_command`,`te
 INSERT INTO `language`(`content_type`,`description`,`name`,`compile_command`,`template`, `code_template`, `is_spj`, `oj`) VALUES ( 'text/javascript', 'Node.js 14.19.0', 'JavaScript Node', '/usr/bin/node {src_path}', 'var readline = require(\'readline\');\nconst rl = readline.createInterface({\n        input: process.stdin,\n        output: process.stdout\n});\nrl.on(\'line\', function(line){\n   var tokens = line.split(\' \');\n    console.log(parseInt(tokens[0]) + parseInt(tokens[1]));\n});', NULL, 0, 'SCPC');
 INSERT INTO `language`(`content_type`,`description`,`name`,`compile_command`,`template`, `code_template`, `is_spj`, `oj`) VALUES ( 'text/javascript', 'JavaScript V8 8.4.109', 'JavaScript V8', '/usr/bin/jsv8/d8 {src_path}', 'const [a, b] = readline().split(\' \').map(n => parseInt(n, 10));\nprint((a + b).toString());', NULL, 0, 'SCPC');
 
+
+/*
+* 增加正式赛
+
+*/
+DROP PROCEDURE
+IF EXISTS add_Official;
+DELIMITER $$
+
+CREATE PROCEDURE add_Official ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'contest'
+	AND column_name = 'sign_start_time'
+) THEN
+
+	ALTER TABLE `hoj`.`contest`  ADD COLUMN `sign_start_time` datetime NULL DEFAULT NULL comment '报名开始时间';
+	ALTER TABLE `hoj`.`contest`  ADD COLUMN `sign_end_time` datetime NULL DEFAULT NULL comment '报名结束时间';
+	ALTER TABLE `hoj`.`contest`  ADD COLUMN `sign_duration`  bigint(20) DEFAULT NULL comment '报名时长(s)';
+	ALTER TABLE `hoj`.`contest`  ADD COLUMN `max_participants` int(11) DEFAULT NULL comment '队员上限(最大为3)';
+
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_Official ;
+
+DROP PROCEDURE add_Official;
+
+/*
+* 增加正式赛报名表
+
+*/
+DROP PROCEDURE
+IF EXISTS contest_Add_sign;
+DELIMITER $$
+
+CREATE PROCEDURE contest_Add_sign ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'user_sign'
+) THEN
+
+	CREATE TABLE `user_sign` (
+	  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+	  `uid` varchar(32) NOT NULL COMMENT '用户id',
+	  `username` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  	  `realname` varchar(50) DEFAULT NULL COMMENT '真实姓名',
+	  `school` varchar(50) DEFAULT NULL COMMENT '学校',
+	  `course` varchar(50) DEFAULT NULL COMMENT '专业/班级',
+	  `number` varchar(50) DEFAULT NULL COMMENT '学号',
+	  `clothes_size` varchar(10) DEFAULT NULL COMMENT '衣服尺寸',
+	  `phone_number` varchar(20) DEFAULT NULL COMMENT '联系方式',
+	  `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	  `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	  PRIMARY KEY (`id`,`uid`),
+	  KEY `uid` (`uid`),
+	  CONSTRAINT `user_sign_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `user_info` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+END
+IF ; END$$
+
+DELIMITER ;
+CALL contest_Add_sign ;
+
+DROP PROCEDURE contest_Add_sign;
+
+/*
+* 增加比赛的报名表
+
+*/
+DROP PROCEDURE
+IF EXISTS Add_contest_sign;
+DELIMITER $$
+
+CREATE PROCEDURE Add_contest_sign ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'contest_sign'
+) THEN
+	CREATE TABLE `contest_sign` (
+	  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+	  `cid` bigint(20) unsigned DEFAULT NULL COMMENT '比赛id',
+	  `cname` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '队伍中文名称',
+	  `ename` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '队伍英文名称',
+      `school` varchar(100) DEFAULT NULL COMMENT '学校',
+	  `team_names` varchar(200) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '队员用户id',
+	  `team_config` text DEFAULT NULL COMMENT '队伍信息',
+	  `participants` int(11) DEFAULT NULL COMMENT '队伍人数',
+	  `type` int(11) DEFAULT '0' COMMENT '报名类型（0为正式名额，1为打星名额）',
+	  `status` int(11) DEFAULT '0' COMMENT '报名审核状态（0表示审核中，1为审核通过，2为审核不通过。）',
+	  `gender` int(11) DEFAULT '0' COMMENT '报名类型（0为正式队伍，1为女生队伍）',
+	  `msg` varchar(255) DEFAULT NULL COMMENT '审核不通过原因',
+	  `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	  `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP,
+	  PRIMARY KEY (`id`),
+	  KEY `cid` (`cid`),
+	  CONSTRAINT `contest_sign_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+END
+IF ; END$$
+
+DELIMITER ;
+CALL Add_contest_sign ;
+
+DROP PROCEDURE Add_contest_sign;
+
+/*
+* 批量转移用户信息
+
+*/
+INSERT INTO user_sign (`uid`, `username`, `realname`, `school`, `course`, `number`)
+SELECT `uuid`, `username`, `realname`, `school`, `course`, `number`
+FROM user_info;

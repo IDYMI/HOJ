@@ -138,6 +138,7 @@ public class Constants {
         AUTH_PUBLIC(0, "Public"),
         AUTH_PRIVATE(1, "Private"),
         AUTH_PROTECT(2, "Protect"),
+        AUTH_OFFICIAL(3, "Official"),
         AUTH_PUBLIC_SYNCHRONOUS(4, "Public_Synchronous"),
         AUTH_PRIVATE_SYNCHRONOUS(5, "Private_Synchronous"),
 
@@ -199,6 +200,8 @@ public class Constants {
         DISCUSSION_ADD_NUM_LOCK("discussion_add_num_lock:"),
         GROUP_ADD_NUM_LOCK("group_add_num_lock"),
         CONTEST_ADD_PRINT_LOCK("contest_add_print_lock:"),
+        CONTEST_INVENT_LOCK("contest_invent_lock:"),
+        CONTEST_SIGN_LOCK("contest_sign_lock:"),
 
         REMOTE_JUDGE_CF_ACCOUNT_NUM("remote_judge_cf_account:");
 

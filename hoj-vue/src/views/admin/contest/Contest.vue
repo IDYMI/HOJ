@@ -167,10 +167,7 @@
               ></el-switch>
             </el-form-item>
           </el-col>
-        </el-row>
 
-        <!-- 文件柜 -->
-        <el-row :gutter="20">
           <el-col :md="8" :xs="24">
             <el-form-item :label="$t('m.BoxFile_Func')" required>
               <el-switch
@@ -243,7 +240,7 @@
                 type="warning"
                 size="medium"
                 @close="removeStarUser(username)"
-                style="margin-right: 7px;margin-top:4px"
+                style="margin-right: 7px; margin-top: 4px"
               >{{ username }}</el-tag>
               <el-input
                 v-if="inputVisible"
@@ -271,29 +268,74 @@
                 <el-option :label="$t('m.Public')" :value="0"></el-option>
                 <el-option :label="$t('m.Private')" :value="1"></el-option>
                 <el-option :label="$t('m.Protected')" :value="2"></el-option>
+                <el-option :label="$t('m.Official')" :value="3"></el-option>
                 <el-option :label="$t('m.Public_Synchronous')" :value="4"></el-option>
                 <el-option :label="$t('m.Private_Synchronous')" :value="5"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :md="8" :xs="24" v-if="contest.auth != 0 && contest.auth != 4">
+          <el-col
+            :md="8"
+            :xs="24"
+            v-if="contest.auth != 0 && contest.auth != 3 && contest.auth != 4"
+          >
             <el-form-item
               :label="$t('m.Contest_Password')"
-              v-show="contest.auth != 0 && contest.auth != 4"
-              :required="contest.auth != 0 && contest.auth != 4"
+              v-show="contest.auth != 0 && contest.auth != 3 && contest.auth != 4"
+              :required="contest.auth != 0 && contest.auth != 3 && contest.auth != 4"
             >
               <el-input v-model="contest.pwd" :placeholder="$t('m.Contest_Password')"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :md="8" :xs="24">
+          <el-col :md="8" :xs="24" v-if="contest.auth != 0 && contest.auth != 4">
             <el-form-item
               :label="$t('m.Account_Limit')"
-              v-show="contest.auth != 0"
-              :required="contest.auth != 0"
+              v-show="contest.auth != 0 && contest.auth != 4"
+              :required="contest.auth != 0 && contest.auth != 4"
             >
               <el-switch v-model="contest.openAccountLimit"></el-switch>
             </el-form-item>
           </el-col>
+
+          <!-- 正式赛配置 -->
+          <template v-if="contest.auth == 3">
+            <el-col :md="8" :xs="24">
+              <el-form-item :label="$t('m.Max_Participants')" required>
+                <el-input-number
+                  style="width: 50%;"
+                  v-model="contest.maxParticipants"
+                  :min="1"
+                  :max="3"
+                ></el-input-number>
+              </el-form-item>
+            </el-col>
+            <el-col :md="8" :xs="24">
+              <el-form-item :label="$t('m.Sign_Start_Time')" required>
+                <el-date-picker
+                  v-model="contest.signStartTime"
+                  @change="changeSignDuration"
+                  type="datetime"
+                  :placeholder="$t('m.Sign_Start_Time')"
+                ></el-date-picker>
+              </el-form-item>
+            </el-col>
+            <!-- 报名的结束时间不晚于比赛的结束时间 -->
+            <el-col :md="8" :xs="24">
+              <el-form-item :label="$t('m.Sign_End_Time')" required>
+                <el-date-picker
+                  v-model="contest.signEndTime"
+                  @change="changeSignDuration"
+                  type="datetime"
+                  :placeholder="$t('m.Sign_End_Time')"
+                ></el-date-picker>
+              </el-form-item>
+            </el-col>
+            <el-col :md="8" :xs="24">
+              <el-form-item :label="$t('m.Sign_Duration')" required>
+                <el-input v-model="signdurationText" disabled></el-input>
+              </el-form-item>
+            </el-col>
+          </template>
 
           <!-- 同步赛配置 -->
           <el-col :span="24" v-if="contest.auth == 4 || contest.auth == 5">
@@ -535,6 +577,7 @@ export default {
       title: "Create Contest",
       disableRuleType: false,
       durationText: "", // 比赛时长文本表示
+      signdurationText: "", // 报名时长文本显示
       seal_rank_time: 1, // 当开启封榜模式，即实时榜单关闭时，可选择前半小时，前一小时，全程封榜,默认全程封榜
       boxFileList: [], // 文件柜的默认文件
       contest: {
@@ -590,6 +633,10 @@ export default {
             password: "",
           },
         ],
+        signStartTime: "",
+        signEndTime: "",
+        maxParticipants: 0,
+        signDuration: 0,
       },
       formRule: {
         prefix: "",
@@ -622,7 +669,6 @@ export default {
       } else if (this.$route.name === "admin-create-contest") {
         this.title = this.$i18n.t("m.Create_Contest");
         this.disableRuleType = false;
-        // this.contest = {};
       }
     },
     // 如果未开启文件柜
@@ -712,8 +758,24 @@ export default {
         return;
       }
 
+      if (this.contest.auth == 3) {
+        if (!this.contest.signDuration || this.contest.signDuration <= 0) {
+          myMessage.error(this.$i18n.t("m.Sign_Duration_Check"));
+          return;
+        }
+        if (this.contest.signEndTime > this.contest.endTime) {
+          myMessage.error(this.$i18n.t("m.Sign_EndTime_Check"));
+          return;
+        }
+        if (this.contest.signEndTime > this.contest.endTime) {
+          myMessage.error(this.$i18n.t("m.Sign_EndTime_Check"));
+          return;
+        }
+      }
+
       if (
         this.contest.auth != 0 &&
+        this.contest.auth != 3 &&
         this.contest.auth != 4 &&
         !this.contest.pwd
       ) {
@@ -724,7 +786,6 @@ export default {
         );
         return;
       }
-
       if (this.contest.openAccountLimit) {
         this.contest.accountLimitRule = this.changeAccountRuleToStr(
           this.formRule
@@ -995,6 +1056,20 @@ export default {
     switchToAdmin() {
       // 管理文件柜详情页
       this.$router.push({ name: "admin-file" });
+    },
+    changeSignDuration() {
+      let start = this.contest.signStartTime;
+      let end = this.contest.signEndTime;
+      let durationMS = time.durationMs(start, end);
+      if (durationMS < 0) {
+        this.signdurationText = this.$i18n.t("m.Contets_Time_Check");
+        this.contest.signDuration = 0;
+        return;
+      }
+      if (start != "" && end != "") {
+        this.signdurationText = time.formatSpecificDuration(start, end);
+        this.contest.signDuration = durationMS;
+      }
     },
   },
 };

@@ -109,6 +109,18 @@ public class AdminContestVO {
     @ApiModelProperty(value = "文件柜配置 json")
     private List<ContestFileConfigVO> fileConfigList;
 
+    @ApiModelProperty(value = "报名开始时间")
+    private Date signStartTime;
+
+    @ApiModelProperty(value = "报名结束时间")
+    private Date signEndTime;
+
+    @ApiModelProperty(value = "报名时长（s）")
+    private Long signDuration;
+
+    @ApiModelProperty(value = "队员上限(最大为3)")
+    private Integer maxParticipants;
+
     private Date gmtCreate;
 
     private Date gmtModified;

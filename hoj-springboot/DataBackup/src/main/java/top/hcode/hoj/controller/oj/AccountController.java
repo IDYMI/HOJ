@@ -111,6 +111,13 @@ public class AccountController {
     public CommonResult<UserInfoVO> changeUserPreferences(@RequestBody UserPreferencesVO UserPreferencesVo) {
         return accountService.changeUserPreferences(UserPreferencesVo);
     }
+
+    @PostMapping("/change-userRace")
+    @RequiresAuthentication
+    public CommonResult<UserInfoVO> changeUserRace(@RequestBody UserSignVO UserSignVo) {
+        return accountService.changeUserRace(UserSignVo);
+    }
+
     @GetMapping("/get-user-auth-info")
     @RequiresAuthentication
     public CommonResult<UserAuthInfoVO> getUserAuthInfo() {

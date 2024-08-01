@@ -19,6 +19,8 @@
         <result column="code_size" property="codeSize"></result>
         <result column="ide_theme" property="ideTheme"></result>
         <result column="code_template" property="codeTemplate"></result>
+        <result column="clothes_size" property="clothesSize"></result>
+        <result column="phone_number" property="phoneNumber"></result>
         <result column="blog" property="blog"></result>
         <result column="email" property="email"></result>
         <result column="signature" property="signature"></result>
@@ -43,10 +45,12 @@
         role_gmt_create,
         r.gmt_modified as role_gmt_modified,
         up.ui_language, up.ui_theme, up.code_language, up.code_size, up.ide_theme, up.code_template,
+        us.realname as realname, us.school as school, us.course as course, us.number, us.clothes_size, us.phone_number,
         u.* FROM user_info u
         LEFT OUTER JOIN user_role ur ON u.uuid=ur.uid
         LEFT JOIN role r ON ur.role_id = r.id
         LEFT JOIN user_preferences up ON u.uuid=up.uid
+        LEFT JOIN user_sign us ON u.uuid=us.uid
         <where>
             <if test="uid != null and uid != ''">
                 u.uuid = #{uid}
@@ -91,12 +95,14 @@
 
     <!-- 主查询  -->
     <select id="getUserList" resultMap="map_UserRolesList" resultType="list">
-        SELECT u.* FROM user_info u
+        SELECT us.realname as realname, us.school as school, us.course as course, us.number, us.clothes_size, us.phone_number,
+        u.* FROM user_info u
+        LEFT JOIN user_sign us ON u.uuid=us.uid
         <where>
             <if test="keyword!=null and keyword!=''">
                 u.username like CONCAT("%",#{keyword},"%")
                 or u.email like CONCAT("%",#{keyword},"%")
-                or u.realname like CONCAT("%",#{keyword},"%")
+                or us.realname like CONCAT("%",#{keyword},"%")
             </if>
         </where>
         order by u.gmt_create desc, u.uuid desc
@@ -108,15 +114,17 @@
     </select>
 
     <!-- 主查询 -->
-    <select id="getAdminUserList" resultMap="map_UserRolesList" resultType="list">
-        SELECT u.* FROM user_info u
+     <select id="getAdminUserList" resultMap="map_UserRolesList" resultType="list">
+        SELECT us.realname as realname, us.school as school, us.course as course, us.number, us.clothes_size, us.phone_number,
+        u.* FROM user_info u
+        LEFT JOIN user_sign us ON u.uuid=us.uid
         LEFT JOIN user_role ur ON (ur.role_id=1000 OR ur.role_id=1001 OR ur.role_id=1008)
         <where>
          ur.uid = u.uuid
             <if test="keyword!=null and keyword!=''">
                 and (u.username like CONCAT("%",#{keyword},"%")
                 or u.email like CONCAT("%",#{keyword},"%")
-                or u.realname like CONCAT("%",#{keyword},"%"))
+                or us.realname like CONCAT("%",#{keyword},"%"))
             </if>
         </where>
         order by u.gmt_create desc, u.uuid desc

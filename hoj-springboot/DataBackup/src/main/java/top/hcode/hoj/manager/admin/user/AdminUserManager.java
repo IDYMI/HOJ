@@ -18,11 +18,13 @@ import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.dao.user.UserInfoEntityService;
 import top.hcode.hoj.dao.user.UserPreferencesEntityService;
 import top.hcode.hoj.dao.user.UserRecordEntityService;
+import top.hcode.hoj.dao.user.UserSignEntityService;
 import top.hcode.hoj.dao.user.UserRoleEntityService;
 import top.hcode.hoj.manager.msg.AdminNoticeManager;
 import top.hcode.hoj.pojo.dto.AdminEditUserDTO;
 import top.hcode.hoj.pojo.entity.user.UserInfo;
 import top.hcode.hoj.pojo.entity.user.UserPreferences;
+import top.hcode.hoj.pojo.entity.user.UserSign;
 import top.hcode.hoj.pojo.entity.user.UserRecord;
 import top.hcode.hoj.pojo.entity.user.UserRole;
 import top.hcode.hoj.pojo.vo.UserRolesVO;
@@ -53,6 +55,9 @@ public class AdminUserManager {
 
     @Autowired
     private UserRecordEntityService userRecordEntityService;
+
+    @Autowired
+    private UserSignEntityService userSignEntityService;
 
     @Autowired
     private UserPreferencesEntityService userPreferencesEntityService;
@@ -116,13 +121,18 @@ public class AdminUserManager {
         UpdateWrapper<UserInfo> userInfoUpdateWrapper = new UpdateWrapper<>();
         userInfoUpdateWrapper.eq("uuid", uid)
                 .set("username", username)
-                .set("realname", realname)
                 .set("email", email)
                 .set(setNewPwd, "password", SecureUtil.md5(password))
                 .set("title_name", titleName)
                 .set("title_color", titleColor)
                 .set("status", status);
         boolean updateUserInfo = userInfoEntityService.update(userInfoUpdateWrapper);
+
+        QueryWrapper<UserSign> userSignQueryWrapper = new QueryWrapper<>();
+        userSignQueryWrapper.eq("uid", uid);
+        UserSign userSign = userSignEntityService.getOne(userSignQueryWrapper, false);
+        userSign.setUsername(username).setRealname(realname);
+        boolean updateUserSign = userSignEntityService.updateById(userSign);
 
         QueryWrapper<UserRole> userRoleQueryWrapper = new QueryWrapper<>();
         userRoleQueryWrapper.eq("uid", uid);
@@ -138,7 +148,7 @@ public class AdminUserManager {
                 redisUtils.del(cacheKey);
             }
         }
-        if (updateUserInfo && setNewPwd) {
+        if (updateUserInfo && setNewPwd && updateUserSign) {
             // 需要重新登录
             userRoleEntityService.deleteCache(uid, true);
         } else if (changeUserRole) {
@@ -203,6 +213,7 @@ public class AdminUserManager {
         String uuid = IdUtil.simpleUUID();
 
         UserPreferences userPreferences = new UserPreferences().setUid(uuid);
+        UserSign userSign = new UserSign().setUid(uuid).setUsername(user.get(0));
         UserInfo userInfo = new UserInfo()
                 .setUuid(uuid)
                 .setUsername(user.get(0))
@@ -212,7 +223,7 @@ public class AdminUserManager {
         if (user.size() >= 4) {
             String realname = user.get(3);
             if (!StringUtils.isEmpty(realname)) {
-                userInfo.setRealname(user.get(3));
+                userSign.setRealname(user.get(3));
             }
         }
 
@@ -235,7 +246,7 @@ public class AdminUserManager {
         if (user.size() >= 7) {
             String school = user.get(6);
             if (!StringUtils.isEmpty(school)) {
-                userInfo.setSchool(school);
+                userSign.setSchool(school);
             }
         }
 
@@ -247,7 +258,8 @@ public class AdminUserManager {
         UserRecord userRecord = new UserRecord().setUid(uuid);
         boolean result3 = userRecordEntityService.save(userRecord);
         boolean result4 = userPreferencesEntityService.save(userPreferences);
-        if (!result1 || !result2 || !result3 || !result4) {
+        boolean result5 = userSignEntityService.save(userSign);
+        if (!result1 || !result2 || !result3 || !result4 || !result5) {
             throw new StatusFailException("生成用户失败");
         }
         return uuid;
@@ -267,6 +279,7 @@ public class AdminUserManager {
         List<UserRole> userRoleList = new LinkedList<>();
         List<UserRecord> userRecordList = new LinkedList<>();
         List<UserPreferences> userPreferencesList = new LinkedList<>();
+        List<UserSign> userSignList = new LinkedList<>();
 
         HashMap<String, Object> userInfo = new HashMap<>(); // 存储账号密码放入redis中，等待导出excel
         for (int num = numberFrom; num <= numberTo; num++) {
@@ -283,13 +296,15 @@ public class AdminUserManager {
                     .setUid(uuid));
             userRecordList.add(new UserRecord().setUid(uuid));
             userPreferencesList.add(new UserPreferences().setUid(uuid));
+            userSignList.add(new UserSign().setUid(uuid).setUsername(username));
         }
         boolean result1 = userInfoEntityService.saveBatch(userInfoList);
         boolean result2 = userRoleEntityService.saveBatch(userRoleList);
         boolean result3 = userRecordEntityService.saveBatch(userRecordList);
         boolean result4 = userPreferencesEntityService.saveBatch(userPreferencesList);
+        boolean result5 = userSignEntityService.saveBatch(userSignList);
 
-        if (result1 && result2 && result3 && result4) {
+        if (result1 && result2 && result3 && result4 && result5) {
             String key = IdUtil.simpleUUID();
             redisUtils.hmset(key, userInfo, 1800); // 存储半小时
             // 异步同步系统通知

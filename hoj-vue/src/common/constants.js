@@ -269,6 +269,33 @@ export const GROUP_TYPE_REVERSE = {
   },
 };
 
+export const SIGN_TYPE_REVERSE = {
+  // 未报名
+  '-1': {
+    name: 'Sign_Required',
+    action: 'Send_Sign',
+    color: 'warning',
+  },
+  // 审核中
+  '0': {
+    name: 'Sign_Waiting',
+    action: 'Edit_Sign',
+    color: 'warning',
+  },
+  // 通过
+  '1': {
+    name: 'Sign_Successfully',
+    action: 'Edit_Sign',
+    color: 'success',
+  },
+  // 未通过
+  '2': {
+    name: 'Sign_Refused',
+    action: 'Edit_Sign',
+    color: 'danger',
+  },
+};
+
 export const RULE_TYPE = {
   ACM: 0,
   OI: 1,
@@ -298,6 +325,13 @@ export const CONTEST_TYPE_REVERSE = {
     submit: false, //保护赛，可以看但是不能提交，提交需要附带比赛密码
     look: true,
   },
+  3: {
+    name: 'Official',
+    color: '',
+    tips: 'Official_Tips',
+    submit: false, // 正式赛 必须要报名后才能看和提交
+    look: false,
+  },
   4: {
     name: 'Public_Synchronous',
     color: 'warning',
@@ -318,6 +352,7 @@ export const CONTEST_TYPE = {
   PUBLIC: 0,
   PRIVATE: 1,
   PROTECTED: 2,
+  OFFICIAL: 3,
   PUBLIC_SYNCHRONOUS: 4,
   PRIVATE_SYNCHRONOUS: 5,
 };

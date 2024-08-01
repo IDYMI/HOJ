@@ -22,6 +22,7 @@ import top.hcode.hoj.dao.user.UserInfoEntityService;
 import top.hcode.hoj.dao.user.UserPreferencesEntityService;
 import top.hcode.hoj.dao.user.UserRecordEntityService;
 import top.hcode.hoj.dao.user.UserRoleEntityService;
+import top.hcode.hoj.dao.user.UserSignEntityService;
 import top.hcode.hoj.manager.email.EmailManager;
 import top.hcode.hoj.manager.msg.NoticeManager;
 import top.hcode.hoj.pojo.bo.EmailRuleBO;
@@ -76,6 +77,9 @@ public class PassportManager {
 
     @Resource
     private UserPreferencesEntityService userPreferencesEntityService;
+
+    @Resource
+    private UserSignEntityService userSignEntityService;
 
     @Resource
     private SessionEntityService sessionEntityService;
@@ -255,7 +259,11 @@ public class PassportManager {
         // 往user_preferences表插入数据
         boolean addUserPreferences = userPreferencesEntityService.save(new UserPreferences().setUid(uuid));
 
-        if (addUser && addUserRole && addUserRecord && addUserPreferences) {
+        // 往user_sign表插入数据
+        boolean addUserSign = userSignEntityService
+                .save(new UserSign().setUid(uuid).setUsername(registerDto.getUsername()));
+
+        if (addUser && addUserRole && addUserRecord && addUserPreferences && addUserSign) {
             redisUtils.del(registerDto.getEmail());
             noticeManager.syncNoticeToNewRegisterUser(uuid);
         } else {

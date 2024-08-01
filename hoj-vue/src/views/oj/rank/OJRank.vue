@@ -8,6 +8,7 @@
               <span class="panel-title-oj">{{ $t("m.OJ_Ranklist") }}</span>
             </li>
           </ul>
+          <div class="filter-left">{{ $t("m.Limited_Tips") }}</div>
         </div>
         <div style="text-align: center;">
           <el-input
@@ -29,6 +30,11 @@
               :active-text="$t('m.NewAcmer')"
               :inactive-text="$t('m.All')"
             ></el-switch>
+            <span>`</span>
+            <el-popover placement="bottom" trigger="hover">
+              <p>{{ $t('m.New_Tips') }}</p>
+              <i slot="reference" class="el-icon-question"></i>
+            </el-popover>
           </div>
         </div>
       </el-card>
@@ -169,6 +175,7 @@ export default {
         { title: "m.leetcodeAc", field: "leetcodeAc" },
         { title: "m.sum", field: "sum" },
       ],
+      maxRecords: 1000, // 最大记录数限制
     };
   },
   created() {
@@ -190,6 +197,14 @@ export default {
     getRankData(page) {
       this.loadingTable = true;
       const type = this.isNew ? RULE_TYPE.NewOJ : RULE_TYPE.OJ;
+
+      // 计算最大页数以确保 limit * page 不超过 1000
+      const maxPage = Math.floor(this.maxRecords / this.limit);
+      if (this.page > maxPage) {
+        this.page = Math.max(1, maxPage - 1); // 确保 page 不小于 1，并转换为整数
+        page = this.page;
+      }
+
       api.getUserRank(page, this.limit, type, this.searchUser).then(
         (res) => {
           this.dataRank = res.data.data.records;
@@ -271,5 +286,9 @@ export default {
 .filter-right {
   float: right;
   margin-top: 15px;
+}
+.filter-left {
+  float: left;
+  margin-top: 25px;
 }
 </style>

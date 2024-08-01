@@ -8,6 +8,7 @@
               <span class="panel-title-oi">{{ $t("m.OI_Ranklist") }}</span>
             </li>
           </ul>
+          <div class="filter-left">{{ $t("m.Limited_Tips") }}</div>
         </div>
         <div class="echarts">
           <ECharts :options="options" ref="chart" auto-resize></ECharts>
@@ -28,6 +29,11 @@
             :active-text="$t('m.NewAcmer')"
             :inactive-text="$t('m.All')"
           ></el-switch>
+          <span>`</span>
+          <el-popover placement="bottom" trigger="hover">
+            <p>{{ $t('m.New_Tips') }}</p>
+            <i slot="reference" class="el-icon-question"></i>
+          </el-popover>
         </div>
       </el-card>
       <vxe-table
@@ -207,6 +213,7 @@ export default {
           },
         ],
       },
+      maxRecords: 1000, // 最大记录数限制
     };
   },
   created() {
@@ -230,6 +237,14 @@ export default {
       bar.showLoading({ maskColor: "rgba(250, 250, 250, 0.8)" });
       this.loadingTable = true;
       const type = this.isNew ? RULE_TYPE.NewOI : RULE_TYPE.OI;
+
+      // 计算最大页数以确保 limit * page 不超过 1000
+      const maxPage = Math.floor(this.maxRecords / this.limit);
+      if (this.page > maxPage) {
+        this.page = Math.max(1, maxPage - 1); // 确保 page 不小于 1，并转换为整数
+        page = this.page;
+      }
+
       api.getUserRank(page, this.limit, type, this.searchUser).then(
         (res) => {
           if (page === 1) {
@@ -349,5 +364,9 @@ export default {
 .filter-right {
   float: right;
   margin-top: 15px;
+}
+.filter-left {
+  float: left;
+  margin-top: 25px;
 }
 </style>

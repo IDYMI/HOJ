@@ -8,6 +8,7 @@
               <span class="panel-title-oj">{{ $t("m.NavBar_Code_Rank") }}</span>
             </li>
           </ul>
+          <div class="filter-left">{{ $t("m.Limited_Tips") }}</div>
         </div>
         <div style="text-align: center;">
           <el-input
@@ -155,6 +156,7 @@ export default {
       screenWidth: 768,
       columns: [],
       codeMap: {},
+      maxRecords: 1000, // 最大记录数限制
     };
   },
   created() {
@@ -174,6 +176,14 @@ export default {
   methods: {
     getRankData(page) {
       this.loadingTable = true;
+
+      // 计算最大页数以确保 limit * page 不超过 1000
+      const maxPage = Math.floor(this.maxRecords / this.limit);
+      if (this.page > maxPage) {
+        this.page = Math.max(1, maxPage - 1); // 确保 page 不小于 1，并转换为整数
+        page = this.page;
+      }
+
       api.getUserRank(page, this.limit, RULE_TYPE.Code, this.searchUser).then(
         (res) => {
           this.dataRank = res.data.data.records;
@@ -286,5 +296,9 @@ export default {
 .filter-right {
   float: right;
   margin-top: 15px;
+}
+.filter-left {
+  float: left;
+  margin-top: 25px;
 }
 </style>

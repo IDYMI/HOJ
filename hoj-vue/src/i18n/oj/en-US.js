@@ -396,6 +396,9 @@ export const m = {
   Comment_Lines: 'Comment Lines',
   Code_Lines: 'Code Lines',
 
+  Limited_Tips: 'The leaderboard only displays the top 1000. Keep going and aim to make the list!',
+  New_Tips: 'New User Definition: Users registered between June of this year and June of the next year are considered new users.',
+
   // /views/oj/discussion/discussionList.vue
   Go_to_problem: 'Go to Problem',
   Release_Time: 'Release Time',

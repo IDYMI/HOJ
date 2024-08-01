@@ -62,6 +62,9 @@ public class RankManager {
     // 排行榜缓存时间 60s
     private static final long cacheRankSecond = 60;
 
+    // 定义最大记录数
+    private static final int MAX_RECORDS = 1000;
+
     /**
      * @MethodName get-rank-list
      * @Params * @param null
@@ -111,6 +114,12 @@ public class RankManager {
                 uidList = uidList.stream().distinct().collect(Collectors.toList());
             }
         }
+
+        // 限制大小
+        if (currentPage * limit > MAX_RECORDS) {
+            currentPage = (int) Math.floor(MAX_RECORDS / limit);
+        }
+
         IPage rankList = null;
         // 根据type查询不同类型的排行榜
         if (type.intValue() == Constants.Contest.TYPE_ACM.getCode()) {

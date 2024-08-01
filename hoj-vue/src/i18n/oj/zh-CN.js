@@ -396,6 +396,9 @@ export const m = {
   Comment_Lines: '注释行',
   Code_Lines: '代码行',
 
+  Limited_Tips: '排行榜仅显示前1000位，请您继续再接再厉，加油上榜哦！',
+  New_Tips: '新生定义：在今年6月到下一年6月之间注册的用户为新生',
+
   // /views/oj/discussion/discussionList.vue
   Go_to_problem: '前往原题',
   Release_Time: '发布时间',

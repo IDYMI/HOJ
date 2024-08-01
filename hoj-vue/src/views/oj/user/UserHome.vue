@@ -11,8 +11,20 @@
     </div>
     <el-card class="box-card">
       <div class="recent-login">
+        <!-- 用户身份 -->
+        <span v-if="profile.roles.indexOf('default_user') === -1">
+          <el-tag type="warning" effect="dark" size="medium">
+            {{
+            profile.roles.indexOf(USER_TYPE.SUPER_ADMIN) !== -1
+            ? $t('m.Super_Admin')
+            : profile.roles.indexOf(USER_TYPE.ADMIN) !== -1
+            ? $t('m.Admin')
+            : $t('m.All_Problem_Admin')
+            }}
+          </el-tag>
+        </span>
         <el-tooltip :content="profile.recentLoginTime | localtime" placement="top">
-          <el-tag type="success" effect="plain" size="medium">
+          <el-tag type="success" effect="plain" size="medium" style="margin-left: 10px;">
             <i class="fa fa-circle">
               {{ $t('m.Recent_login_time')
               }}{{ profile.recentLoginTime | fromNow }}
@@ -31,6 +43,48 @@
           </span>
           <span class="gender-male female" v-else-if="profile.gender == 'female'">
             <i class="fa fa-venus"></i>
+          </span>
+        </p>
+        <p v-if="isMainAdminRole">
+          <span v-if="profile.realName">
+            <el-tooltip :content="$t('m.RealName')" placement="top">
+              <el-tag
+                type="success"
+                effect="plain"
+                size="small"
+                style="margin-left: 10px;"
+              >{{ profile.realName }}</el-tag>
+            </el-tooltip>
+          </span>
+          <span v-if="profile.course">
+            <el-tooltip :content="$t('m.Course')" placement="top">
+              <el-tag
+                type="success"
+                effect="plain"
+                size="small"
+                style="margin-left: 10px;"
+              >{{ profile.course }}</el-tag>
+            </el-tooltip>
+          </span>
+          <span v-if="profile.email">
+            <el-tooltip :content="$t('m.Email')" placement="top">
+              <el-tag
+                type="success"
+                effect="plain"
+                size="small"
+                style="margin-left: 10px;"
+              >{{ profile.email }}</el-tag>
+            </el-tooltip>
+          </span>
+          <span v-if="profile.phoneNumber">
+            <el-tooltip :content="$t('m.Phone_Number')" placement="top">
+              <el-tag
+                type="success"
+                effect="plain"
+                size="small"
+                style="margin-left: 10px;"
+              >{{ profile.phoneNumber }}</el-tag>
+            </el-tooltip>
           </span>
         </p>
         <p v-if="profile.titleName">
@@ -267,7 +321,7 @@ import { addCodeBtn } from "@/common/codeblock";
 import Avatar from "vue-avatar";
 import "vue-calendar-heatmap/dist/vue-calendar-heatmap.css";
 import { CalendarHeatmap } from "vue-calendar-heatmap";
-import { PROBLEM_LEVEL } from "@/common/constants";
+import { PROBLEM_LEVEL, USER_TYPE } from "@/common/constants";
 import utils from "@/common/utils";
 import Markdown from "@/components/oj/common/Markdown";
 import moment from "moment";
@@ -299,8 +353,14 @@ export default {
         calendarHeatmapEndDate: "",
         loadingCalendarHeatmap: false,
         loading: false,
+        realName: "",
+        course: "",
+        email: "",
+        phoneNumber: "",
+        roles: [],
       },
       PROBLEM_LEVEL: {},
+      USER_TYPE: {},
       options: {
         tooltip: {
           trigger: "axis",
@@ -380,6 +440,7 @@ export default {
       this.loadingCalendarHeatmap = true;
     });
     this.PROBLEM_LEVEL = Object.assign({}, PROBLEM_LEVEL);
+    this.USER_TYPE = Object.assign({}, USER_TYPE);
   },
   mounted() {
     this.calendarHeatLocale = {
@@ -516,7 +577,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["webTheme"]),
+    ...mapGetters(["webTheme", "isMainAdminRole"]),
   },
   watch: {
     $route(newVal, oldVal) {

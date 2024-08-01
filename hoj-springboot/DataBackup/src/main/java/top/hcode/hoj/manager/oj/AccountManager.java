@@ -175,6 +175,30 @@ public class AccountManager {
             throw new StatusFailException("用户不存在");
         }
 
+        List<String> roles = userRoleEntityService.getRolesByUid(uid).stream()
+                .map(Role::getRole)
+                .collect(Collectors.toList()); // 获取该用户角色所有的权限
+        userHomeInfo.setRoles(roles);
+
+        QueryWrapper<UserSign> userRecordQueryWrapper = new QueryWrapper<>();
+        userRecordQueryWrapper.eq("uid", uid)
+                .select("realname", "course", "phone_number");
+        UserSign userSign = userSignEntityService.getOne(userRecordQueryWrapper, false);
+        if (userSign != null) {
+            userHomeInfo.setRealName(userSign.getRealname());
+            userHomeInfo.setCourse(userSign.getCourse());
+            userHomeInfo.setPhoneNumber(userSign.getPhoneNumber());
+        }
+
+        QueryWrapper<UserInfo> emailUserInfoQueryWrapper = new QueryWrapper<>();
+        emailUserInfoQueryWrapper.select("uuid", "email")
+                .eq("uuid", uid);
+        UserInfo emailUserInfo = userInfoEntityService.getOne(emailUserInfoQueryWrapper, false);
+
+        if (emailUserInfo != null) {
+            userHomeInfo.setEmail(emailUserInfo.getEmail());
+        }
+
         QueryWrapper<UserAcproblem> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("uid", userHomeInfo.getUid())
                 .select("distinct pid", "submit_id")

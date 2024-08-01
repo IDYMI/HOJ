@@ -69,6 +69,21 @@ public class UserHomeVO {
     @ApiModelProperty(value = "难度=>[P1000,P1001]")
     private Map<Integer, List<UserHomeProblemVO>> solvedGroupByDifficulty;
 
+    @ApiModelProperty(value = "真实姓名")
+    private String realName;
+
+    @ApiModelProperty(value = "专业/班级")
+    private String course;
+
+    @ApiModelProperty(value = "联系方式")
+    private String phoneNumber;
+
+    @ApiModelProperty(value = "邮箱")
+    private String email;
+
+    @ApiModelProperty(value = "角色列表")
+    private List<String> roles;
+
     @ApiModelProperty(value = "最近上线时间")
     private Date recentLoginTime;
 

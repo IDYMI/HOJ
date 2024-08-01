@@ -40,6 +40,7 @@ import top.hcode.hoj.pojo.entity.user.UserSign;
 import top.hcode.hoj.pojo.vo.*;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
+import top.hcode.hoj.utils.Md5Utils;
 import top.hcode.hoj.utils.RedisUtils;
 import top.hcode.hoj.validator.CommonValidator;
 
@@ -100,6 +101,9 @@ public class AccountManager {
 
     @Autowired
     private UserMultiOjEntityService userMultiOjEntityService;
+
+    @Autowired
+    private Md5Utils md5Utils;
 
     /**
      * @MethodName checkUsernameOrEmail
@@ -445,9 +449,9 @@ public class AccountManager {
                 .eq("uuid", userRolesVo.getUid());
         UserInfo userInfo = userInfoEntityService.getOne(userInfoQueryWrapper, false);
         // 与当前登录用户的密码进行比较判断
-        if (userInfo.getPassword().equals(SecureUtil.md5(oldPassword))) { // 如果相同，则进行修改密码操作
+        if (md5Utils.verifySaltPassword(oldPassword, userInfo.getPassword())) { // 如果相同，则进行修改密码操作
             UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.set("password", SecureUtil.md5(newPassword))// 数据库用户密码全部用md5加密
+            updateWrapper.set("password", md5Utils.generateSaltMD5Password(newPassword))// 数据库用户密码全部用加盐md5加密
                     .eq("uuid", userRolesVo.getUid());
             boolean isOk = userInfoEntityService.update(updateWrapper);
             if (isOk) {
@@ -594,7 +598,7 @@ public class AccountManager {
         }
 
         // 与当前登录用户的密码进行比较判断
-        if (userInfo.getPassword().equals(SecureUtil.md5(password))) { // 如果相同，则进行修改操作
+        if (md5Utils.verifySaltPassword(password, userInfo.getPassword())) { // 如果相同，则进行修改操作
             UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
             updateWrapper.set("email", newEmail)
                     .eq("uuid", userRolesVo.getUid());

@@ -11,6 +11,7 @@ import com.alibaba.excel.util.CollectionUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.apache.shiro.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -43,6 +44,7 @@ import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
 import top.hcode.hoj.utils.IpUtils;
 import top.hcode.hoj.utils.JwtUtils;
+import top.hcode.hoj.utils.Md5Utils;
 import top.hcode.hoj.utils.RedisUtils;
 
 import javax.annotation.Resource;
@@ -101,6 +103,9 @@ public class PassportManager {
     @Resource
     private ContestEntityService contestEntityService;
 
+    @Autowired
+    private Md5Utils md5Utils;
+
     public UserInfoVO login(LoginDTO loginDto, HttpServletResponse response, HttpServletRequest request)
             throws StatusFailException, StatusForbiddenException {
         // 去掉账号密码首尾的空格
@@ -134,8 +139,7 @@ public class PassportManager {
         if (userRolesVo == null) {
             throw new StatusFailException("用户名或密码错误！请注意大小写！");
         }
-
-        if (!userRolesVo.getPassword().equals(SecureUtil.md5(loginDto.getPassword()))) {
+        if (!md5Utils.verifySaltPassword(loginDto.getPassword(), userRolesVo.getPassword())) {
             if (tryLoginCount == null) {
                 redisUtils.set(key, 1, 60 * 30); // 三十分钟不尝试，该限制会自动清空消失
             } else {
@@ -171,7 +175,8 @@ public class PassportManager {
 
                 // 更新原始密码
                 UpdateWrapper<UserInfo> userInfoUpdateWrapper = new UpdateWrapper<>();
-                userInfoUpdateWrapper.eq("username", username).set("password", SecureUtil.md5(newPassword));
+                userInfoUpdateWrapper.eq("username", username).set("password",
+                        md5Utils.generateSaltMD5Password(newPassword));
                 userInfoEntityService.update(userInfoUpdateWrapper);
             } else {
                 // 首次登录强制要求更改密码
@@ -320,7 +325,7 @@ public class PassportManager {
         String uuid = IdUtil.simpleUUID();
         // 为新用户设置uuid
         registerDto.setUuid(uuid);
-        registerDto.setPassword(SecureUtil.md5(registerDto.getPassword().trim())); // 将密码MD5加密写入数据库
+        registerDto.setPassword(md5Utils.generateSaltMD5Password(registerDto.getPassword().trim())); // 将密码加盐MD5加密写入数据库
         registerDto.setUsername(registerDto.getUsername().trim());
         registerDto.setEmail(registerDto.getEmail().trim());
 
@@ -410,7 +415,7 @@ public class PassportManager {
         }
 
         UpdateWrapper<UserInfo> userInfoUpdateWrapper = new UpdateWrapper<>();
-        userInfoUpdateWrapper.eq("username", username).set("password", SecureUtil.md5(password));
+        userInfoUpdateWrapper.eq("username", username).set("password", md5Utils.generateSaltMD5Password(password));
         boolean isOk = userInfoEntityService.update(userInfoUpdateWrapper);
         if (!isOk) {
             throw new StatusFailException("重置密码失败");

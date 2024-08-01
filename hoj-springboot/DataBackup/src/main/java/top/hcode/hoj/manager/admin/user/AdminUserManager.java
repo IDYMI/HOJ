@@ -30,6 +30,7 @@ import top.hcode.hoj.pojo.entity.user.UserRole;
 import top.hcode.hoj.pojo.vo.UserRolesVO;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
+import top.hcode.hoj.utils.Md5Utils;
 import top.hcode.hoj.utils.RedisUtils;
 
 import java.util.*;
@@ -64,6 +65,9 @@ public class AdminUserManager {
 
     @Autowired
     private RedisUtils redisUtils;
+
+    @Autowired
+    private Md5Utils md5Utils;
 
     public IPage<UserRolesVO> getUserList(Integer limit, Integer currentPage, Integer type, String keyword) {
         if (currentPage == null || currentPage < 1)
@@ -122,7 +126,7 @@ public class AdminUserManager {
         userInfoUpdateWrapper.eq("uuid", uid)
                 .set("username", username)
                 .set("email", email)
-                .set(setNewPwd, "password", SecureUtil.md5(password))
+                .set(setNewPwd, "password", md5Utils.generateSaltMD5Password(password))
                 .set("title_name", titleName)
                 .set("title_color", titleColor)
                 .set("status", status);
@@ -217,7 +221,7 @@ public class AdminUserManager {
         UserInfo userInfo = new UserInfo()
                 .setUuid(uuid)
                 .setUsername(user.get(0))
-                .setPassword(SecureUtil.md5(user.get(1)))
+                .setPassword(md5Utils.generateSaltMD5Password(user.get(1)))
                 .setEmail(user.size() <= 2 || StringUtils.isEmpty(user.get(2)) ? null : user.get(2));
 
         if (user.size() >= 4) {
@@ -294,7 +298,7 @@ public class AdminUserManager {
             userInfoList.add(new UserInfo()
                     .setUuid(uuid)
                     .setUsername(username)
-                    .setPassword(SecureUtil.md5(password)));
+                    .setPassword(md5Utils.generateSaltMD5Password(password)));
             userInfo.put(username, password);
             userRoleList.add(new UserRole()
                     .setRoleId(type == 0 ? 1002L : (type == 1 ? 1009L : 1010L))

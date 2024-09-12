@@ -362,6 +362,7 @@ export const m = {
   Subtask: 'Subtask',
 
   // /views/oj/rank/ACMRank.vue
+  NewAcmer: 'New',
   ACM_Ranklist: 'ACM Ranklist',
   User: 'User',
   Nickname: 'Nickname',
@@ -786,4 +787,8 @@ export const m = {
 
   // Beauty
   Beauty_Code: 'Beauty Code',
+
+  // /views/oj/rank/ACMContestStatistic.vue
+  ACM_StatisticRank: 'Statistic ACM Ranklist',
+  Contest_Rank_Search_Cids: "Please enter the Cids: ('+'splited)",
 };

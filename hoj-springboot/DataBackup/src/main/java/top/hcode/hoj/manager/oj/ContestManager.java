@@ -25,6 +25,7 @@ import top.hcode.hoj.dao.user.UserInfoEntityService;
 import top.hcode.hoj.pojo.bo.Pair_;
 import top.hcode.hoj.pojo.dto.ContestPrintDTO;
 import top.hcode.hoj.pojo.dto.ContestRankDTO;
+import top.hcode.hoj.pojo.dto.ContestStatisticDTO;
 import top.hcode.hoj.pojo.dto.RegisterContestDTO;
 import top.hcode.hoj.pojo.dto.UserReadContestAnnouncementDTO;
 import top.hcode.hoj.pojo.entity.common.Announcement;
@@ -41,6 +42,7 @@ import top.hcode.hoj.validator.GroupValidator;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.regex.*;
 
 import javax.annotation.Resource;
 
@@ -378,6 +380,65 @@ public class ContestManager {
         }
 
         return contestProblemList;
+    }
+
+    public IPage getStatisticRank(ContestStatisticDTO ContestStatisticDto)
+            throws StatusFailException, StatusForbiddenException {
+        String cids = ContestStatisticDto.getCids();
+        Integer currentPage = ContestStatisticDto.getCurrentPage();
+        Integer limit = ContestStatisticDto.getLimit();
+        String keyword = ContestStatisticDto.getKeyword();
+
+        // 页数，每页题数若为空，设置默认值
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 30;
+
+        // 获取当前登录的用户
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        List<Contest> contestList = new ArrayList<>();
+
+        List<Long> contest_cids = getSplitedCid(cids);
+
+        for (int i = 0; i < contest_cids.size(); i++) {
+            String input_cid = cids.split("\\+")[i];
+            Long cid = contest_cids.get(i);
+            if (cid == -1L) {
+                throw new StatusFailException("错误，请输入正确的 cid, 对应错误 cid: " + input_cid + "无效");
+            }
+
+            Contest contest = contestEntityService.getById(cid);
+            if (contest == null) { // 查询不存在
+                throw new StatusFailException("错误：cid对应比赛不存在, 对应错误 cid: " + input_cid + "无效");
+            }
+
+            Boolean isACM = (contest.getType().intValue() == Constants.Contest.TYPE_ACM.getCode());
+
+            if (!isACM) {
+                throw new StatusFailException("错误：cid对应比赛不为ACM类型, 对应错误 cid: " + input_cid + "无效");
+            }
+
+            // 超级管理员或者该比赛的创建者，则为比赛管理者
+            boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                    || SecurityUtils.getSubject().hasRole("admin");
+
+            // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
+            contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
+
+            if (contest.getStatus().intValue() != Constants.Contest.STATUS_ENDED.getCode()) {
+                throw new StatusFailException("错误：cid对应比赛还未结束, 对应错误 cid: " + input_cid + "无效");
+            }
+
+            if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
+                throw new StatusForbiddenException("错误：您并非该比赛的管理员，对用cid：" + input_cid + "，无权下载榜单！");
+            }
+
+            contestList.add(contest);
+        }
+
+        return contestRankManager.getStatisticRankPage(contestList, currentPage, limit, keyword);
     }
 
     public List<ProblemFullScreenListVO> getContestFullScreenProblemList(Long cid)
@@ -967,5 +1028,39 @@ public class ContestManager {
         } else {
             return null;
         }
+    }
+
+    public List<Long> getSplitedCid(String cids) throws StatusFailException {
+        if (StringUtils.isEmpty(cids) || !isValidCids(cids)) {
+            throw new StatusFailException("错误，请传入正确的 cids （比赛 Id 用 ‘+’ 号隔开）!");
+        }
+
+        // 使用 '+' 分割字符串，然后将每个段转换为Long类型
+        List<Long> contest_cids = Arrays.stream(cids.split("\\+"))
+                .map(segment -> {
+                    try {
+                        long value = Long.parseLong(segment);
+                        return (value >= 0) ? value : -1L;
+                    } catch (NumberFormatException e) {
+                        return -1L;
+                    }
+                })
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(contest_cids)) {
+            throw new StatusFailException("错误，请传入 cids !");
+        }
+
+        return contest_cids;
+    }
+
+    private static boolean isValidCids(String input) {
+        // 使用正则表达式进行匹配
+        String pattern = "\\d+(\\s*\\+\\s*\\d+)*";
+        Pattern regex = Pattern.compile(pattern);
+        Matcher matcher = regex.matcher(input);
+
+        // 判断是否匹配成功
+        return matcher.matches();
     }
 }

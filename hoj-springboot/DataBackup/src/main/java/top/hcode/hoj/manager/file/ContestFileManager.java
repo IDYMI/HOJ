@@ -23,11 +23,14 @@ import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.user.UserInfoEntityService;
 import top.hcode.hoj.manager.oj.ContestCalculateRankManager;
 import top.hcode.hoj.pojo.bo.File_;
+import top.hcode.hoj.manager.oj.ContestManager;
+import top.hcode.hoj.manager.oj.ContestRankManager;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.contest.ContestPrint;
 import top.hcode.hoj.pojo.entity.contest.ContestProblem;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.vo.ACMContestRankVO;
+import top.hcode.hoj.pojo.vo.ACMStatisticContestVO;
 import top.hcode.hoj.pojo.vo.OIContestRankVO;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
@@ -75,10 +78,16 @@ public class ContestFileManager {
     private ContestCalculateRankManager contestCalculateRankManager;
 
     @Autowired
+    private ContestRankManager contestRankManager;
+
+    @Autowired
     private ContestValidator contestValidator;
 
     @Autowired
     private GroupValidator groupValidator;
+
+    @Autowired
+    private ContestManager contestManager;
 
     public void downloadContestRank(Long cid, Boolean forceRefresh, Boolean removeStar,
             Boolean isContainsAfterContestJudge,
@@ -151,6 +160,74 @@ public class ContestFileManager {
                     .doWrite(fileEntityService.changOIContestRankToExcelRowList(oiContestRankVOList,
                             contestProblemDisplayIDList, contest.getRankShowName()));
         }
+    }
+
+    public void downloadStatisticRank(String cids, HttpServletResponse response)
+            throws IOException, StatusFailException, StatusForbiddenException {
+
+        // 获取当前登录的用户
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        List<Contest> contestList = new ArrayList<>();
+
+        List<Long> contest_cids = contestManager.getSplitedCid(cids);
+
+        for (int i = 0; i < contest_cids.size(); i++) {
+            String input_cid = cids.split("\\+")[i];
+            Long cid = contest_cids.get(i);
+            if (cid == -1L) {
+                throw new StatusFailException("错误，请输入正确的 cid, 对应错误 cid: " + input_cid + "无效");
+            }
+
+            Contest contest = contestEntityService.getById(cid);
+            if (contest == null) { // 查询不存在
+                throw new StatusFailException("错误：cid对应比赛不存在, 对应错误 cid: " + input_cid + "无效");
+            }
+
+            Boolean isACM = (contest.getType().intValue() == Constants.Contest.TYPE_ACM.getCode());
+
+            if (!isACM) {
+                throw new StatusFailException("错误：cid对应比赛不为ACM类型, 对应错误 cid: " + input_cid + "无效");
+            }
+
+            // 超级管理员或者该比赛的创建者，则为比赛管理者
+            boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                    || SecurityUtils.getSubject().hasRole("admin");
+
+            // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
+            contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
+
+            if (contest.getStatus().intValue() != Constants.Contest.STATUS_ENDED.getCode()) {
+                throw new StatusFailException("错误：cid对应比赛还未结束, 对应错误 cid: " + input_cid + "无效");
+            }
+
+            if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
+                throw new StatusForbiddenException("错误：您并非该比赛的管理员，对用cid：" + input_cid + "，无权下载榜单！");
+            }
+            contestList.add(contest);
+        }
+
+        List<ACMStatisticContestVO> acmStatisticContestRankVOList = contestRankManager.getStatisticRankList(contestList,
+                null);
+
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+
+        // 这里URLEncoder.encode可以防止中文乱码
+        String fileName = encodeFileName("contest_" + cids + "_rank");
+
+        response.setHeader("Content-disposition", "attachment;filename=" + fileName + ".xlsx");
+        response.setHeader("Content-Type", "application/xlsx");
+
+        EasyExcel.write(response.getOutputStream())
+                .head(fileEntityService.getStatisticRankExcelHead(contest_cids))
+                .sheet("rank")
+                .doWrite(fileEntityService.changeStatisticContestRankToExcelRowList(acmStatisticContestRankVOList,
+                        contest_cids));
+    }
+
+    private String encodeFileName(String fileName) throws UnsupportedEncodingException {
+        return URLEncoder.encode(fileName, "UTF-8").replace("+", "%20").replace("%2B", "+");
     }
 
     public void downloadContestACSubmission(Long cid, Boolean excludeAdmin, String splitType,

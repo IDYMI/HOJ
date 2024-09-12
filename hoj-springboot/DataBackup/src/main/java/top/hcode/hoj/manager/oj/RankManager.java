@@ -78,31 +78,36 @@ public class RankManager {
         IPage rankList = null;
         // 根据type查询不同类型的排行榜
         if (type.intValue() == Constants.Contest.TYPE_ACM.getCode()) {
-            rankList = getACMRankList(limit, currentPage, uidList);
+            rankList = getACMRankList(limit, currentPage, uidList, false);
         } else if (type.intValue() == Constants.Contest.TYPE_OI.getCode()) {
-            rankList = getOIRankList(limit, currentPage, uidList);
+            rankList = getOIRankList(limit, currentPage, uidList, false);
+        } else if (type.intValue() == Constants.Contest.TYPE_NEWACM.getCode()) {
+            rankList = getACMRankList(limit, currentPage, uidList, true);
+        } else if (type.intValue() == Constants.Contest.TYPE_NEWOI.getCode()) {
+            rankList = getOIRankList(limit, currentPage, uidList, true);
         } else {
-            throw new StatusFailException("排行榜类型代码不正确，请使用0(ACM),1(OI)！");
+            throw new StatusFailException("排行榜类型代码不正确，请使用0(ACM),1(OI),2(NewACM),3(NewOI)！");
         }
         return rankList;
     }
 
-    private IPage<ACMRankVO> getACMRankList(int limit, int currentPage, List<String> uidList) {
+    private IPage<ACMRankVO> getACMRankList(int limit, int currentPage, List<String> uidList, Boolean isNew) {
 
         IPage<ACMRankVO> data = null;
         if (uidList != null) {
             Page<ACMRankVO> page = new Page<>(currentPage, limit);
             if (uidList.size() > 0) {
-                data = userRecordEntityService.getACMRankList(page, uidList);
+                data = userRecordEntityService.getACMRankList(page, uidList, isNew);
             } else {
                 data = page;
             }
         } else {
-            String key = Constants.Account.ACM_RANK_CACHE.getCode() + "_" + limit + "_" + currentPage;
+            String key = isNew ? Constants.Account.NEW_ACM_RANK_CACHE.getCode()
+                    : Constants.Account.ACM_RANK_CACHE.getCode() + "_" + limit + "_" + currentPage;
             data = (IPage<ACMRankVO>) redisUtils.get(key);
             if (data == null) {
                 Page<ACMRankVO> page = new Page<>(currentPage, limit);
-                data = userRecordEntityService.getACMRankList(page, null);
+                data = userRecordEntityService.getACMRankList(page, null, isNew);
                 redisUtils.set(key, data, cacheRankSecond);
             }
         }
@@ -110,22 +115,23 @@ public class RankManager {
         return data;
     }
 
-    private IPage<OIRankVO> getOIRankList(int limit, int currentPage, List<String> uidList) {
+    private IPage<OIRankVO> getOIRankList(int limit, int currentPage, List<String> uidList, Boolean isNew) {
 
         IPage<OIRankVO> data = null;
         if (uidList != null) {
             Page<OIRankVO> page = new Page<>(currentPage, limit);
             if (uidList.size() > 0) {
-                data = userRecordEntityService.getOIRankList(page, uidList);
+                data = userRecordEntityService.getOIRankList(page, uidList, isNew);
             } else {
                 data = page;
             }
         } else {
-            String key = Constants.Account.OI_RANK_CACHE.getCode() + "_" + limit + "_" + currentPage;
+            String key = isNew ? Constants.Account.NEW_OI_RANK_CACHE.getCode()
+                    : Constants.Account.OI_RANK_CACHE.getCode() + "_" + limit + "_" + currentPage;
             data = (IPage<OIRankVO>) redisUtils.get(key);
             if (data == null) {
                 Page<OIRankVO> page = new Page<>(currentPage, limit);
-                data = userRecordEntityService.getOIRankList(page, null);
+                data = userRecordEntityService.getOIRankList(page, null, isNew);
                 redisUtils.set(key, data, cacheRankSecond);
             }
         }

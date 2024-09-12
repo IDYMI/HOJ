@@ -56,7 +56,8 @@ public class GroupTrainingProblemManager {
     private GroupValidator groupValidator;
 
     public HashMap<String, Object> getTrainingProblemList(Integer limit, Integer currentPage, String keyword,
-            Boolean queryExisted, Long tid) throws StatusNotFoundException, StatusForbiddenException {
+            Boolean queryExisted, Long tid)
+            throws StatusNotFoundException, StatusForbiddenException, StatusFailException {
 
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 

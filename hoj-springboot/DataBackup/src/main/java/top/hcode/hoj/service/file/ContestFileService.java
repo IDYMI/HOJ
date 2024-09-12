@@ -18,6 +18,9 @@ public interface ContestFileService {
             Boolean isContainsAfterContestJudge,
             HttpServletResponse response) throws StatusFailException, IOException, StatusForbiddenException;
 
+    public void downloadStatisticRank(String cids, HttpServletResponse response)
+            throws StatusFailException, IOException, StatusForbiddenException;
+
     public void downloadContestACSubmission(Long cid, Boolean excludeAdmin, String splitType,
             HttpServletResponse response) throws StatusFailException, StatusForbiddenException;
 

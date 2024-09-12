@@ -577,6 +577,10 @@ const ojApi = {
       params: { cid, containsEnd, time },
     });
   },
+  // 系列比赛排行榜
+  getStatisticRank(data) {
+    return ajax('/api/get-statistic-rank', 'post', { data });
+  },
   // 获取比赛题目详情
   getContestProblem(displayId, cid, gid, containsEnd = false) {
     return ajax('/api/get-contest-problem-details', 'get', {

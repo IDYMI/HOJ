@@ -362,6 +362,7 @@ export const m = {
   Subtask: '子任务',
 
   // /views/oj/rank/ACMRank.vue
+  NewAcmer: '新生',
   ACM_Ranklist: 'ACM 排行榜',
   User: '用户',
   Nickname: '昵称',
@@ -787,4 +788,8 @@ export const m = {
 
   // Beauty
   Beauty_Code: '美化代码',
+
+  // /views/oj/rank/ACMContestStatistic.vue
+  ACM_StatisticRank: 'ACM 系列比赛排行榜',
+  Contest_Rank_Search_Cids: "请输入比赛的 Cids：（'+'隔开）",
 };

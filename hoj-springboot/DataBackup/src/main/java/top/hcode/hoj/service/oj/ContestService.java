@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.pojo.dto.ContestPrintDTO;
 import top.hcode.hoj.pojo.dto.ContestRankDTO;
+import top.hcode.hoj.pojo.dto.ContestStatisticDTO;
 import top.hcode.hoj.pojo.dto.RegisterContestDTO;
 import top.hcode.hoj.pojo.dto.UserReadContestAnnouncementDTO;
 import top.hcode.hoj.pojo.entity.common.Announcement;
@@ -58,6 +59,8 @@ public interface ContestService {
     public CommonResult<IPage> getContestRank(ContestRankDTO contestRankDto);
 
     public CommonResult<IPage> getSynchronousRank(ContestRankDTO contestRankDto);
+
+    public CommonResult<IPage> getStatisticRank(ContestStatisticDTO ContestStatisticDto);
 
     public CommonResult<IPage<AnnouncementVO>> getContestAnnouncement(Long cid, Integer limit, Integer currentPage,
             Long id);

@@ -3,7 +3,11 @@
     <el-col :span="24">
       <el-card :padding="10">
         <div slot="header">
-          <span class="panel-title">{{ $t('m.ACM_Ranklist') }}</span>
+          <ul class="nav-list">
+            <li>
+              <span class="panel-title-acm">{{ $t("m.ACM_Ranklist") }}</span>
+            </li>
+          </ul>
         </div>
         <div class="echarts">
           <ECharts :options="options" ref="chart" :autoresize="true"></ECharts>
@@ -17,6 +21,14 @@
         >
           <el-button slot="append" icon="el-icon-search" class="search-btn" @click="getRankData(1)"></el-button>
         </el-input>
+        <div class="filter-right">
+          <el-switch
+            v-model="isNew"
+            @change="handleOnlyNew"
+            :active-text="$t('m.NewAcmer')"
+            :inactive-text="$t('m.All')"
+          ></el-switch>
+        </div>
       </el-card>
       <vxe-table
         :data="dataRank"
@@ -125,6 +137,7 @@ export default {
       limit: 30,
       total: 0,
       searchUser: null,
+      isNew: false,
       loadingTable: false,
       screenWidth: 768,
       dataRank: [],
@@ -227,6 +240,9 @@ export default {
     };
   },
   mounted() {
+    this.page = parseInt(this.$route.query.page) || 1;
+    this.isNew = this.$route.query.isNew === "true" || false;
+    this.searchUser = this.$route.query.searchUser || null;
     this.getRankData(1);
   },
   methods: {
@@ -234,8 +250,9 @@ export default {
       let bar = this.$refs.chart;
       bar.showLoading({ maskColor: "rgba(250, 250, 250, 0.8)" });
       this.loadingTable = true;
+      const type = this.isNew ? RULE_TYPE.NewACM : RULE_TYPE.ACM;
       api
-        .getUserRank(page, this.limit, RULE_TYPE.ACM, this.searchUser)
+        .getUserRank(page, this.limit, type, this.searchUser)
         .then((res) => {
           this.loadingTable = false;
           if (page === 1) {
@@ -287,6 +304,13 @@ export default {
     getAxisLabelColor() {
       return this.webTheme === "Dark" ? "white" : "black";
     },
+    handleOnlyNew() {
+      this.$router.push({
+        name: "ACM Rank",
+        query: { isNew: this.isNew },
+      });
+      this.getRankData(1);
+    },
   },
   computed: {
     ...mapGetters(["isAuthenticated", "userInfo", "webTheme"]),
@@ -324,6 +348,29 @@ export default {
   .el-input-group {
     width: 30%;
   }
+}
+.nav-list {
+  display: flex;
+  list-style: none;
+}
+
+.nav-list li {
+  display: inline-block;
+  margin-right: 100px;
+}
+
+.selected {
+  color: #409eff;
+}
+
+.panel-title-acm {
+  font-size: 2em;
+  font-weight: 500;
+  line-height: 30px;
+}
+.filter-right {
+  float: right;
+  margin-top: 15px;
 }
 </style>
 <style>

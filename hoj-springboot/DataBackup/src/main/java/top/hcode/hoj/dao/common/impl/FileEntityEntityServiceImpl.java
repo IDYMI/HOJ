@@ -5,9 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import top.hcode.hoj.mapper.FileMapper;
 import top.hcode.hoj.pojo.entity.common.File;
+import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.vo.ACMContestRankVO;
+import top.hcode.hoj.pojo.vo.ACMStatisticContestVO;
 import top.hcode.hoj.pojo.vo.OIContestRankVO;
 import top.hcode.hoj.dao.common.FileEntityService;
+import top.hcode.hoj.dao.contest.ContestEntityService;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,6 +25,9 @@ import java.util.List;
 public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> implements FileEntityService {
     @Autowired
     private FileMapper fileMapper;
+
+    @Autowired
+    private ContestEntityService contestEntityService;
 
     @Override
     public int updateFileToDeleteByUidAndType(String uid, String type) {
@@ -101,6 +107,40 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
             tmp.add(displayID);
             headList.add(tmp);
         }
+        return headList;
+    }
+
+    @Override
+    public List<List<String>> getStatisticRankExcelHead(List<Long> cidList) {
+        List<List<String>> headList = new LinkedList<>();
+
+        List<String> head0 = new LinkedList<>();
+        head0.add("Rank");
+
+        List<String> head1 = new LinkedList<>();
+        head1.add("Username");
+        List<String> head2 = new LinkedList<>();
+        head2.add("School");
+
+        headList.add(head0);
+        headList.add(head1);
+        headList.add(head2);
+
+        List<String> head3 = new LinkedList<>();
+        head3.add("AC");
+        List<String> head4 = new LinkedList<>();
+        head4.add("Total Penalty Time");
+        headList.add(head3);
+        headList.add(head4);
+
+        // 添加题目头
+        for (Long cid : cidList) {
+            List<String> tmp = new LinkedList<>();
+            Contest contest = contestEntityService.getById(cid);
+            tmp.add(String.valueOf(cid + "\n" + contest.getTitle()));
+            headList.add(tmp);
+        }
+
         return headList;
     }
 
@@ -199,4 +239,31 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
         return allRowDataList;
     }
 
+    @Override
+    public List<List<Object>> changeStatisticContestRankToExcelRowList(
+            List<ACMStatisticContestVO> acmStatisticContestRankVOList,
+            List<Long> cidList) {
+        List<List<Object>> allRowDataList = new LinkedList<>();
+        for (ACMStatisticContestVO acmContestRankVo : acmStatisticContestRankVOList) {
+            List<Object> rowData = new LinkedList<>();
+            rowData.add(acmContestRankVo.getRank() == -1 ? "*" : acmContestRankVo.getRank().toString());
+            rowData.add(acmContestRankVo.getUsername());
+
+            rowData.add(acmContestRankVo.getSchool());
+            rowData.add(acmContestRankVo.getAc());
+            rowData.add(acmContestRankVo.getTotalTime());
+            HashMap<String, HashMap<String, Object>> contestInfos = acmContestRankVo.getContestInfo();
+            for (Long cid : cidList) {
+                HashMap<String, Object> contestInfo = contestInfos.getOrDefault(String.valueOf(cid), null);
+                if (contestInfo != null) {
+                    String info = String.valueOf(contestInfo.getOrDefault("AC", false));
+                    rowData.add(info);
+                } else {
+                    rowData.add("");
+                }
+            }
+            allRowDataList.add(rowData);
+        }
+        return allRowDataList;
+    }
 }

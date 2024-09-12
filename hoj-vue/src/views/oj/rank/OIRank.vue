@@ -3,7 +3,11 @@
     <el-col :span="24">
       <el-card :padding="10">
         <div slot="header">
-          <span class="panel-title">{{ $t('m.OI_Ranklist') }}</span>
+          <ul class="nav-list">
+            <li>
+              <span class="panel-title-oi">{{ $t("m.OI_Ranklist") }}</span>
+            </li>
+          </ul>
         </div>
         <div class="echarts">
           <ECharts :options="options" ref="chart" auto-resize></ECharts>
@@ -17,6 +21,14 @@
         >
           <el-button slot="append" icon="el-icon-search" class="search-btn" @click="getRankData(1)"></el-button>
         </el-input>
+        <div class="filter-right">
+          <el-switch
+            v-model="isNew"
+            @change="handleOnlyNew"
+            :active-text="$t('m.NewAcmer')"
+            :inactive-text="$t('m.All')"
+          ></el-switch>
+        </div>
       </el-card>
       <vxe-table
         :data="dataRank"
@@ -68,19 +80,6 @@
             <span>{{ row.score }}</span>
           </template>
         </vxe-table-column>
-        <vxe-table-column :title="$t('m.AC') + '/' + $t('m.Total')" min-width="100">
-          <template v-slot="{ row }">
-            <span>
-              <a @click="goUserACStatus(row.username)" style="color:rgb(87, 163, 243);">{{ row.ac }}</a>
-              <span>/{{ row.total }}</span>
-            </span>
-          </template>
-        </vxe-table-column>
-        <vxe-table-column :title="$t('m.Rating')" min-width="80">
-          <template v-slot="{ row }">
-            <span>{{ getACRate(row.ac, row.total) }}</span>
-          </template>
-        </vxe-table-column>
         <vxe-table-column
           :title="$t('m.Signature')"
           min-width="300"
@@ -128,6 +127,7 @@ export default {
       limit: 30,
       total: 0,
       searchUser: null,
+      isNew: false,
       dataRank: [],
       loadingTable: false,
       screenWidth: 768,
@@ -221,6 +221,9 @@ export default {
     };
   },
   mounted() {
+    this.page = parseInt(this.$route.query.page) || 1;
+    this.isNew = this.$route.query.isNew === "true" || false;
+    this.searchUser = this.$route.query.searchUser || null;
     this.getRankData(1);
   },
   methods: {
@@ -228,7 +231,8 @@ export default {
       let bar = this.$refs.chart;
       bar.showLoading({ maskColor: "rgba(250, 250, 250, 0.8)" });
       this.loadingTable = true;
-      api.getUserRank(page, this.limit, RULE_TYPE.OI, this.searchUser).then(
+      const type = this.isNew ? RULE_TYPE.NewOI : RULE_TYPE.OI;
+      api.getUserRank(page, this.limit, type, this.searchUser).then(
         (res) => {
           if (page === 1) {
             this.changeCharts(res.data.data.records.slice(0, 10));
@@ -279,6 +283,13 @@ export default {
     getAxisLabelColor() {
       return this.webTheme === "Dark" ? "white" : "black";
     },
+    handleOnlyNew() {
+      this.$router.push({
+        name: "OI Rank",
+        query: { isNew: this.isNew },
+      });
+      this.getRankData(1);
+    },
   },
   computed: {
     ...mapGetters(["isAuthenticated", "userInfo", "webTheme"]),
@@ -320,5 +331,26 @@ export default {
   .el-input-group {
     width: 30%;
   }
+}
+.nav-list {
+  display: flex;
+  list-style: none;
+}
+
+.nav-list li {
+  display: inline-block;
+  margin-right: 100px;
+}
+.selected {
+  color: #409eff;
+}
+.panel-title-oi {
+  font-size: 2em;
+  font-weight: 500;
+  line-height: 30px;
+}
+.filter-right {
+  float: right;
+  margin-top: 15px;
 }
 </style>

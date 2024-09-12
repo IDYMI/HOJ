@@ -21,6 +21,7 @@ import top.hcode.hoj.dao.contest.ContestPrintEntityService;
 import top.hcode.hoj.dao.contest.ContestProblemEntityService;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.user.UserInfoEntityService;
+import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.manager.oj.ContestCalculateRankManager;
 import top.hcode.hoj.pojo.bo.File_;
 import top.hcode.hoj.manager.oj.ContestManager;
@@ -88,6 +89,9 @@ public class ContestFileManager {
 
     @Autowired
     private ContestManager contestManager;
+
+    @Autowired
+    private GroupManager groupManager;
 
     public void downloadContestRank(Long cid, Boolean forceRefresh, Boolean removeStar,
             Boolean isContainsAfterContestJudge,
@@ -189,9 +193,7 @@ public class ContestFileManager {
                 throw new StatusFailException("错误：cid对应比赛不为ACM类型, 对应错误 cid: " + input_cid + "无效");
             }
 
-            // 超级管理员或者该比赛的创建者，则为比赛管理者
-            boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                    || SecurityUtils.getSubject().hasRole("admin");
+            boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
             // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
             contestValidator.validateContestAuth(contest, userRolesVo, isRoot);

@@ -8,6 +8,7 @@ import top.hcode.hoj.common.exception.StatusAccessDeniedException;
 import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.common.exception.StatusForbiddenException;
 import top.hcode.hoj.dao.training.TrainingRegisterEntityService;
+import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.pojo.entity.training.Training;
 import top.hcode.hoj.pojo.entity.training.TrainingRegister;
 import top.hcode.hoj.shiro.AccountProfile;
@@ -33,6 +34,9 @@ public class TrainingValidator {
     @Resource
     private CommonValidator commonValidator;
 
+    @Autowired
+    private GroupManager groupManager;
+
     public void validateTraining(Training training) throws StatusFailException {
         commonValidator.validateContent(training.getTitle(), "训练标题", 500);
         commonValidator.validateContentLength(training.getDescription(), "训练描述", 65535);
@@ -54,7 +58,8 @@ public class TrainingValidator {
                 || SecurityUtils.getSubject().hasRole("admin");
 
         if (training.getIsGroup()) {
-            if (!groupValidator.isGroupMember(userRolesVo.getUid(), training.getGid()) && !isRoot) {
+            Boolean isGroupRoot = groupManager.getGroupAuthAdmin(training.getGid());
+            if (!isGroupRoot) {
                 throw new StatusForbiddenException("对不起，您并非该团队内的成员，无权操作！");
             }
         }

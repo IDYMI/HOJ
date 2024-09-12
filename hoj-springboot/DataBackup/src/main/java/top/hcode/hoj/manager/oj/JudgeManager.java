@@ -27,6 +27,7 @@ import top.hcode.hoj.dao.user.UserAcproblemEntityService;
 import top.hcode.hoj.exception.AccessException;
 import top.hcode.hoj.judge.remote.RemoteJudgeDispatcher;
 import top.hcode.hoj.judge.self.JudgeDispatcher;
+import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.pojo.dto.*;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.contest.ContestRecord;
@@ -103,6 +104,9 @@ public class JudgeManager {
 
     @Resource
     private SynchronousManager synchronousManager;
+
+    @Autowired
+    private GroupManager groupManager;
 
     /**
      * @MethodName submitProblemJudge
@@ -336,8 +340,7 @@ public class JudgeManager {
 
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(judge.getGid());
 
         // 清空vj信息
         judge.setVjudgeUsername(null);

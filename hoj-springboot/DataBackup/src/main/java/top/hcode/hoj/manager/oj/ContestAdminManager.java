@@ -24,6 +24,7 @@ import top.hcode.hoj.dao.contest.ContestRecordEntityService;
 import top.hcode.hoj.dao.contest.ContestRegisterEntityService;
 import top.hcode.hoj.dao.contest.ContestSignEntityService;
 import top.hcode.hoj.dao.user.UserSignEntityService;
+import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.pojo.dto.CheckACDTO;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.contest.ContestPrint;
@@ -69,6 +70,9 @@ public class ContestAdminManager {
     @Autowired
     private GroupValidator groupValidator;
 
+    @Autowired
+    private GroupManager groupManager;
+
     public IPage<ContestRecord> getContestACInfo(Long cid, Integer currentPage, Integer limit)
             throws StatusForbiddenException {
 
@@ -77,9 +81,7 @@ public class ContestAdminManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         if (!isRoot
                 && !contest.getUid().equals(userRolesVo.getUid())
@@ -110,9 +112,7 @@ public class ContestAdminManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(checkACDto.getCid());
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         if (!isRoot
                 && !contest.getUid().equals(userRolesVo.getUid())
@@ -136,9 +136,7 @@ public class ContestAdminManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         if (!isRoot
                 && !contest.getUid().equals(userRolesVo.getUid())
@@ -170,9 +168,7 @@ public class ContestAdminManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())
                 && !(contest.getIsGroup() && groupValidator.isGroupRoot(userRolesVo.getUid(), contest.getGid()))) {
@@ -194,8 +190,7 @@ public class ContestAdminManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         if (!isRoot
                 && !contest.getUid().equals(userRolesVo.getUid())
@@ -242,8 +237,7 @@ public class ContestAdminManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         if (!isRoot
                 && !contest.getUid().equals(userRolesVo.getUid())
@@ -286,8 +280,7 @@ public class ContestAdminManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())
                 && !(contest.getIsGroup() && groupValidator.isGroupRoot(userRolesVo.getUid(), contest.getGid()))) {
@@ -311,8 +304,7 @@ public class ContestAdminManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())
                 && !(contest.getIsGroup() && groupValidator.isGroupRoot(userRolesVo.getUid(), contest.getGid()))) {

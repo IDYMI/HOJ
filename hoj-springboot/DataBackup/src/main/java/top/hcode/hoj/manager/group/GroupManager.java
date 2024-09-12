@@ -330,14 +330,20 @@ public class GroupManager {
     }
 
     public Boolean getGroupAuthAdmin(Long gid) {
-        // 对于命题团队开放root
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        if (userRolesVo == null) {
+            return false;
+        }
+
+        // 对于命题团队不开放开放root
         boolean isRoot = SecurityUtils.getSubject().hasRole("root")
                 || SecurityUtils.getSubject().hasRole("admin");
 
         Group group = groupEntityService.getById(gid);
 
-        return isRoot && (group == null
-                || (group != null && group.getAuth().intValue() != Constants.Group.PROPOSITION.getAuth()));
+        return isRoot && (group == null || group.getAuth().intValue() != Constants.Group.PROPOSITION.getAuth()
+                || groupValidator.isGroupAdmin(userRolesVo.getUid(), gid));
     }
 
 }

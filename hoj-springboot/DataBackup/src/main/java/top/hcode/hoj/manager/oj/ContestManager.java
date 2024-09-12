@@ -22,6 +22,7 @@ import top.hcode.hoj.dao.group.GroupMemberEntityService;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.problem.*;
 import top.hcode.hoj.dao.user.UserInfoEntityService;
+import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.pojo.bo.Pair_;
 import top.hcode.hoj.pojo.dto.ContestPrintDTO;
 import top.hcode.hoj.pojo.dto.ContestRankDTO;
@@ -117,6 +118,9 @@ public class ContestManager {
     @Resource
     private SynchronousManager synchronousManager;
 
+    @Autowired
+    private GroupManager groupManager;
+
     public IPage<ContestVO> getContestList(Integer limit, Integer currentPage, Integer status, Integer type,
             String keyword) {
         // 页数，每页题数若为空，设置默认值
@@ -130,9 +134,6 @@ public class ContestManager {
     public ContestVO getContestInfo(Long cid) throws StatusFailException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
-
         ContestVO contestInfo = contestEntityService.getContestInfoById(cid);
         if (contestInfo == null) {
             throw new StatusFailException("对不起，该比赛不存在!");
@@ -141,7 +142,8 @@ public class ContestManager {
         Contest contest = contestEntityService.getById(cid);
 
         if (contest.getIsGroup()) {
-            if (!groupValidator.isGroupMember(userRolesVo.getUid(), contest.getGid()) && !isRoot) {
+            Boolean isGroupRoot = groupManager.getGroupAuthAdmin(contest.getGid());
+            if (!groupValidator.isGroupMember(userRolesVo.getUid(), contest.getGid()) && !isGroupRoot) {
                 throw new StatusForbiddenException("对不起，您无权限操作！");
             }
         }
@@ -155,15 +157,14 @@ public class ContestManager {
     public List<ContestFileConfigVO> getContestFileList(Long cid) throws StatusFailException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
-
         ContestVO contestInfo = contestEntityService.getContestInfoById(cid);
         if (contestInfo == null) {
             throw new StatusFailException("对不起，该比赛不存在!");
         }
 
         Contest contest = contestEntityService.getById(cid);
+
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         if (contest.getIsGroup()) {
             if (!groupValidator.isGroupMember(userRolesVo.getUid(), contest.getGid()) && !isRoot) {
@@ -195,10 +196,9 @@ public class ContestManager {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
-
         Contest contest = contestEntityService.getById(cid);
+
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         if (contest == null || !contest.getVisible()) {
             throw new StatusFailException("对不起，该比赛不存在!");
@@ -303,9 +303,7 @@ public class ContestManager {
             }
         }
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         if (!Objects.equals(contest.getOpenRank(), true)) { // 当比賽没有開放赛外榜单，需要鉴权
             // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目列表，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
@@ -420,9 +418,7 @@ public class ContestManager {
                 throw new StatusFailException("错误：cid对应比赛不为ACM类型, 对应错误 cid: " + input_cid + "无效");
             }
 
-            // 超级管理员或者该比赛的创建者，则为比赛管理者
-            boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                    || SecurityUtils.getSubject().hasRole("admin");
+            boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
             // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
             contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
@@ -450,8 +446,7 @@ public class ContestManager {
         Contest contest = contestEntityService.getById(cid);
 
         // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目列表，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
         contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
@@ -523,9 +518,7 @@ public class ContestManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
         contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
@@ -636,9 +629,7 @@ public class ContestManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(searchCid);
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
         contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
@@ -723,10 +714,7 @@ public class ContestManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(searchCid);
 
-        // 是否为超级管理员或者该比赛的创建者，则为比赛管理者
-
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         IPage<JudgeVO> contestJudgeList = getContestSubmissionList(
                 limit,
@@ -823,9 +811,7 @@ public class ContestManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(contestRankDto.getCid());
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
         contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
@@ -904,10 +890,7 @@ public class ContestManager {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(contestRankDto.getCid());
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
         contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
@@ -945,8 +928,7 @@ public class ContestManager {
         Contest contest = contestEntityService.getById(cid);
 
         // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
         contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
@@ -996,8 +978,7 @@ public class ContestManager {
         Contest contest = contestEntityService.getById(contestPrintDto.getCid());
 
         // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
         contestValidator.validateContestAuth(contest, userRolesVo, isRoot);

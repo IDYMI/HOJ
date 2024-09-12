@@ -29,6 +29,7 @@ import top.hcode.hoj.dao.user.UserRoleEntityService;
 import top.hcode.hoj.exception.AccessException;
 import top.hcode.hoj.common.exception.MossException;
 import top.hcode.hoj.manager.file.ContestFileManager;
+import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.pojo.dto.ContestMossImportDTO;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.contest.ContestMoss;
@@ -93,6 +94,9 @@ public class MossManager {
     @Autowired
     private UserRoleEntityService userRoleEntityService;
 
+    @Autowired
+    private GroupManager groupManager;
+
     public List<String> getContestLanguage(Long cid, Boolean excludeAdmin)
             throws StatusFailException, StatusForbiddenException, AccessException {
 
@@ -105,8 +109,7 @@ public class MossManager {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         Long gid = contest.getGid();
         if (!isRoot
@@ -139,8 +142,7 @@ public class MossManager {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         Long gid = contest.getGid();
         if (!isRoot
@@ -194,8 +196,7 @@ public class MossManager {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         Long gid = contest.getGid();
         if (!isRoot
@@ -304,8 +305,7 @@ public class MossManager {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         Long gid = contest.getGid();
         if (!isRoot
@@ -373,8 +373,7 @@ public class MossManager {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
 
         Long gid = contest.getGid();
         if (!isRoot

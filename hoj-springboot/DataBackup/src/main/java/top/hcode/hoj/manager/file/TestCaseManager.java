@@ -22,6 +22,8 @@ import top.hcode.hoj.common.result.ResultStatus;
 import top.hcode.hoj.dao.problem.ProblemCaseEntityService;
 import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.pojo.bo.File_;
+import top.hcode.hoj.manager.group.GroupManager;
+
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.problem.ProblemCase;
 import top.hcode.hoj.shiro.AccountProfile;
@@ -52,12 +54,14 @@ public class TestCaseManager {
     @Autowired
     private GroupValidator groupValidator;
 
+    @Autowired
+    private GroupManager groupManager;
+
     public Map<Object, Object> uploadTestcaseZip(MultipartFile file, Long gid, String mode)
             throws StatusFailException, StatusSystemErrorException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin");
+        boolean isRoot = groupManager.getGroupAuthAdmin(gid);
 
         if (!isRoot && !(gid != null && groupValidator.isGroupAdmin(userRolesVo.getUid(), gid))) {
             throw new StatusForbiddenException("对不起，您无权限操作！");

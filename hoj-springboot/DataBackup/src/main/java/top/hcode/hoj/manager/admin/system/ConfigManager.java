@@ -179,7 +179,7 @@ public class ConfigManager {
         }
         boolean isOk = fileEntityService.removeById(id);
         if (isOk) {
-            FileUtil.del(imgFile.getFilePath());
+            FileUtil.del(new java.io.File(imgFile.getFilePath()));
         } else {
             throw new StatusFailException("删除失败！");
         }

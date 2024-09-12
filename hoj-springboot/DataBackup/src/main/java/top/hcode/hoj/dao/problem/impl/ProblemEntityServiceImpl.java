@@ -26,6 +26,7 @@ import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.problem.*;
 import top.hcode.hoj.exception.ProblemIDRepeatException;
 import top.hcode.hoj.mapper.ProblemMapper;
+import top.hcode.hoj.pojo.bo.File_;
 import top.hcode.hoj.pojo.bo.Pair_;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
 import top.hcode.hoj.pojo.entity.problem.*;
@@ -552,14 +553,14 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
         // 将之前的临时文件夹里面的评测文件全部复制到指定文件夹(覆盖)
         if (!StringUtils.isEmpty(tmpTestcaseDir)
-                && FileUtil.exist(tmpTestcaseDir)
+                && FileUtil.exist(new File(tmpTestcaseDir))
                 && !FileUtil.isDirEmpty(new File(tmpTestcaseDir))) {
-            FileUtil.clean(testCasesDir);
+            FileUtil.clean(new File(testCasesDir));
             File testCasesDirFile = new File(testCasesDir);
             FileUtil.copyFilesFromDir(new File(tmpTestcaseDir), testCasesDirFile, true);
         }
 
-        List<String> listFileNames = FileUtil.listFileNames(testCasesDir);
+        List<String> listFileNames = File_.listFileNames(testCasesDir);
 
         if (StringUtils.isEmpty(judgeCaseMode)) {
             judgeCaseMode = Constants.JudgeCaseMode.DEFAULT.getMode();
@@ -588,29 +589,31 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             listFileNames.remove(problemCase.getOutput());
 
             // 读取输入文件
-            FileReader inputFile = new FileReader(testCasesDir + File.separator + problemCase.getInput(),
+            FileReader inputFile = new FileReader(new File(testCasesDir + File.separator + problemCase.getInput()),
                     CharsetUtil.UTF_8);
             String input = inputFile.readString()
                     .replaceAll("\r\n", "\n") // 避免window系统的换行问题
                     .replaceAll("\r", "\n"); // 避免mac系统的换行问题
 
-            FileWriter inputFileWriter = new FileWriter(testCasesDir + File.separator + problemCase.getInput(),
+            FileWriter inputFileWriter = new FileWriter(
+                    new File(testCasesDir + File.separator + problemCase.getInput()),
                     CharsetUtil.UTF_8);
             inputFileWriter.write(input);
 
             // 读取输出文件
             String output = "";
             String outputFilePath = testCasesDir + File.separator + problemCase.getOutput();
-            if (FileUtil.exist(outputFilePath)) {
-                FileReader outputFile = new FileReader(outputFilePath, CharsetUtil.UTF_8);
+            if (FileUtil.exist(new File(outputFilePath))) {
+                FileReader outputFile = new FileReader(new File(outputFilePath), CharsetUtil.UTF_8);
                 output = outputFile.readString()
                         .replaceAll("\r\n", "\n") // 避免window系统的换行问题
                         .replaceAll("\r", "\n"); // 避免mac系统的换行问题
-                FileWriter outFileWriter = new FileWriter(testCasesDir + File.separator + problemCase.getOutput(),
+                FileWriter outFileWriter = new FileWriter(
+                        new File(testCasesDir + File.separator + problemCase.getOutput()),
                         CharsetUtil.UTF_8);
                 outFileWriter.write(output);
             } else {
-                FileWriter fileWriter = new FileWriter(outputFilePath);
+                FileWriter fileWriter = new FileWriter(new File(outputFilePath));
                 fileWriter.write("");
             }
 
@@ -633,16 +636,16 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
         result.set("testCases", testCaseList);
 
-        FileWriter infoFile = new FileWriter(testCasesDir + "/info", CharsetUtil.UTF_8);
+        FileWriter infoFile = new FileWriter(new File(testCasesDir + "/info"), CharsetUtil.UTF_8);
         // 写入记录文件
         infoFile.write(JSONUtil.toJsonStr(result));
         // 删除临时上传文件夹
-        FileUtil.del(tmpTestcaseDir);
+        FileUtil.del(new File(tmpTestcaseDir));
         // 删除非测试数据的文件
         listFileNames.remove("info");
         if (!CollectionUtils.isEmpty(listFileNames)) {
             for (String filename : listFileNames) {
-                FileUtil.del(testCasesDir + File.separator + filename);
+                FileUtil.del(new File(testCasesDir + File.separator + filename));
             }
         }
     }
@@ -667,7 +670,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         JSONArray testCaseList = new JSONArray(problemCaseList.size());
 
         String testCasesDir = Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + problemId;
-        FileUtil.del(testCasesDir);
+        FileUtil.del(new File(testCasesDir));
         for (int index = 0; index < problemCaseList.size(); index++) {
             JSONObject jsonObject = new JSONObject();
             String inputName = (index + 1) + ".in";
@@ -679,7 +682,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             jsonObject.set("score", problemCaseList.get(index).getScore());
             jsonObject.set("inputName", inputName);
             // 生成对应文件
-            FileWriter infileWriter = new FileWriter(testCasesDir + "/" + inputName, CharsetUtil.UTF_8);
+            FileWriter infileWriter = new FileWriter(new File(testCasesDir + "/" + inputName), CharsetUtil.UTF_8);
             // 将该测试数据的输入写入到文件
             String inputData = problemCaseList
                     .get(index)
@@ -696,7 +699,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
                     .getOutput()
                     .replaceAll("\r\n", "\n") // 避免window系统的换行问题
                     .replaceAll("\r", "\n"); // 避免mac系统的换行问题
-            FileWriter outFile = new FileWriter(testCasesDir + "/" + outputName, CharsetUtil.UTF_8);
+            FileWriter outFile = new FileWriter(new File(testCasesDir + "/" + outputName), CharsetUtil.UTF_8);
             outFile.write(outputData);
 
             // spj和interactive是根据特判程序输出判断结果，所以无需初始化测试数据
@@ -718,7 +721,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
         result.set("testCases", testCaseList);
 
-        FileWriter infoFile = new FileWriter(testCasesDir + "/info", CharsetUtil.UTF_8);
+        FileWriter infoFile = new FileWriter(new File(testCasesDir + "/info"), CharsetUtil.UTF_8);
         // 写入记录文件
         infoFile.write(JSONUtil.toJsonStr(result));
     }

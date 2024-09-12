@@ -69,11 +69,11 @@ public class ImportHydroProblemManager {
         String fileDir = Constants.File.TESTCASE_TMP_FOLDER.getPath() + File.separator + fileDirId;
         String filePath = fileDir + File.separator + file.getOriginalFilename();
         // 文件夹不存在就新建
-        FileUtil.mkdir(fileDir);
+        FileUtil.mkdir(new File(fileDir));
         try {
             file.transferTo(new File(filePath));
         } catch (IOException e) {
-            FileUtil.del(fileDir);
+            FileUtil.del(new File(fileDir));
             throw new StatusSystemErrorException("服务器异常：hydro题目上传失败！");
         }
 
@@ -81,13 +81,13 @@ public class ImportHydroProblemManager {
         ZipUtil.unzip(filePath, fileDir);
 
         // 删除zip文件
-        FileUtil.del(filePath);
+        FileUtil.del(new File(filePath));
 
         // 检查文件是否存在
         File testCaseFileList = new File(fileDir);
         File[] files = testCaseFileList.listFiles();
         if (files == null || files.length == 0) {
-            FileUtil.del(fileDir);
+            FileUtil.del(new File(fileDir));
             throw new StatusFailException("压缩包里文件不能为空！");
         }
 
@@ -172,7 +172,7 @@ public class ImportHydroProblemManager {
                 .setIsUploadCase(true);
 
         String testDataDirPath = rootDirPath + File.separator + "testdata";
-        String configYaml = FileUtil.readString(testDataDirPath + File.separator + "config.yaml",
+        String configYaml = FileUtil.readString(new File(testDataDirPath + File.separator + "config.yaml"),
                 StandardCharsets.UTF_8);
         parseConfigYaml(configYaml, dto, problem, testDataDirPath, languageMap, languageList);
         // config配置文件没有配置cases，则去遍历testdata文件夹获取
@@ -192,15 +192,17 @@ public class ImportHydroProblemManager {
             }
         }
 
-        String problemYaml = FileUtil.readString(rootDirPath + File.separator + "problem.yaml", StandardCharsets.UTF_8);
+        String problemYaml = FileUtil.readString(new File(rootDirPath + File.separator + "problem.yaml"),
+                StandardCharsets.UTF_8);
         parseProblemYaml(problemYaml, dto, problem, tagMap);
 
         String problemMarkPath = rootDirPath + File.separator + "problem_zh.md";
         String problemMarkdown = "";
-        if (FileUtil.exist(problemMarkPath)) {
-            problemMarkdown = FileUtil.readString(problemMarkPath, StandardCharsets.UTF_8);
+        if (FileUtil.exist(new File(problemMarkPath))) {
+            problemMarkdown = FileUtil.readString(new File(problemMarkPath), StandardCharsets.UTF_8);
         } else {
-            problemMarkdown = FileUtil.readString(rootDirPath + File.separator + "problem.md", StandardCharsets.UTF_8);
+            problemMarkdown = FileUtil.readString(new File(rootDirPath + File.separator + "problem.md"),
+                    StandardCharsets.UTF_8);
         }
 
         parseMarkdown(problemMarkdown, problem, rootDirPath);
@@ -252,7 +254,8 @@ public class ImportHydroProblemManager {
 
                 if (hydroConfigYamlBO.getChecker() != null) {
                     problem.setJudgeMode(Constants.JudgeMode.SPJ.getMode());
-                    String code = FileUtil.readString(testDataDirPath + File.separator + hydroConfigYamlBO.getChecker(),
+                    String code = FileUtil.readString(
+                            new File(testDataDirPath + File.separator + hydroConfigYamlBO.getChecker()),
                             StandardCharsets.UTF_8);
                     problem.setSpjCode(code);
                     if (hydroConfigYamlBO.getChecker().endsWith("cc")) {
@@ -264,7 +267,8 @@ public class ImportHydroProblemManager {
 
             } else if (Objects.equals(hydroConfigYamlBO.getType(), "interactive")) {
                 problem.setJudgeMode(Constants.JudgeMode.INTERACTIVE.getMode());
-                String code = FileUtil.readString(testDataDirPath + File.separator + hydroConfigYamlBO.getInteractor(),
+                String code = FileUtil.readString(
+                        new File(testDataDirPath + File.separator + hydroConfigYamlBO.getInteractor()),
                         StandardCharsets.UTF_8);
                 problem.setSpjCode(code);
                 if (hydroConfigYamlBO.getInteractor().endsWith("cc")) {
@@ -277,7 +281,7 @@ public class ImportHydroProblemManager {
             if (!CollectionUtils.isEmpty(hydroConfigYamlBO.getJudge_extra_files())) {
                 JSONObject jsonObject = new JSONObject();
                 for (String fileName : hydroConfigYamlBO.getJudge_extra_files()) {
-                    String code = FileUtil.readString(testDataDirPath + File.separator + fileName,
+                    String code = FileUtil.readString(new File(testDataDirPath + File.separator + fileName),
                             StandardCharsets.UTF_8);
                     jsonObject.set(fileName, code);
                 }
@@ -287,7 +291,7 @@ public class ImportHydroProblemManager {
             if (!CollectionUtils.isEmpty(hydroConfigYamlBO.getUser_extra_files())) {
                 JSONObject jsonObject = new JSONObject();
                 for (String fileName : hydroConfigYamlBO.getUser_extra_files()) {
-                    String code = FileUtil.readString(testDataDirPath + File.separator + fileName,
+                    String code = FileUtil.readString(new File(testDataDirPath + File.separator + fileName),
                             StandardCharsets.UTF_8);
                     jsonObject.set(fileName, code);
                 }
@@ -404,12 +408,12 @@ public class ImportHydroProblemManager {
         List<String> fileNameList = ReUtil.findAll("\\(file://([\\s\\S]*?)\\)", md, 1);
         // 将文件保存指定目录
         String additionalFilePath = rootDirPath + File.separator + "additional_file";
-        if (!CollectionUtils.isEmpty(fileNameList) && FileUtil.exist(additionalFilePath)) {
+        if (!CollectionUtils.isEmpty(fileNameList) && FileUtil.exist(new File(additionalFilePath))) {
             for (String filename : fileNameList) {
                 String filePath = additionalFilePath + File.separator + filename;
-                if (FileUtil.exist(filePath)) {
-                    FileUtil.copyFile(filePath,
-                            Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + filename,
+                if (FileUtil.exist(new File(filePath))) {
+                    FileUtil.copyFile(new File(filePath),
+                            new File(Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + filename),
                             StandardCopyOption.REPLACE_EXISTING);
                     String lowerName = filename.toLowerCase();
                     if (lowerName.endsWith(".png")

@@ -228,17 +228,17 @@ public class JudgeStrategy {
                         problem.getId() + File.separator + "version";
 
                 // 如果不存在该已经编译好的程序，则需要再次进行编译
-                if (!FileUtil.exist(programFilePath) || !FileUtil.exist(programVersionPath)) {
+                if (!FileUtil.exist(new File(programFilePath)) || !FileUtil.exist(new File(programVersionPath))) {
                     boolean isCompileSpjOk = Compiler.compileSpj(problem.getSpjCode(), problem.getId(),
                             problem.getSpjLanguage(),
                             JudgeUtils.getProblemExtraFileMap(problem, "judge"));
 
-                    FileWriter fileWriter = new FileWriter(programVersionPath);
+                    FileWriter fileWriter = new FileWriter(new File(programVersionPath));
                     fileWriter.write(currentVersion);
                     return isCompileSpjOk;
                 }
 
-                FileReader spjVersionReader = new FileReader(programVersionPath);
+                FileReader spjVersionReader = new FileReader(new File(programVersionPath));
                 String recordSpjVersion = spjVersionReader.readString();
 
                 // 版本变动也需要重新编译
@@ -246,7 +246,7 @@ public class JudgeStrategy {
                     boolean isCompileSpjOk = Compiler.compileSpj(problem.getSpjCode(), problem.getId(),
                             problem.getSpjLanguage(),
                             JudgeUtils.getProblemExtraFileMap(problem, "judge"));
-                    FileWriter fileWriter = new FileWriter(programVersionPath);
+                    FileWriter fileWriter = new FileWriter(new File(programVersionPath));
                     fileWriter.write(currentVersion);
                     return isCompileSpjOk;
                 }
@@ -262,16 +262,16 @@ public class JudgeStrategy {
                         problem.getId() + File.separator + "version";
 
                 // 如果不存在该已经编译好的程序，则需要再次进行编译 版本变动也需要重新编译
-                if (!FileUtil.exist(programFilePath) || !FileUtil.exist(programVersionPath)) {
+                if (!FileUtil.exist(new File(programFilePath)) || !FileUtil.exist(new File(programVersionPath))) {
                     boolean isCompileInteractive = Compiler.compileInteractive(problem.getSpjCode(), problem.getId(),
                             problem.getSpjLanguage(),
                             JudgeUtils.getProblemExtraFileMap(problem, "judge"));
-                    FileWriter fileWriter = new FileWriter(programVersionPath);
+                    FileWriter fileWriter = new FileWriter(new File(programVersionPath));
                     fileWriter.write(currentVersion);
                     return isCompileInteractive;
                 }
 
-                FileReader interactiveVersionFileReader = new FileReader(programVersionPath);
+                FileReader interactiveVersionFileReader = new FileReader(new File(programVersionPath));
                 String recordInteractiveVersion = interactiveVersionFileReader.readString();
 
                 // 版本变动也需要重新编译
@@ -280,7 +280,7 @@ public class JudgeStrategy {
                             problem.getSpjLanguage(),
                             JudgeUtils.getProblemExtraFileMap(problem, "judge"));
 
-                    FileWriter fileWriter = new FileWriter(programVersionPath);
+                    FileWriter fileWriter = new FileWriter(new File(programVersionPath));
                     fileWriter.write(currentVersion);
 
                     return isCompileInteractive;

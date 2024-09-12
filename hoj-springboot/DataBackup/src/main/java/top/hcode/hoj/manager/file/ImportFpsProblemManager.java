@@ -175,7 +175,8 @@ public class ImportFpsProblemManager {
                 byte[] decode = Base64.getDecoder().decode(base64);
                 String fileName = IdUtil.fastSimpleUUID() + "." + split[split.length - 1];
 
-                FileUtil.writeBytes(decode, Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + fileName);
+                FileUtil.writeBytes(decode,
+                        new File(Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + fileName));
                 srcMapUrl.put(src, Constants.File.IMG_API.getPath() + fileName);
             }
 
@@ -283,8 +284,8 @@ public class ImportFpsProblemManager {
             for (int i = 0; i < testInputs.size(); i++) {
                 String infileName = (i + 1) + ".in";
                 String outfileName = (i + 1) + ".out";
-                FileWriter infileWriter = new FileWriter(problemTestCaseDir + File.separator + infileName);
-                FileWriter outfileWriter = new FileWriter(problemTestCaseDir + File.separator + outfileName);
+                FileWriter infileWriter = new FileWriter(new File(problemTestCaseDir + File.separator + infileName));
+                FileWriter outfileWriter = new FileWriter(new File(problemTestCaseDir + File.separator + outfileName));
                 infileWriter.write(testInputs.get(i).getTextContent());
                 outfileWriter.write(isNotOutputTestCase ? "" : testOutputs.get(i).getTextContent());
                 problemSamples.add(new ProblemCase()

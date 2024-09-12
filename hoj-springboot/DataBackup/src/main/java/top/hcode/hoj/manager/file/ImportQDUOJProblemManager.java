@@ -70,11 +70,11 @@ public class ImportQDUOJProblemManager {
         String fileDir = Constants.File.TESTCASE_TMP_FOLDER.getPath() + File.separator + fileDirId;
         String filePath = fileDir + File.separator + file.getOriginalFilename();
         // 文件夹不存在就新建
-        FileUtil.mkdir(fileDir);
+        FileUtil.mkdir(new File(fileDir));
         try {
             file.transferTo(new File(filePath));
         } catch (IOException e) {
-            FileUtil.del(fileDir);
+            FileUtil.del(new File(fileDir));
             throw new StatusSystemErrorException("服务器异常：qduoj题目上传失败！");
         }
 
@@ -82,13 +82,13 @@ public class ImportQDUOJProblemManager {
         ZipUtil.unzip(filePath, fileDir);
 
         // 删除zip文件
-        FileUtil.del(filePath);
+        FileUtil.del(new File(filePath));
 
         // 检查文件是否存在
         File testCaseFileList = new File(fileDir);
         File[] files = testCaseFileList.listFiles();
         if (files == null || files.length == 0) {
-            FileUtil.del(fileDir);
+            FileUtil.del(new File(fileDir));
             throw new StatusFailException("压缩包里文件不能为空！");
         }
 
@@ -97,14 +97,14 @@ public class ImportQDUOJProblemManager {
             if (tmp.isDirectory()) {
                 File[] problemAndTestcase = tmp.listFiles();
                 if (problemAndTestcase == null || problemAndTestcase.length == 0) {
-                    FileUtil.del(fileDir);
+                    FileUtil.del(new File(fileDir));
                     throw new StatusFailException("编号为：" + tmp.getName() + "的文件夹为空！");
                 }
                 for (File problemFile : problemAndTestcase) {
                     if (problemFile.isFile()) {
                         // 检查文件是否时json文件
                         if (!problemFile.getName().endsWith("json")) {
-                            FileUtil.del(fileDir);
+                            FileUtil.del(new File(fileDir));
                             throw new StatusFailException("编号为：" + tmp.getName() + "的文件夹里面的题目数据格式错误，请使用json文件！");
                         }
                         problemInfo.put(tmp.getName(), problemFile);
@@ -122,7 +122,7 @@ public class ImportQDUOJProblemManager {
                 QDOJProblemDTO qdojProblemDto = QDOJProblemToProblemVo(problemJson);
                 problemVoMap.put(key, qdojProblemDto);
             } catch (Exception e) {
-                FileUtil.del(fileDir);
+                FileUtil.del(new File(fileDir));
                 throw new StatusFailException("请检查编号为：" + key + "的题目json文件的格式：" + e.getLocalizedMessage());
             }
         }

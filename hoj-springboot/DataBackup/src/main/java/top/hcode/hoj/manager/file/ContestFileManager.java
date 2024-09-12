@@ -22,6 +22,7 @@ import top.hcode.hoj.dao.contest.ContestProblemEntityService;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.user.UserInfoEntityService;
 import top.hcode.hoj.manager.oj.ContestCalculateRankManager;
+import top.hcode.hoj.pojo.bo.File_;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.contest.ContestPrint;
 import top.hcode.hoj.pojo.entity.contest.ContestProblem;
@@ -193,7 +194,7 @@ public class ContestFileManager {
         // 打包文件的临时路径 -> username为文件夹名字
         String tmpFilesDir = Constants.File.CONTEST_AC_SUBMISSION_TMP_FOLDER.getPath() + File.separator
                 + IdUtil.fastSimpleUUID();
-        FileUtil.mkdir(tmpFilesDir);
+        FileUtil.mkdir(new File(tmpFilesDir));
 
         HashMap<String, Boolean> recordMap = new HashMap<>();
         if ("user".equals(splitType)) {
@@ -212,7 +213,7 @@ public class ContestFileManager {
             for (String username : usernameList) {
                 // 对于每个用户生成对应的文件夹
                 String userDir = tmpFilesDir + File.separator + username;
-                FileUtil.mkdir(userDir);
+                FileUtil.mkdir(new File(userDir));
                 // 如果是ACM模式，则所有提交代码都要生成，如果同一题多次提交AC，加上提交时间秒后缀 ---> A_(666666).c
                 // 如果是OI模式就生成最近一次提交即可，且带上分数 ---> A_(666666)_100.c
                 List<Judge> userSubmissionList = judgeList.stream()
@@ -230,7 +231,7 @@ public class ContestFileManager {
                             filePath += "_" + judge.getScore() + "_("
                                     + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
                                     + languageToFileSuffix(judge.getLanguage().toLowerCase());
-                            FileWriter fileWriter = new FileWriter(filePath);
+                            FileWriter fileWriter = new FileWriter(new File(filePath));
                             fileWriter.write(judge.getCode());
                             recordMap.put(key, true);
                         }
@@ -238,7 +239,7 @@ public class ContestFileManager {
                     } else {
                         filePath += "_(" + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
                                 + languageToFileSuffix(judge.getLanguage().toLowerCase());
-                        FileWriter fileWriter = new FileWriter(filePath);
+                        FileWriter fileWriter = new FileWriter(new File(filePath));
                         fileWriter.write(judge.getCode());
                     }
 
@@ -252,7 +253,7 @@ public class ContestFileManager {
             for (ContestProblem contestProblem : contestProblemList) {
                 // 对于每题目生成对应的文件夹
                 String problemDir = tmpFilesDir + File.separator + contestProblem.getDisplayId();
-                FileUtil.mkdir(problemDir);
+                FileUtil.mkdir(new File(problemDir));
                 // 如果是ACM模式，则所有提交代码都要生成，如果同一题多次提交AC，加上提交时间秒后缀 ---> username_(666666).c
                 // 如果是OI模式就生成最近一次提交即可，且带上分数 ---> username_(666666)_100.c
                 List<Judge> problemSubmissionList = judgeList.stream()
@@ -269,14 +270,14 @@ public class ContestFileManager {
                             filePath += "_" + judge.getScore() + "_("
                                     + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
                                     + languageToFileSuffix(judge.getLanguage().toLowerCase());
-                            FileWriter fileWriter = new FileWriter(filePath);
+                            FileWriter fileWriter = new FileWriter(new File(filePath));
                             fileWriter.write(judge.getCode());
                             recordMap.put(key, true);
                         }
                     } else {
                         filePath += "_(" + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
                                 + languageToFileSuffix(judge.getLanguage().toLowerCase());
-                        FileWriter fileWriter = new FileWriter(filePath);
+                        FileWriter fileWriter = new FileWriter(new File(filePath));
                         fileWriter.write(judge.getCode());
                     }
                 }
@@ -285,9 +286,9 @@ public class ContestFileManager {
 
         String zipFileName = "contest_" + contest.getId() + "_" + System.currentTimeMillis() + ".zip";
         String zipPath = Constants.File.CONTEST_AC_SUBMISSION_TMP_FOLDER.getPath() + File.separator + zipFileName;
-        ZipUtil.zip(tmpFilesDir, zipPath);
+        File_.zip(new File(tmpFilesDir), new File(zipPath));
         // 将zip变成io流返回给前端
-        FileReader zipFileReader = new FileReader(zipPath);
+        FileReader zipFileReader = new FileReader(new File(zipPath));
         BufferedInputStream bins = new BufferedInputStream(zipFileReader.getInputStream());// 放到缓冲流里面
         OutputStream outs = null;// 获取文件输出IO流
         BufferedOutputStream bouts = null;
@@ -332,8 +333,8 @@ public class ContestFileManager {
             }
         }
 
-        FileUtil.del(tmpFilesDir);
-        FileUtil.del(zipPath);
+        FileUtil.del(new File(tmpFilesDir));
+        FileUtil.del(new File(zipPath));
 
     }
 
@@ -356,13 +357,13 @@ public class ContestFileManager {
         String filename = contestPrint.getUsername() + "_Contest_Print.txt";
         String filePath = Constants.File.CONTEST_TEXT_PRINT_FOLDER.getPath() + File.separator + id + File.separator
                 + filename;
-        if (!FileUtil.exist(filePath)) {
+        if (!FileUtil.exist(new File(filePath))) {
 
-            FileWriter fileWriter = new FileWriter(filePath);
+            FileWriter fileWriter = new FileWriter(new File(filePath));
             fileWriter.write(contestPrint.getContent());
         }
 
-        FileReader zipFileReader = new FileReader(filePath);
+        FileReader zipFileReader = new FileReader(new File(filePath));
         BufferedInputStream bins = new BufferedInputStream(zipFileReader.getInputStream());// 放到缓冲流里面
         OutputStream outs = null;// 获取文件输出IO流
         BufferedOutputStream bouts = null;

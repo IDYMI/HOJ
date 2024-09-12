@@ -189,7 +189,7 @@ public class AdminContestProblemManager {
              * problem的id为其他表的外键的表中的对应数据都会被一起删除！
              */
             problemEntityService.removeById(pid);
-            FileUtil.del(Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + pid);
+            FileUtil.del(new File(Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + pid));
 
             // 获取当前登录的用户
             AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();

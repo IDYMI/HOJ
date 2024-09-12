@@ -63,13 +63,13 @@ public class MarkDownFileManager {
         }
 
         // 若不存在该目录，则创建目录
-        FileUtil.mkdir(Constants.File.MARKDOWN_FILE_FOLDER.getPath());
+        FileUtil.mkdir(new File(Constants.File.MARKDOWN_FILE_FOLDER.getPath()));
 
         // 通过UUID生成唯一文件名
         String filename = IdUtil.simpleUUID() + "." + suffix;
         try {
             // 将文件保存指定目录
-            image.transferTo(FileUtil.file(Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + filename));
+            image.transferTo(FileUtil.file(new File(Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + filename)));
         } catch (Exception e) {
             log.error("图片文件上传异常-------------->", e);
             throw new StatusSystemErrorException("服务器异常：图片文件上传失败！");
@@ -115,7 +115,7 @@ public class MarkDownFileManager {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
 
-        boolean isOk = FileUtil.del(file.getFilePath());
+        boolean isOk = FileUtil.del(new File(file.getFilePath()));
         if (isOk) {
             fileEntityService.removeById(fileId);
         } else {
@@ -153,11 +153,12 @@ public class MarkDownFileManager {
             filename = IdUtil.simpleUUID();
         }
         // 若不存在该目录，则创建目录
-        FileUtil.mkdir(Constants.File.MARKDOWN_FILE_FOLDER.getPath());
+        FileUtil.mkdir(new File(Constants.File.MARKDOWN_FILE_FOLDER.getPath()));
 
         try {
             // 将文件保存指定目录
-            file.transferTo(FileUtil.file(Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + filename));
+            file.transferTo(
+                    FileUtil.file(new File(Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + filename)));
         } catch (Exception e) {
             log.error("文件上传异常-------------->", e);
             throw new StatusSystemErrorException("服务器异常：文件上传失败！");

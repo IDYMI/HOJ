@@ -23,6 +23,7 @@ import top.hcode.hoj.dao.problem.ProblemCaseEntityService;
 import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.dao.problem.TagEntityService;
 import top.hcode.hoj.exception.ProblemIDRepeatException;
+import top.hcode.hoj.pojo.bo.File_;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
 import top.hcode.hoj.pojo.entity.problem.*;
 import top.hcode.hoj.pojo.vo.ImportProblemVO;
@@ -73,11 +74,11 @@ public class ProblemFileManager {
         String fileDir = Constants.File.TESTCASE_TMP_FOLDER.getPath() + File.separator + fileDirId;
         String filePath = fileDir + File.separator + file.getOriginalFilename();
         // 文件夹不存在就新建
-        FileUtil.mkdir(fileDir);
+        FileUtil.mkdir(new File(fileDir));
         try {
             file.transferTo(new File(filePath));
         } catch (IOException e) {
-            FileUtil.del(fileDir);
+            FileUtil.del(new File(fileDir));
             throw new StatusSystemErrorException("服务器异常：评测数据上传失败！");
         }
 
@@ -85,13 +86,13 @@ public class ProblemFileManager {
         ZipUtil.unzip(filePath, fileDir);
 
         // 删除zip文件
-        FileUtil.del(filePath);
+        FileUtil.del(new File(filePath));
 
         // 检查文件是否存在
         File testCaseFileList = new File(fileDir);
         File[] files = testCaseFileList.listFiles();
         if (files == null || files.length == 0) {
-            FileUtil.del(fileDir);
+            FileUtil.del(new File(fileDir));
             throw new StatusFailException("评测数据压缩包里文件不能为空！");
         }
 
@@ -102,7 +103,7 @@ public class ProblemFileManager {
             if (tmp.isFile()) {
                 // 检查文件是否时json文件
                 if (!tmp.getName().endsWith("json")) {
-                    FileUtil.del(fileDir);
+                    FileUtil.del(new File(fileDir));
                     throw new StatusFailException("编号为：" + tmp.getName() + "的文件格式错误，请使用json文件！");
                 }
                 String tmpPreName = tmp.getName().substring(0, tmp.getName().lastIndexOf("."));
@@ -118,7 +119,7 @@ public class ProblemFileManager {
         for (String key : problemInfo.keySet()) {
             // 若有名字不对应，直接返回失败
             if (testcaseInfo.getOrDefault(key, null) == null) {
-                FileUtil.del(fileDir);
+                FileUtil.del(new File(fileDir));
                 throw new StatusFailException("请检查编号为：" + key + "的题目数据文件与测试数据文件夹是否一一对应！");
             }
             try {
@@ -126,7 +127,7 @@ public class ProblemFileManager {
                 ImportProblemVO importProblemVo = JSONUtil.toBean(fileReader.readString(), ImportProblemVO.class);
                 problemVoMap.put(key, importProblemVo);
             } catch (Exception e) {
-                FileUtil.del(fileDir);
+                FileUtil.del(new File(fileDir));
                 throw new StatusFailException("请检查编号为：" + key + "的题目json文件的格式：" + e.getLocalizedMessage());
             }
         }
@@ -160,7 +161,7 @@ public class ProblemFileManager {
                 }
             }
 
-            if (languages.size() == 0){
+            if (languages.size() == 0) {
                 languages = languageList;
             }
 
@@ -171,8 +172,9 @@ public class ProblemFileManager {
                 String code = tmp.getOrDefault("code", null);
                 Long lid = languageMap.getOrDefault(language, null);
                 if (language == null || code == null || lid == null) {
-//                    FileUtil.del(fileDir);
-//                    throw new StatusFailException("请检查编号为：" + key + "的题目的代码模板列表是否有错，不要添加不支持的语言！");
+                    // FileUtil.del(new File(fileDir));
+                    // throw new StatusFailException("请检查编号为：" + key +
+                    // "的题目的代码模板列表是否有错，不要添加不支持的语言！");
                     continue;
                 }
                 codeTemplates.add(new CodeTemplate().setCode(code).setStatus(true).setLid(lid));
@@ -314,15 +316,15 @@ public class ProblemFileManager {
                         QueryWrapper<ProblemCase> problemCaseQueryWrapper = new QueryWrapper<>();
                         problemCaseQueryWrapper.eq("pid", pid);
                         List<ProblemCase> problemCaseList = problemCaseEntityService.list(problemCaseQueryWrapper);
-                        FileUtil.mkdir(testcaseWorkDir);
+                        FileUtil.mkdir(new File(testcaseWorkDir));
                         // 写入本地
                         for (int i = 0; i < problemCaseList.size(); i++) {
                             String filePreName = testcaseWorkDir + File.separator + (i + 1);
                             String inputName = filePreName + ".in";
                             String outputName = filePreName + ".out";
-                            FileWriter infileWriter = new FileWriter(inputName);
+                            FileWriter infileWriter = new FileWriter(new File(inputName));
                             infileWriter.write(problemCaseList.get(i).getInput());
-                            FileWriter outfileWriter = new FileWriter(outputName);
+                            FileWriter outfileWriter = new FileWriter(new File(outputName));
                             outfileWriter.write(problemCaseList.get(i).getOutput());
 
                             ProblemCase problemCase = problemCaseList.get(i).setPid(null)
@@ -336,12 +338,12 @@ public class ProblemFileManager {
                             BeanUtil.beanToMap(problemCase, problemCaseMap, false, true);
                             problemCases.add(problemCaseMap);
                         }
-                        FileUtil.copy(testcaseWorkDir, workDir, true);
+                        FileUtil.copy(new File(testcaseWorkDir), new File(workDir), true);
 
                     } else {
                         String infoPath = testcaseWorkDir + File.separator + "info";
-                        if (FileUtil.exist(infoPath)) {
-                            FileReader reader = new FileReader(infoPath);
+                        if (FileUtil.exist(new File(infoPath))) {
+                            FileReader reader = new FileReader(new File(infoPath));
                             JSONObject jsonObject = JSONUtil.parseObj(reader.readString());
                             JSONArray testCases = jsonObject.getJSONArray("testCases");
                             for (int i = 0; i < testCases.size(); i++) {
@@ -360,12 +362,13 @@ public class ProblemFileManager {
                                 problemCases.add(problemCaseMap);
                             }
                         }
-                        FileUtil.copy(testcaseWorkDir, workDir, true);
+                        FileUtil.copy(new File(testcaseWorkDir), new File(workDir), true);
                     }
                     ImportProblemVO importProblemVo = problemEntityService.buildExportProblem(pid, problemCases,
                             languageMap, tagMap);
                     String content = JSONUtil.toJsonStr(importProblemVo);
-                    FileWriter fileWriter = new FileWriter(workDir + File.separator + "problem_" + pid + ".json");
+                    FileWriter fileWriter = new FileWriter(
+                            new File(workDir + File.separator + "problem_" + pid + ".json"));
                     fileWriter.write(content);
                     return null;
                 }
@@ -389,10 +392,11 @@ public class ProblemFileManager {
 
         String fileName = "problem_export_" + System.currentTimeMillis() + ".zip";
         // 将对应文件夹的文件压缩成zip
-        ZipUtil.zip(workDir, Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName);
+        File_.zip(new File(workDir),
+                new File(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName));
         // 将zip变成io流返回给前端
         FileReader fileReader = new FileReader(
-                Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName);
+                new File(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName));
         BufferedInputStream bins = new BufferedInputStream(fileReader.getInputStream());// 放到缓冲流里面
         OutputStream outs = null;// 获取文件输出IO流
         BufferedOutputStream bouts = null;
@@ -435,8 +439,8 @@ public class ProblemFileManager {
                 e.printStackTrace();
             }
             // 清空临时文件
-            FileUtil.del(workDir);
-            FileUtil.del(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName);
+            FileUtil.del(new File(workDir));
+            FileUtil.del(new File(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName));
         }
     }
 

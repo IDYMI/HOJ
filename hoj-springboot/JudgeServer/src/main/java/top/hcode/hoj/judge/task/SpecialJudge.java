@@ -72,7 +72,7 @@ public class SpecialJudge extends AbstractJudge {
                 // 对于当前测试样例，用户程序的输出对应生成的文件
                 String userOutputFilePath = judgeGlobalDTO.getRunDir() + File.separator + judgeDTO.getTestCaseNum()
                         + ".out";
-                FileWriter stdWriter = new FileWriter(userOutputFilePath);
+                FileWriter stdWriter = new FileWriter(new File(userOutputFilePath));
                 stdWriter.write(sandBoxRes.getStdout());
 
                 LanguageConfig spjRunConfig = judgeGlobalDTO.getSpjRunConfig();
@@ -95,7 +95,7 @@ public class SpecialJudge extends AbstractJudge {
                         spjRunConfig);
 
                 // 删除用户输出文件
-                FileUtil.del(userOutputFilePath);
+                FileUtil.del(new File(userOutputFilePath));
 
                 int code = spjResult.getInt("code");
                 if (code == SPJ_WA) {

@@ -125,7 +125,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         List<Long> idLists = new LinkedList<>();
         for (File file : files) {
             if (file.getDelete()) {
-                boolean delSuccess = FileUtil.del(file.getFilePath());
+                boolean delSuccess = FileUtil.del(new java.io.File(file.getFilePath()));
                 if (delSuccess) {
                     idLists.add(file.getId());
                 }
@@ -149,7 +149,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     // @Scheduled(cron = "0/5 * * * * *")
     @Override
     public void deleteTestCase() {
-        boolean result = FileUtil.del(Constants.File.TESTCASE_TMP_FOLDER.getPath());
+        boolean result = FileUtil.del(new java.io.File(Constants.File.TESTCASE_TMP_FOLDER.getPath()));
         if (!result) {
             log.error("每日定时任务异常------------------------>{}", "清除本地的题目测试数据失败!");
         }
@@ -165,7 +165,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Scheduled(cron = "0 0 4 * * *")
     @Override
     public void deleteContestPrintText() {
-        boolean result = FileUtil.del(Constants.File.CONTEST_TEXT_PRINT_FOLDER.getPath());
+        boolean result = FileUtil.del(new java.io.File(Constants.File.CONTEST_TEXT_PRINT_FOLDER.getPath()));
         if (!result) {
             log.error("每日定时任务异常------------------------>{}", "清除本地的比赛打印数据失败!");
         }

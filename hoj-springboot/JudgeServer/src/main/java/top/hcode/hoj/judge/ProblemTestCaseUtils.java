@@ -64,7 +64,7 @@ public class ProblemTestCaseUtils {
 
         // 无论有没有测试数据，一旦执行该函数，一律清空，重新生成该题目对应的测试数据文件
 
-        FileUtil.del(testCasesDir);
+        FileUtil.del(new File(testCasesDir));
         for (int index = 0; index < testCases.size(); index++) {
             JSONObject jsonObject = new JSONObject();
             String inputName = (index + 1) + ".in";
@@ -76,7 +76,7 @@ public class ProblemTestCaseUtils {
             jsonObject.set("score", testCases.get(index).getOrDefault("score", null));
             jsonObject.set("inputName", inputName);
             // 生成对应文件
-            FileWriter infileWriter = new FileWriter(testCasesDir + "/" + inputName, CharsetUtil.UTF_8);
+            FileWriter infileWriter = new FileWriter(new File(testCasesDir + "/" + inputName), CharsetUtil.UTF_8);
             // 将该测试数据的输入写入到文件
             infileWriter.write((String) testCases.get(index).get("input"));
 
@@ -84,7 +84,7 @@ public class ProblemTestCaseUtils {
             jsonObject.set("outputName", outputName);
             // 生成对应文件
             String outputData = (String) testCases.get(index).get("output");
-            FileWriter outFile = new FileWriter(testCasesDir + "/" + outputName, CharsetUtil.UTF_8);
+            FileWriter outFile = new FileWriter(new File(testCasesDir + "/" + outputName), CharsetUtil.UTF_8);
             outFile.write(outputData);
 
             // spj或interactive是根据特判程序输出判断结果，所以无需初始化测试数据
@@ -106,7 +106,7 @@ public class ProblemTestCaseUtils {
 
         result.set("testCases", testCaseList);
 
-        FileWriter infoFile = new FileWriter(testCasesDir + File.separator + "info", CharsetUtil.UTF_8);
+        FileWriter infoFile = new FileWriter(new File(testCasesDir + File.separator + "info"), CharsetUtil.UTF_8);
         // 写入记录文件
         infoFile.write(JSONUtil.toJsonStr(result));
         return result;
@@ -144,16 +144,17 @@ public class ProblemTestCaseUtils {
             // 读取输出文件
             String output = "";
             String outputFilePath = testCasesDir + File.separator + problemCase.getOutput();
-            if (FileUtil.exist(outputFilePath)) {
-                FileReader outputFile = new FileReader(outputFilePath, CharsetUtil.UTF_8);
+            if (FileUtil.exist(new File(outputFilePath))) {
+                FileReader outputFile = new FileReader(new File(outputFilePath), CharsetUtil.UTF_8);
                 output = outputFile.readString()
                         .replaceAll("\r\n", "\n") // 避免window系统的换行问题
                         .replaceAll("\r", "\n"); // 避免mac系统的换行问题
-                FileWriter outFileWriter = new FileWriter(testCasesDir + File.separator + problemCase.getOutput(),
+                FileWriter outFileWriter = new FileWriter(
+                        new File(testCasesDir + File.separator + problemCase.getOutput()),
                         CharsetUtil.UTF_8);
                 outFileWriter.write(output);
             } else {
-                FileWriter fileWriter = new FileWriter(outputFilePath);
+                FileWriter fileWriter = new FileWriter(new File(outputFilePath));
                 fileWriter.write("");
             }
 
@@ -174,7 +175,7 @@ public class ProblemTestCaseUtils {
             ((JSONArray) result.get("testCases")).put(jsonObject);
         }
 
-        FileWriter infoFile = new FileWriter(testCasesDir + File.separator + "info", CharsetUtil.UTF_8);
+        FileWriter infoFile = new FileWriter(new File(testCasesDir + File.separator + "info"), CharsetUtil.UTF_8);
         // 写入记录文件
         infoFile.write(JSONUtil.toJsonStr(result));
 
@@ -184,8 +185,8 @@ public class ProblemTestCaseUtils {
     // 获取指定题目的info数据
     public JSONObject loadTestCaseInfo(Long problemId, String testCasesDir, String version, String judgeMode,
             String judgeCaseMode) throws SystemError {
-        if (FileUtil.exist(testCasesDir + File.separator + "info")) {
-            FileReader fileReader = new FileReader(testCasesDir + File.separator + "info", CharsetUtil.UTF_8);
+        if (FileUtil.exist(new File(testCasesDir + File.separator + "info"))) {
+            FileReader fileReader = new FileReader(new File(testCasesDir + File.separator + "info"), CharsetUtil.UTF_8);
             String infoStr = fileReader.readString();
             JSONObject testcaseInfo = JSONUtil.parseObj(infoStr);
             // 测试样例被改动需要重新生成

@@ -140,7 +140,8 @@ public class AdminTrainingProblemManager {
             // 获取当前登录的用户
             AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
             if (tid == null) {
-                FileUtil.del(Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + pid);
+                FileUtil.del(
+                        new File(Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + pid));
                 log.info("[{}],[{}],tid:[{}],pid:[{}],operatorUid:[{}],operatorUsername:[{}]",
                         "Admin_Training", "Delete_Problem", tid, pid, userRolesVo.getUid(), userRolesVo.getUsername());
             } else {

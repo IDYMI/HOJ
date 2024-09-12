@@ -67,12 +67,13 @@ public class ImageManager {
             throw new StatusFailException("请选择jpg,jpeg,gif,png,webp格式的头像图片！");
         }
         // 若不存在该目录，则创建目录
-        FileUtil.mkdir(Constants.File.USER_AVATAR_FOLDER.getPath());
+        FileUtil.mkdir(new File(Constants.File.USER_AVATAR_FOLDER.getPath()));
         // 通过UUID生成唯一文件名
         String filename = IdUtil.simpleUUID() + "." + suffix;
         try {
             // 将文件保存指定目录
-            image.transferTo(FileUtil.file(Constants.File.USER_AVATAR_FOLDER.getPath() + File.separator + filename));
+            image.transferTo(
+                    FileUtil.file(new File(Constants.File.USER_AVATAR_FOLDER.getPath() + File.separator + filename)));
         } catch (Exception e) {
             log.error("头像文件上传异常-------------->", e);
             throw new StatusSystemErrorException("服务器异常：头像上传失败！");
@@ -143,11 +144,12 @@ public class ImageManager {
             throw new StatusFailException("请选择jpg,jpeg,gif,png,webp格式的头像图片！");
         }
 
-        FileUtil.mkdir(Constants.File.GROUP_AVATAR_FOLDER.getPath());
+        FileUtil.mkdir(new File(Constants.File.GROUP_AVATAR_FOLDER.getPath()));
 
         String filename = IdUtil.simpleUUID() + "." + suffix;
         try {
-            image.transferTo(FileUtil.file(Constants.File.GROUP_AVATAR_FOLDER.getPath() + File.separator + filename));
+            image.transferTo(
+                    FileUtil.file(new File(Constants.File.GROUP_AVATAR_FOLDER.getPath() + File.separator + filename)));
         } catch (Exception e) {
             log.error("头像文件上传异常-------------->", e);
             throw new StatusSystemErrorException("服务器异常：头像上传失败！");
@@ -187,12 +189,13 @@ public class ImageManager {
             throw new StatusFailException("请选择jpg,jpeg,gif,png,webp,jfif,svg格式的头像图片！");
         }
         // 若不存在该目录，则创建目录
-        FileUtil.mkdir(Constants.File.HOME_CAROUSEL_FOLDER.getPath());
+        FileUtil.mkdir(new File(Constants.File.HOME_CAROUSEL_FOLDER.getPath()));
         // 通过UUID生成唯一文件名
         String filename = IdUtil.simpleUUID() + "." + suffix;
         try {
             // 将文件保存指定目录
-            image.transferTo(FileUtil.file(Constants.File.HOME_CAROUSEL_FOLDER.getPath() + File.separator + filename));
+            image.transferTo(
+                    FileUtil.file(new File(Constants.File.HOME_CAROUSEL_FOLDER.getPath() + File.separator + filename)));
         } catch (Exception e) {
             log.error("图片文件上传异常-------------->{}", e.getMessage());
             throw new StatusSystemErrorException("服务器异常：图片上传失败！");

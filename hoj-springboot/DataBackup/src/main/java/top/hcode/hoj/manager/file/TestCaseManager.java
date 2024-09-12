@@ -20,6 +20,7 @@ import top.hcode.hoj.common.exception.StatusSystemErrorException;
 import top.hcode.hoj.common.result.ResultStatus;
 import top.hcode.hoj.dao.problem.ProblemCaseEntityService;
 import top.hcode.hoj.dao.problem.ProblemEntityService;
+import top.hcode.hoj.pojo.bo.File_;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.problem.ProblemCase;
 import top.hcode.hoj.shiro.AccountProfile;
@@ -72,7 +73,7 @@ public class TestCaseManager {
         String fileDir = Constants.File.TESTCASE_TMP_FOLDER.getPath() + File.separator + fileDirId;
         String filePath = fileDir + File.separator + file.getOriginalFilename();
         // 文件夹不存在就新建
-        FileUtil.mkdir(fileDir);
+        FileUtil.mkdir(new File(fileDir));
         try {
             file.transferTo(new File(filePath));
         } catch (IOException e) {
@@ -83,12 +84,12 @@ public class TestCaseManager {
         // 将压缩包压缩到指定文件夹
         ZipUtil.unzip(filePath, fileDir);
         // 删除zip文件
-        FileUtil.del(filePath);
+        FileUtil.del(new File(filePath));
         // 检查文件是否存在
         File testCaseFileList = new File(fileDir);
         File[] files = testCaseFileList.listFiles();
         if (files == null || files.length == 0) {
-            FileUtil.del(fileDir);
+            FileUtil.del(new File(fileDir));
             throw new StatusFailException("评测数据压缩包里文件不能为空！");
         }
 
@@ -131,7 +132,7 @@ public class TestCaseManager {
                 if (inputFileName.endsWith(".txt")) {
                     oriOutputFileName = inputFileName.replaceAll("input", "output");
                 }
-                FileWriter fileWriter = new FileWriter(fileDir + File.separator + oriOutputFileName);
+                FileWriter fileWriter = new FileWriter(new File(fileDir + File.separator + oriOutputFileName));
                 fileWriter.write("");
             }
 
@@ -207,25 +208,26 @@ public class TestCaseManager {
                 throw new StatusFailException("对不起，该题目的评测数据为空！");
             }
 
-            FileUtil.mkdir(workDir);
+            FileUtil.mkdir(new File(workDir));
             // 写入本地
             for (int i = 0; i < problemCaseList.size(); i++) {
                 String filePreName = workDir + File.separator + (i + 1);
                 String inputName = filePreName + ".in";
                 String outputName = filePreName + ".out";
-                FileWriter infileWriter = new FileWriter(inputName);
+                FileWriter infileWriter = new FileWriter(new File(inputName));
                 infileWriter.write(problemCaseList.get(i).getInput());
-                FileWriter outfileWriter = new FileWriter(outputName);
+                FileWriter outfileWriter = new FileWriter(new File(outputName));
                 outfileWriter.write(problemCaseList.get(i).getOutput());
             }
         }
 
         String fileName = "problem_" + pid + "_testcase_" + System.currentTimeMillis() + ".zip";
         // 将对应文件夹的文件压缩成zip
-        ZipUtil.zip(workDir, Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName);
+        File_.zip(new File(workDir),
+                new File(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName));
         // 将zip变成io流返回给前端
         FileReader fileReader = new FileReader(
-                Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName);
+                new File(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName));
         BufferedInputStream bins = new BufferedInputStream(fileReader.getInputStream());// 放到缓冲流里面
         OutputStream outs = null;// 获取文件输出IO流
         BufferedOutputStream bouts = null;
@@ -268,7 +270,7 @@ public class TestCaseManager {
                 e.printStackTrace();
             }
             // 清空临时文件
-            FileUtil.del(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName);
+            FileUtil.del(new File(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName));
             log.info("[{}],[{}],pid:[{}],operatorUid:[{}],operatorUsername:[{}]",
                     "Test_Case", "Download", pid, userRolesVo.getUid(), userRolesVo.getUsername());
         }

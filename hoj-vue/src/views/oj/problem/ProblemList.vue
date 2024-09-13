@@ -96,7 +96,7 @@
                 size="medium"
                 class="filter-item"
                 v-for="(value, key, index) in PROBLEM_TYPE"
-                :effect="query.difficulty == key ? 'dark' : 'plain'"
+                :effect="query.type == key ? 'dark' : 'plain'"
                 :style="getTypeBlockColor(key)"
                 :key="index"
                 @click="filterByType(key)"

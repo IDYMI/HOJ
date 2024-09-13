@@ -324,6 +324,19 @@ export const m = {
   Judge_Case_Subtask_Average_Mode: 'Subtasks (Average Score)',
   Judge_Case_Ergodic_Without_Error_Mode: 'Stop judge when error',
 
+  // /views/admin/problem/Problem.vue
+  Selection_Options: 'Selection Options',
+  Filling_Count: 'Filling Count',
+  Selection_View: 'View',
+  Add_Selection: 'Add Selection',
+  Problem_Answer: 'Problem Answer',
+  Problem_Sample2: 'Answer',
+  Problem_Answer_Output: 'Answer Output',
+  Examples_Desc: 'Upload File: Compress all data files in the folder into a zip-type compressed package',
+  Answer_Examples_Desc1: 'Answer format: For multiple-choice questions, the answer is a series of answers separated by line breaks in alphabetical order (e.g., selecting A and B would be input as `A` `\\n` `B`)',
+  Answer_Examples_Desc2: 'Answer format: For fill-in-the-blank questions, the answer is a series of answers separated by line breaks (e.g., selecting A and B would be input as `A` `\\n` `B`)',
+  Answer_Examples_Desc3: 'Answer format: For true or false questions, the answer is either YES or NO, usually just one word!',
+
   // /views/admin/problem/Tag.vue
   Admin_Tag: 'Admin Tag',
   Add_Tag: 'Add Tag',

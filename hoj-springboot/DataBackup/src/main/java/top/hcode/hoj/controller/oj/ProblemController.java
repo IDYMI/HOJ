@@ -70,8 +70,8 @@ public class ProblemController {
      */
     @GetMapping("/get-last-problemId")
     @AnonApi
-    public CommonResult<ProblemLastIdVO> getProblemLastId() {
-        return problemService.getProblemLastId();
+    public CommonResult<ProblemLastIdVO> getProblemLastId(@RequestParam(value = "gid", required = false) Long gid) {
+        return problemService.getProblemLastId(gid);
     }
 
     /**

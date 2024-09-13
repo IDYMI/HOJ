@@ -167,14 +167,35 @@ export const PROBLEM_TYPE = {
       'zh-CN': 'ACM',
       'en-US': 'ACM',
     },
-    color: '#19be6b',
+    color: '#1559A1',
   },
   '1': {
     name: {
       'zh-CN': 'OI',
       'en-US': 'OI',
     },
-    color: '#2d8cf0',
+    color: '#19be6b',
+  },
+  '2': {
+    name: {
+      'zh-CN': '选择',
+      'en-US': 'Selection',
+    },
+    color: '#66B1FF',
+  },
+  '3': {
+    name: {
+      'zh-CN': '填空',
+      'en-US': 'Filling',
+    },
+    color: '#EEAC3C',
+  },
+  '4': {
+    name: {
+      'zh-CN': '判断',
+      'en-US': 'Decide',
+    },
+    color: '#881E1F',
   },
 };
 

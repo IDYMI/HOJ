@@ -208,6 +208,9 @@ public class Constants {
     public enum Contest {
         TYPE_ACM(0, "ACM"),
         TYPE_OI(1, "OI"),
+        TYPE_SELECTION(1, "SELECTION"),
+        TYPE_FILLING(1, "FILLING"),
+        TYPE_DECIDE(1, "DECIDE"),
 
         STATUS_SCHEDULED(-1, "Scheduled"),
         STATUS_RUNNING(0, "Running"),

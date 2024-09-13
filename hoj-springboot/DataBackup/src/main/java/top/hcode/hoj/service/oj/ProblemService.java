@@ -25,7 +25,7 @@ public interface ProblemService {
 
     public CommonResult<RandomProblemVO> getRandomProblem(String oj);
 
-    public CommonResult<ProblemLastIdVO> getProblemLastId();
+    public CommonResult<ProblemLastIdVO> getProblemLastId(Long gid);
 
     public CommonResult<HashMap<Long, Object>> getUserProblemStatus(PidListDTO pidListDto);
 

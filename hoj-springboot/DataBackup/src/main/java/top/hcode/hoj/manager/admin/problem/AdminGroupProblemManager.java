@@ -65,7 +65,7 @@ public class AdminGroupProblemManager {
         }
 
         // 更改 problem 的 problem_id
-        String lastProblemId = problemManager.getProblemLastId().getProblemLastId();
+        String lastProblemId = problemManager.getProblemLastId(null).getProblemLastId();
 
         problem.setApplyPublicProgress(progress);
         switch (progress) {

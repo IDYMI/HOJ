@@ -38,7 +38,7 @@ public class Problem implements Serializable {
     @ApiModelProperty(value = "作者")
     private String author;
 
-    @ApiModelProperty(value = "0为ACM,1为OI")
+    @ApiModelProperty(value = "0为ACM,1为OI,2为选择,3为填空,4为判断")
     private Integer type;
 
     @ApiModelProperty(value = "default,spj,interactive")

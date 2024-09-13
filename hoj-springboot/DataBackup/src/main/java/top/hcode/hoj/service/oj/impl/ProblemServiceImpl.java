@@ -52,9 +52,9 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public CommonResult<ProblemLastIdVO> getProblemLastId() {
+    public CommonResult<ProblemLastIdVO> getProblemLastId(Long gid) {
         try {
-            return CommonResult.successResponse(problemManager.getProblemLastId());
+            return CommonResult.successResponse(problemManager.getProblemLastId(gid));
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
         }

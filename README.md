@@ -328,3 +328,8 @@
    ![image.png](docs/docs/.vuepress/public/e04f86a3e9304a7196fc81fe61510e00.png)
 
 2024 年 4 月 17 日 19 点
+
+# 增加 选择填空判断题
+   ![image.png](docs/docs/.vuepress/public/239c092b4cce4c5bbf9e2488881997e0.png)
+
+2024 年 5 月 19 日 19 点

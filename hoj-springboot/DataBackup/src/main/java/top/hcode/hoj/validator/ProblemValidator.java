@@ -43,7 +43,7 @@ public class ProblemValidator {
     private void defaultValidate(Problem problem) throws StatusFailException {
         Constants.ProblemType type = Constants.ProblemType.getProblemType(problem.getType());
         if (type == null) {
-            throw new StatusFailException("题目的类型必须为ACM(0), OI(1)！");
+            throw new StatusFailException("题目的类型必须为ACM(0), OI(1), 选择(2), 填空(3), 判断(4)！");
         }
 
         Constants.ProblemAuth auth = Constants.ProblemAuth.getProblemAuth(problem.getAuth());
@@ -65,12 +65,16 @@ public class ProblemValidator {
                     && judgeCaseMode != Constants.JudgeCaseMode.ERGODIC_WITHOUT_ERROR) {
                 throw new StatusFailException("题目的用例模式错误，ACM类型的题目只能为默认模式(default)、遇错止评(ergodic_without_error)！");
             }
-        } else {
+        } else if (type == Constants.ProblemType.OI) {
             if (judgeCaseMode != Constants.JudgeCaseMode.DEFAULT
                     && judgeCaseMode != Constants.JudgeCaseMode.SUBTASK_AVERAGE
                     && judgeCaseMode != Constants.JudgeCaseMode.SUBTASK_LOWEST) {
                 throw new StatusFailException("题目的用例模式错误，OI类型的题目只能为默认模式(default)、" +
                         "子任务（最低得分）(subtask_lowest)、 子任务（平均得分）(subtask_average)！");
+            }
+        } else {
+            if (judgeCaseMode != Constants.JudgeCaseMode.DEFAULT) {
+                throw new StatusFailException("题目的用例模式错误，题目只能为默认模式(default)！");
             }
         }
     }

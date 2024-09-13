@@ -13,8 +13,14 @@
           :lg="12"
           class="problem-left"
           :id="'problem-left'+'-'+ $route.name"
+          :style="{ height: '100%', display: 'flex', flexDirection: 'column' }"
         >
-          <el-tabs v-model="activeName" type="border-card" @tab-click="handleClickTab">
+          <el-tabs
+            v-model="activeName"
+            type="border-card"
+            @tab-click="handleClickTab"
+            :style="{ flex: 1 }"
+          >
             <el-tab-pane name="problemDetail" v-loading="loading">
               <span slot="label">
                 <i class="fa fa-list-alt">{{ $t('m.Problem_Description') }}</i>
@@ -163,7 +169,7 @@
                       </span>
                       <br />
                     </template>
-                    <template v-if="problemData.problem.type == 1">
+                    <template v-if="isOi">
                       <span>{{ $t('m.Score') }}：{{ problemData.problem.ioScore }}</span>
                       <span v-if="!contestID" style="margin-left:5px;">
                         {{ $t('m.OI_Rank_Score') }}：{{
@@ -218,7 +224,7 @@
                     ></Markdown>
                   </template>
 
-                  <template v-if="problemData.problem.examples">
+                  <template v-if="isAcmOi && problemData.problem.examples">
                     <div v-for="(example, index) of problemData.problem.examples" :key="index">
                       <div class="flex-container example">
                         <div class="example-input">
@@ -248,6 +254,24 @@
                             </a>
                           </p>
                           <pre>{{ example.output }}</pre>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                  <!-- 选择题 -->
+                  <template v-else-if="isSelection">
+                    <div v-for="(example, index) in problemData.problem.examples" :key="index">
+                      <div class="flex-container example" v-if="index % 2 === 0">
+                        <div class="example-input">
+                          <p class="title">{{ String.fromCharCode(65 + index) }}</p>
+                          <pre>{{ example.output }}</pre>
+                        </div>
+                        <div
+                          class="example-input"
+                          v-if="index + 1 < problemData.problem.examples.length"
+                        >
+                          <p class="title">{{ String.fromCharCode(65 + index + 1) }}</p>
+                          <pre>{{ problemData.problem.examples[index + 1].output }}</pre>
                         </div>
                       </div>
                     </div>
@@ -331,11 +355,7 @@
                         <span>{{ submissionMemoryFormat(row.memory) }}</span>
                       </template>
                     </vxe-table-column>
-                    <vxe-table-column
-                      :title="$t('m.Score')"
-                      min-width="64"
-                      v-if="problemData.problem.type == 1"
-                    >
+                    <vxe-table-column :title="$t('m.Score')" min-width="64" v-if="isOi">
                       <template v-slot="{ row }">
                         <template v-if="contestID && row.score != null">
                           <el-tag
@@ -458,6 +478,7 @@
           </el-tabs>
         </el-col>
         <div
+          v-if="isAcmOi"
           class="problem-resize hidden-sm-and-down"
           :id="'js-center'+'-'+ $route.name"
           :title="$t('m.Shrink_Sidebar')"
@@ -502,30 +523,83 @@
           :lg="12"
           class="problem-right"
           :id="'problem-right' + '-' + $route.name"
+          :style="{ height: '100%'}"
         >
           <el-card :padding="10" id="submit-code" shadow="always" class="submit-detail">
-            <CodeMirror
-              :value.sync="code"
-              :languages="problemData.languages"
-              :language.sync="language"
-              :theme.sync="theme"
-              :height.sync="height"
-              :fontSize.sync="fontSize"
-              :tabSize.sync="tabSize"
-              @resetCode="onResetToTemplate"
-              @changeTheme="onChangeTheme"
-              @changeLang="onChangeLang"
-              @getUserLastAccepetedCode="getUserLastAccepetedCode"
-              @switchFocusMode="switchFocusMode"
-              :openFocusMode.sync="openFocusMode"
-              :openTestCaseDrawer.sync="openTestCaseDrawer"
-              :problemTestCase="problemData.problem.examples"
-              :pid="problemData.problem.id"
-              :type="problemType"
-              :isAuthenticated="isAuthenticated"
-              :isRemoteJudge="problemData.problem.isRemote"
-              :submitDisabled="submitDisabled"
-            ></CodeMirror>
+            <div v-if="isAcmOi">
+              <CodeMirror
+                :value.sync="code"
+                :languages="problemData.languages"
+                :language.sync="language"
+                :theme.sync="theme"
+                :height.sync="height"
+                :fontSize.sync="fontSize"
+                :tabSize.sync="tabSize"
+                @resetCode="onResetToTemplate"
+                @changeTheme="onChangeTheme"
+                @changeLang="onChangeLang"
+                @getUserLastAccepetedCode="getUserLastAccepetedCode"
+                @switchFocusMode="switchFocusMode"
+                :openFocusMode.sync="openFocusMode"
+                :openTestCaseDrawer.sync="openTestCaseDrawer"
+                :problemTestCase="problemData.problem.examples"
+                :pid="problemData.problem.id"
+                :type="problemType"
+                :isAuthenticated="isAuthenticated"
+                :isRemoteJudge="problemData.problem.isRemote"
+                :submitDisabled="submitDisabled"
+              ></CodeMirror>
+            </div>
+            <div v-else-if="isSelection || isDecide" :style="{ height: getLeftHeight() + 'px'}">
+              <el-row :style="{ height: '100%', display: 'flex', flexDirection: 'column' }">
+                <!-- 上部区域，占据85%的高度 -->
+                <el-col
+                  :span="24"
+                  :style="{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }"
+                >
+                  <div
+                    v-for="(item, index) in (isSelection ? problemData.problem.examples : orderList)"
+                    :key="index"
+                  >
+                    <el-button
+                      class="centered-button"
+                      size="size"
+                      @click="addAnswer(item, index)"
+                      style="flex-grow: 1;"
+                    >{{ isSelection ? String.fromCharCode(65 + index) : item.output }}</el-button>
+                  </div>
+                </el-col>
+
+                <!-- 下部区域，占据15%的高度 -->
+                <el-col :span="24" :style="{ flexBasis: '15%' }">
+                  <el-form>
+                    <el-form-item :label="$t('m.Selected_Answer')" required>
+                      <el-tag
+                        v-for="selected in selectedList"
+                        closable
+                        :close-transition="false"
+                        :key="selected.index"
+                        size="small"
+                        @close="closeAnswer(selected)"
+                        style="margin-right: 7px;margin-top:4px"
+                      >{{ isSelection ? String.fromCharCode(65 + selected.index) : selected.output }}</el-tag>
+                    </el-form-item>
+                  </el-form>
+                </el-col>
+              </el-row>
+            </div>
+            <div v-else :style="{ height: getLeftHeight() + 'px'}">
+              <el-form>
+                <el-form-item :label="$t('m.Filling_Answer')" required>
+                  <el-input
+                    v-for="(selected, index) in problemData.problem.examples"
+                    :key="index"
+                    v-model="selected.output"
+                    style="margin-top: 20px"
+                  ></el-input>
+                </el-form-item>
+              </el-form>
+            </div>
             <div id="js-right-bottom">
               <el-row>
                 <el-col :sm="24" :md="10" :lg="10" style="margin-top:4px;">
@@ -692,10 +766,10 @@
                     <span v-else>{{ $t('m.Submit') }}</span>
                   </el-button>
                   <el-tag
+                    v-if="!submitDisabled"
                     type="success"
                     :class="openTestCaseDrawer?'tj-btn active':'tj-btn non-active'"
                     @click.native="openTestJudgeDrawer"
-                    v-if="!submitDisabled"
                     effect="plain"
                   >
                     <svg
@@ -868,6 +942,16 @@ export default {
       openTestCaseDrawer: false,
       openFocusMode: false,
       showProblemHorizontalMenu: false,
+      isAcm: true,
+      isOi: true,
+      isAcmOi: true,
+      isSelection: false,
+      isFilling: false,
+      isDecide: false,
+      fillingCount: 0,
+      type: 0,
+      selectedList: [],
+      orderList: [{ output: "YES" }, { output: "NO" }],
     };
   },
   created() {
@@ -903,6 +987,9 @@ export default {
     window.onresize = () => {
       this.resizeWatchHeight();
     };
+    this.$nextTick(() => {
+      this.updateHeights();
+    });
   },
   methods: {
     ...mapActions(["changeDomTitle"]),
@@ -1211,6 +1298,7 @@ export default {
               left.style.width
           );
       } catch (e) {}
+      this.updateHeights();
     },
     init() {
       if (this.$route.name === "ContestFullProblemDetails") {
@@ -1247,7 +1335,7 @@ export default {
           }
 
           this.problemData = result;
-
+          this.changeType();
           this.loading = false;
 
           if (this.isAuthenticated) {
@@ -1528,11 +1616,6 @@ export default {
     },
 
     submitCode() {
-      if (this.code.trim() === "") {
-        myMessage.error(this.$i18n.t("m.Code_can_not_be_empty"));
-        return;
-      }
-
       if (this.code.length > 65535) {
         myMessage.error(this.$i18n.t("m.Code_Length_can_not_exceed_65535"));
         return;
@@ -1547,6 +1630,16 @@ export default {
       this.submissionId = "";
       this.result = { status: 9 };
       this.submitting = true;
+
+      if (!this.isAcmOi) {
+        this.code = this.formartCode;
+      }
+
+      if (this.code.trim() === "") {
+        myMessage.error(this.$i18n.t("m.Code_can_not_be_empty"));
+        return;
+      }
+
       let data = {
         pid: this.problemID, // 如果是比赛题目就为display_id
         language: this.language,
@@ -1708,6 +1801,56 @@ export default {
         tabSize: this.tabSize,
       });
     },
+    changeType(type) {
+      if (this.problemData.problem != null) {
+        type = this.problemData.problem.type;
+      }
+      this.type = type;
+
+      this.isAcm = type === 0;
+      this.isOi = type === 1;
+      this.isAcmOi = type === 0 || type === 1;
+      this.isSelection = type === 2;
+      this.isFilling = type === 3;
+      this.isDecide = type > 3;
+    },
+    addAnswer(example, index) {
+      let type = this.problemData.problem.type;
+      if (type === 4) {
+        this.selectedList = [];
+      }
+      const isSelected = this.selectedList.some(
+        (item) => item.output === example.output && item.index === example.index
+      );
+      if (!isSelected) {
+        example["index"] = index;
+        this.selectedList.push(example);
+      }
+    },
+    closeAnswer(example) {
+      this.selectedList = this.selectedList.filter((item) => {
+        return !(
+          item.output === example.output && item.index === example.index
+        );
+      });
+    },
+    updateHeights() {
+      let route = this.$route.name;
+      const left = document.getElementById(`problem-left-${route}`);
+      const right = document.getElementById(`problem-right-${route}`);
+
+      if (left && right) {
+        const maxHeight = Math.max(left.offsetHeight, right.offsetHeight);
+        left.style.height = right.style.height = `${maxHeight}px`;
+      }
+    },
+    getLeftHeight() {
+      let route = this.$route.name;
+      const left = document.getElementById(`problem-left-${route}`);
+      const rightBottom = document.getElementById(`js-right-bottom`);
+
+      return left.offsetHeight - rightBottom.offsetHeight * 1.5;
+    },
   },
   computed: {
     ...mapGetters([
@@ -1788,6 +1931,27 @@ export default {
         return "public";
       }
     },
+    formartCode() {
+      let type = this.problemData.problem.type;
+
+      this.sortedList = this.selectedList.sort((a, b) => a.index - b.index);
+      let sortedList = this.sortedList;
+      if (type == 3) {
+        sortedList = this.problemData.problem.examples;
+      }
+
+      let formartCode = "";
+      for (let i = 0; i < sortedList.length; i++) {
+        let answer = "";
+        if (type === 2) {
+          answer = String.fromCharCode(65 + sortedList[i]["index"]);
+        } else if (type === 3 || type === 4) {
+          answer = sortedList[i]["output"];
+        }
+        formartCode += answer + "\n";
+      }
+      return formartCode;
+    },
   },
   beforeRouteLeave(to, from, next) {
     this.beforeLeaveDo(from.params.contestID);
@@ -1821,6 +1985,9 @@ export default {
     activeName() {
       this.resizeWatchHeight();
     },
+    "problemData.problem.type"(newVal) {
+      this.changeType(newVal);
+    },
   },
 };
 </script>
@@ -1831,6 +1998,13 @@ export default {
 </style>
 
 <style scoped>
+.centered-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px auto; /* 上下间距10px，左右自动居中 */
+  width: 80%; /* 宽度为父元素宽度的80% */
+}
 .problem-menu {
   float: left;
 }
@@ -2066,7 +2240,7 @@ a {
   margin-right: 7%;
 }
 #submit-code {
-  height: auto;
+  height: 100%;
 }
 #submit-code .status {
   float: left;

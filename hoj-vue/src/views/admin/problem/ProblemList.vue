@@ -84,6 +84,9 @@
               <el-option :label="$t('m.All_Problem')" :value="'All'"></el-option>
               <el-option :label="'ACM'" :value="'0'"></el-option>
               <el-option :label="'OI'" :value="'1'"></el-option>
+              <el-option :label="$t('m.Selection')" :value="'2'"></el-option>
+              <el-option :label="$t('m.Filling')" :value="'3'"></el-option>
+              <el-option :label="$t('m.Decide')" :value="'4'"></el-option>
             </el-select>
           </span>
           <span>
@@ -194,8 +197,11 @@
         </vxe-table-column>
         <vxe-table-column min-width="60" :title="$t('m.Type')">
           <template v-slot="{ row }">
-            <el-tag effect="dark" color="#19be6b" v-if="row.type == 0">{{ 'ACM' }}</el-tag>
-            <el-tag effect="dark" color="#409eff" v-if="row.type == 1">{{ 'OI' }}</el-tag>
+            <el-tag effect="dark" color="#1559A1" v-if="row.type == 0">{{ 'ACM' }}</el-tag>
+            <el-tag effect="dark" color="#19be6b" v-if="row.type == 1">{{ 'OI' }}</el-tag>
+            <el-tag effect="dark" color="#66B1FF" v-if="row.type == 2">{{ $t('m.Selection') }}</el-tag>
+            <el-tag effect="dark" color="#EEAC3C" v-if="row.type == 3">{{ $t('m.Filling') }}</el-tag>
+            <el-tag effect="dark" color="#881E1F" v-if="row.type == 4">{{ $t('m.Decide') }}</el-tag>
           </template>
         </vxe-table-column>
         <vxe-table-column min-width="50" :title="$t('m.Level')">

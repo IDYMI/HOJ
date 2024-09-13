@@ -976,4 +976,11 @@ export const m = {
   Search_ExaminationSeat: '搜索考场',
   Enter_RealnameOrNumber: '输入 `真实姓名` or `学号`',
   View: '查看考场座位分布',
+
+  // Problem
+  Selection: '选择',
+  Filling: '填空',
+  Decide: '判断',
+  Selected_Answer: '已选择答案',
+  Filling_Answer: '填入答案',
 };

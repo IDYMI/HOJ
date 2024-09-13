@@ -315,8 +315,10 @@ const ojApi = {
     });
   },
 
-  getProblemLastId() {
-    return ajax('/api/get-last-problemId', 'get');
+  getProblemLastId(gid = null) {
+    return ajax('/api/get-last-problemId', 'get', {
+      params: { gid },
+    });
   },
 
   // Problem详情页的相关请求

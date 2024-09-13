@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import top.hcode.hoj.annotation.HOJAccessEnum;
 import top.hcode.hoj.common.exception.StatusAccessDeniedException;
@@ -136,17 +137,17 @@ public class ProblemManager {
      * @MethodName getProblemLastId
      * @Description 获取最新的题目Id
      */
-    public ProblemLastIdVO getProblemLastId() throws StatusFailException {
+    public ProblemLastIdVO getProblemLastId(Long gid) throws StatusFailException {
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
 
         queryWrapper.select("problem_id")
                 .eq("is_remote", false) // 公共题库
-                .orderByDesc("problem_id");
+                .orderByDesc("problem_id")
+                .eq(gid != null, "gid", gid)
+                .isNull(gid == null, "gid");
         List<Problem> list = problemEntityService.list(queryWrapper);
 
-        // TODO 默认纯数字为主题库
-
-        // 刷选选纯数字的 problem_id，防止团队题目影响
+        // 默认纯数字为主题库
         Pattern pattern = Pattern.compile("^\\d+$");
         List<Problem> filteredList = new ArrayList<>();
         for (Problem problem : list) {
@@ -158,8 +159,8 @@ public class ProblemManager {
             }
         }
 
-        ProblemLastIdVO problemLastIdVO = new ProblemLastIdVO();
-        problemLastIdVO.setProblemLastId(filteredList.get(0).getProblemId());
+        String problemId = !CollectionUtils.isEmpty(filteredList) ? filteredList.get(0).getProblemId() : "1000";
+        ProblemLastIdVO problemLastIdVO = new ProblemLastIdVO(problemId);
         return problemLastIdVO;
     }
 

@@ -408,7 +408,10 @@ public class Constants {
 
     public enum ProblemType {
         ACM(0),
-        OI(1);
+        OI(1),
+        Selection(2),
+        Filling(3),
+        Decide(4);
 
         private final Integer type;
 

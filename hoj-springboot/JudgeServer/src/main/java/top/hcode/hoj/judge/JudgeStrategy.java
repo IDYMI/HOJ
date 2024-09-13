@@ -296,7 +296,7 @@ public class JudgeStrategy {
 
     // 获取判题的运行时间，运行空间，OI得分
     public HashMap<String, Object> computeResultInfo(List<JudgeCase> allTestCaseResultList,
-            Boolean isACM,
+            Boolean isOI,
             Integer errorCaseNum,
             Integer totalScore,
             Integer problemDifficulty,
@@ -310,7 +310,7 @@ public class JudgeStrategy {
                 .ifPresent(t -> result.put("memory", t.getMemory()));
 
         // OI题目计算得分
-        if (!isACM) {
+        if (isOI) {
             // 全对的直接用总分*0.1+2*题目难度
             if (errorCaseNum == 0 && Constants.JudgeCaseMode.DEFAULT.getMode().equals(judgeCaseMode)) {
                 int oiRankScore = (int) Math.round(totalScore * 0.1 + 2 * problemDifficulty);
@@ -368,6 +368,7 @@ public class JudgeStrategy {
             String judgeCaseMode) {
 
         boolean isACM = Objects.equals(problem.getType(), Constants.Contest.TYPE_ACM.getCode());
+        boolean isOI = Objects.equals(problem.getType(), Constants.Contest.TYPE_OI.getCode());
 
         List<JSONObject> errorTestCaseList = new LinkedList<>();
 
@@ -408,11 +409,7 @@ public class JudgeStrategy {
                 judgeCase.setUserOutput(msg);
             }
 
-            if (isACM) {
-                if (!Objects.equals(status, Constants.Judge.STATUS_ACCEPTED.getStatus())) {
-                    errorTestCaseList.add(jsonObject);
-                }
-            } else {
+            if (isOI) {
                 int oiScore = jsonObject.getInt("score");
                 if (Objects.equals(status, Constants.Judge.STATUS_ACCEPTED.getStatus())) {
                     judgeCase.setScore(oiScore);
@@ -429,6 +426,10 @@ public class JudgeStrategy {
                     errorTestCaseList.add(jsonObject);
                     judgeCase.setScore(0);
                 }
+            } else {
+                if (!Objects.equals(status, Constants.Judge.STATUS_ACCEPTED.getStatus())) {
+                    errorTestCaseList.add(jsonObject);
+                }
             }
 
             allCaseResList.add(judgeCase);
@@ -442,7 +443,7 @@ public class JudgeStrategy {
 
         // 获取判题的运行时间，运行空间，OI得分
         HashMap<String, Object> result = computeResultInfo(allCaseResList,
-                isACM,
+                isOI,
                 errorTestCaseList.size(),
                 problem.getIoScore(),
                 problem.getDifficulty(),
@@ -491,9 +492,11 @@ public class JudgeStrategy {
         if (Objects.equals(type, Constants.Contest.TYPE_ACM.getCode())) {
             // ACM题目 以题目现有的judgeCaseMode为准
             return problemJudgeCaseMode;
-        } else {
+        } else if (Objects.equals(type, Constants.Contest.TYPE_OI.getCode())) {
             // OI题目 涉及到可能有子任务分组评测，还是依赖info文件的配置为准
             return infoJudgeCaseMode;
+        } else {
+            return problemJudgeCaseMode;
         }
     }
 }

@@ -975,4 +975,11 @@ export const m = {
   Search_ExaminationSeat: 'Search ExaminationSeat',
   Enter_RealnameOrNumber: 'Enter Your `Realname` or `Student number`',
   View: 'View',
+
+  // Problem
+  Selection: 'Selection',
+  Filling: 'Filling',
+  Decide: 'Decide',
+  Selected_Answer: 'Selected Answer',
+  Filling_Answer:'Filling Answer',
 };

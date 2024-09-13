@@ -323,6 +323,19 @@ export const m = {
   Judge_Case_Subtask_Average_Mode: '子任务（平均得分）',
   Judge_Case_Ergodic_Without_Error_Mode: '遇错止评（顺序评测）',
 
+  // /views/admin/problem/Problem.vue
+  Selection_Options: '选择选项',
+  Filling_Count: '填空数量',
+  Selection_View: '选项展示',
+  Add_Selection: '添加选项',
+  Problem_Answer: '题目答案',
+  Problem_Sample2: '答案',
+  Problem_Answer_Output: '答案输出',
+  Examples_Desc: '上传文件：将所有的数据文件所在的文件夹压缩为一个zip类型的压缩包',
+  Answer_Examples_Desc1: '题目答案：选择题，答案输出为换行相隔的按照字典顺序的答案（例如选择`A`，`B`），则输入`A` `\\n` `B`',
+  Answer_Examples_Desc2: '题目答案：填空题，答案输出为换行相隔的答案（例如选择`A`，`B`），则输入`A` `\\n` `B`',
+  Answer_Examples_Desc3: '题目答案：判断题，答案输出为 ‘YES’ 或者 ‘NO’，一般为一个！',
+
   // /views/admin/problem/tag
   Admin_Tag: '标签管理',
   Add_Tag: '添加标签',

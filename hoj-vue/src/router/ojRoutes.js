@@ -61,12 +61,6 @@ import NotFound from '@/views/404.vue';
 const ojRoutes = [
   {
     path: '/',
-    redirect: '/home',
-    component: Home,
-    meta: { title: 'Home' },
-  },
-  {
-    path: '/home',
     name: 'Home',
     component: Home,
     meta: { title: 'Home' },

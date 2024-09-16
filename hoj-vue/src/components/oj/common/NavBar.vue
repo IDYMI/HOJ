@@ -9,16 +9,16 @@
           active-text-color="#2196f3"
           class="custom-menu"
         >
-          <router-link to="/home" v-if="mode == 'defalut'">
+          <router-link to="/" v-if="mode == 'defalut'">
             <el-image :src="big_imgUrl" style="width:100%;"></el-image>
           </router-link>
           <div class="logo">
-            <router-link to="/home">
+            <router-link to="/">
               <el-image style="width: 139px; height: 50px" :src="imgUrl" fit="scale-down"></el-image>
             </router-link>
           </div>
           <template v-if="mode == 'defalut'">
-            <el-menu-item index="/home">
+            <el-menu-item index="/">
               <i class="el-icon-s-home"></i>
               {{ $t("m.NavBar_Home") }}
             </el-menu-item>
@@ -82,7 +82,7 @@
             </el-submenu>
           </template>
           <template v-else-if="mode == 'training'">
-            <el-menu-item index="/home">
+            <el-menu-item index="/">
               <i class="el-icon-s-home"></i>
               {{ $t("m.NavBar_Back_Home") }}
             </el-menu-item>
@@ -102,7 +102,7 @@
             </el-menu-item>
           </template>
           <template v-else-if="mode == 'contest'">
-            <el-menu-item index="/home">
+            <el-menu-item index="/">
               <i class="el-icon-s-home"></i>
               {{ $t("m.NavBar_Back_Home") }}
             </el-menu-item>
@@ -130,7 +130,7 @@
             </el-menu-item>
           </template>
           <template v-else-if="mode == 'group'">
-            <el-menu-item index="/home">
+            <el-menu-item index="/">
               <i class="el-icon-s-home"></i>
               {{ $t("m.NavBar_Back_Home") }}
             </el-menu-item>
@@ -285,7 +285,7 @@
             <i class="el-icon-s-unfold"></i>
           </mu-button>
           <el-tooltip :content="$t('m.Click_To_Home')" placement="bottom" effect="dark">
-            <router-link to="/home">{{ websiteConfig.shortName ? websiteConfig.shortName : "OJ" }}</router-link>
+            <router-link to="/">{{ websiteConfig.shortName ? websiteConfig.shortName : "OJ" }}</router-link>
           </el-tooltip>
           <mu-button
             flat
@@ -462,7 +462,7 @@
           <mu-list toggle-nested>
             <mu-list-item
               button
-              to="/home"
+              to="/"
               @click="opendrawer = !opendrawer"
               active-class="mobile-menu-active"
             >

@@ -8,7 +8,7 @@ export default {
     api.logout().then((res) => {
       this.$store.dispatch("clearUserInfoAndToken");
       this.$router.replace({
-        path: "/home",
+        path: "/",
       });
     });
   },

@@ -320,6 +320,20 @@ const Announcement = () => import("@/views/oj/about/Switch_Announcement.vue");
 
 export default {
   name: "home",
+  metaInfo: {
+    title: "Home",
+    meta: [
+      {
+        name: "keywords",
+        content: "NYOJ首页",
+      },
+      {
+        name: "description",
+        content:
+          "现在您所看到的是全新版的 nyoj 3.0，nyoj 是南阳理工学院历史最早的在线评测系统，提供各种算法题目和竞赛，帮助学生提高编程技能。现域名https://xcpc.nyist.edu.cn，曾用域名http://acm.nyist.net/JudgeOnline，https://nyoj.online。",
+      },
+    ],
+  },
   components: {
     Announcements,
     Announcement,

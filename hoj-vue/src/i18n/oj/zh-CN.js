@@ -23,7 +23,7 @@ export const m = {
   NavBar_Code_Rank: '万码行动',
   NavBar_Discussion: '讨论',
   NavBar_Group: '团队',
-  NavBar_About: '关于',
+  NavBar_About: '帮助',
   NavBar_Introduction: '简介',
   NavBar_Developer: '开发者',
   NavBar_Login: '登录',

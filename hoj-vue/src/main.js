@@ -85,13 +85,16 @@ Vue.use(Element, {
 Vue.use(VueCropper); // 图像剪切
 Vue.use(Message, { name: 'msg' }); // `Vue.prototype.$msg` 全局消息提示
 
-import Vcode from "vue-puzzle-vcode";
+import Vcode from 'vue-puzzle-vcode';
 
 Vue.use(Vcode); // 滑动验证码组件
 
 Vue.prototype.$axios = axios;
 
 Vue.prototype.$markDown = mavonEditor.mavonEditor.getMarkdownIt().use(Md_Katex); // 挂载到vue
+
+import MetaInfo from 'vue-meta-info'; // meta标签
+Vue.use(MetaInfo);
 
 Vue.config.productionTip = false;
 new Vue({

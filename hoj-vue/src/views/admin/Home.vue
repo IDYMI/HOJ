@@ -4,7 +4,7 @@
       <el-menu class="vertical_menu" :router="true" :default-active="currentPath">
         <el-tooltip :content="$t('m.Click_To_Home')" placement="bottom" effect="dark">
           <div class="logo">
-            <router-link to="/home">
+            <router-link to="/">
               <img :src="imgUrl" alt="Online Judge Admin" />
             </router-link>
           </div>

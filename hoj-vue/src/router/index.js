@@ -64,7 +64,7 @@ router.beforeEach((to, from, next) => {
           } else {
             // oj端
             next({
-              path: '/home',
+              path: '/',
             });
             store.commit('changeModalStatus', { mode: 'Login', visible: true });
             mMessage.error(i18n.t('m.Please_login_first'));
@@ -85,7 +85,7 @@ router.beforeEach((to, from, next) => {
             mMessage.error(i18n.t('m.Please_login_first_by_admin_account'));
           } else {
             next({
-              path: '/home',
+              path: '/',
             });
             store.commit('changeModalStatus', { mode: 'Login', visible: true });
             mMessage.error(i18n.t('m.Please_login_first'));
@@ -106,7 +106,7 @@ router.beforeEach((to, from, next) => {
             mMessage.error(i18n.t('m.Please_login_first_by_admin_account'));
           } else {
             next({
-              path: '/home',
+              path: '/',
             });
             store.commit('changeModalStatus', { mode: 'Login', visible: true });
             mMessage.error(i18n.t('m.Please_login_first'));
@@ -138,7 +138,7 @@ router.beforeEach((to, from, next) => {
         case 'discussion':
           if (!webConfig.openPublicDiscussion) {
             next({
-              path: '/home',
+              path: '/',
             });
             mMessage.error(i18n.t('m.No_Access_There_is_no_open_discussion_area_on_the_website'));
           }
@@ -146,7 +146,7 @@ router.beforeEach((to, from, next) => {
         case 'groupDiscussion':
           if (!webConfig.openGroupDiscussion) {
             next({
-              path: '/home',
+              path: '/',
             });
             mMessage.error(i18n.t('m.No_Access_There_is_no_open_group_discussion_area_on_the_website'));
           }
@@ -154,7 +154,7 @@ router.beforeEach((to, from, next) => {
         case 'contestComment':
           if (!webConfig.openContestComment) {
             next({
-              path: '/home',
+              path: '/',
             });
             mMessage.error(i18n.t('m.No_Access_There_is_no_open_contest_comment_area_on_the_website'));
           }

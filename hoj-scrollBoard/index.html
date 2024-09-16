@@ -36,7 +36,7 @@
                         <span id="errorMsg"></span>
                     </div>
                     <div class="alert alert-info" role="alert">
-                        <a href="/home" class="alert-link">点击此处返回平台首页 (Click here to return to Online Judge Homepage)</a>
+                        <a href="/" class="alert-link">点击此处返回平台首页 (Click here to return to Online Judge Homepage)</a>
                     </div>
                 </div>
               </div>
@@ -55,8 +55,8 @@
             var contestInfo = getContestInfo(parmas.cid);
             if(contestInfo != null){
                 var medals = new Array(0, 0, 0);
-                if(parmas.medals != undefined 
-                    && parmas.medals != null 
+                if(parmas.medals != undefined
+                    && parmas.medals != null
                     && parmas.medals instanceof Array){
                     medals = parmas.medals;
                 }

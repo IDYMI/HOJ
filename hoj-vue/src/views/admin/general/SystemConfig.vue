@@ -456,7 +456,7 @@ export default {
     },
     async insertEvent(row) {
       let record = {
-        link: "/home",
+        link: "/",
         title: "首页",
         iconClass: "el-icon-link",
       };

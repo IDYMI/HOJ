@@ -15,9 +15,9 @@ const rootState = {
     visible: false,
   },
   websiteConfig: {
-    recordName: '© 2020-2024',
-    projectName: 'NYOJ',
-    shortName: 'OJ',
+    recordName: '© 2009-2024',
+    projectName: '南阳理工学院OJ',
+    shortName: 'NYOJ',
     recordUrl: '#',
     projectUrl: '#',
     openPublicDiscussion: true,

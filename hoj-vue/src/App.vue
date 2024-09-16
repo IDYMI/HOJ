@@ -71,11 +71,12 @@
             </el-row>
           </div>
           <div class="mundb-footer">
-            <a
+            Copyright {{ websiteConfig.recordName }}
+            <!-- <a
               style="color:#1E9FFF"
               :href="websiteConfig.recordUrl"
               target="_blank"
-            >{{ websiteConfig.recordName }}</a>
+            >{{ websiteConfig.recordName }}</a>-->
             Powered by
             <a
               :href="websiteConfig.projectUrl"
@@ -205,7 +206,7 @@ export default {
           this.$store.commit("changeUserToken", strogeToken);
           // if(this.$route.path.startsWith('/admin')){
           //   this.$router.replace({
-          //     path: "/home",
+          //     path: "/",
           //   });
           // }
         } else {
@@ -219,9 +220,9 @@ export default {
                 });
               }
             } else {
-              if (path != "/home") {
+              if (path != "/") {
                 this.$router.replace({
-                  path: "/home",
+                  path: "/",
                 });
               }
             }

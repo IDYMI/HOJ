@@ -425,6 +425,20 @@ import "element-ui/lib/theme-chalk/display.css";
 import Pagination from "@/components/oj/common/Pagination";
 const Editor = () => import("@/components/admin/Editor.vue");
 export default {
+  metaInfo: {
+    title: "Discussion",
+    meta: [
+      {
+        name: "keywords",
+        content: "NYOJ讨论",
+      },
+      {
+        name: "description",
+        content:
+          "现在您所看到的是全新版的 nyoj 3.0，nyoj 是南阳理工学院历史最早的在线评测系统，提供各种算法题目和竞赛，帮助学生提高编程技能。现域名https://xcpc.nyist.edu.cn，曾用域名http://acm.nyist.net/JudgeOnline，https://nyoj.online。",
+      },
+    ],
+  },
   components: {
     Avatar,
     Editor,
@@ -797,11 +811,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      "isAuthenticated",
-      "userInfo",
-      "isAdminRole",
-    ]),
+    ...mapGetters(["isAuthenticated", "userInfo", "isAdminRole"]),
   },
 };
 </script>

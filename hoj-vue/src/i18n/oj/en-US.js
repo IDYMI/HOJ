@@ -23,7 +23,7 @@ export const m = {
   NavBar_Code_Rank: 'CODERank',
   NavBar_Discussion: 'Discussion',
   NavBar_Group: 'Group',
-  NavBar_About: 'About',
+  NavBar_About: 'Help',
   NavBar_Introduction: 'Introduction',
   NavBar_Developer: 'Developer',
   NavBar_Login: 'Login',

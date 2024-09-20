@@ -21,6 +21,8 @@ public interface ScheduleService {
 
     void getLeetcodeInfo();
 
+    void getCodeLines();
+
     void deleteUserSession();
 
     void syncNoticeToRecentHalfYearUser();

@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public interface AdminUserService {
 
-    public CommonResult<IPage<UserRolesVO>> getUserList(Integer limit, Integer currentPage, Boolean onlyAdmin,
+    public CommonResult<IPage<UserRolesVO>> getUserList(Integer limit, Integer currentPage, Integer type,
             String keyword);
 
     public CommonResult<Void> editUser(AdminEditUserDTO adminEditUserDto);

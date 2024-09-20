@@ -35,4 +35,8 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
     IPage<UserRolesVO> getAdminUserList(Page<UserRolesVO> page, @Param("limit") int limit,
             @Param("currentPage") int currentPage,
             @Param("keyword") String keyword);
+
+	IPage<UserRolesVO> getNewUserList(Page<UserRolesVO> page, @Param("limit") int limit,
+			@Param("currentPage") int currentPage,
+			@Param("keyword") String keyword);
 }

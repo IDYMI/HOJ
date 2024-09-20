@@ -647,18 +647,17 @@ export default {
     // 获取用户列表
     getUserList(page) {
       this.loadingTable = true;
-      api
-        .admin_getUserList(page, this.pageSize, this.keyword, this.onlyAdmin)
-        .then(
-          (res) => {
-            this.loadingTable = false;
-            this.total = res.data.data.total;
-            this.userList = res.data.data.records;
-          },
-          (res) => {
-            this.loadingTable = false;
-          }
-        );
+      let type = this.onlyAdmin ? 0 : 1;
+      api.admin_getUserList(page, this.pageSize, this.keyword, type).then(
+        (res) => {
+          this.loadingTable = false;
+          this.total = res.data.data.total;
+          this.userList = res.data.data.records;
+        },
+        (res) => {
+          this.loadingTable = false;
+        }
+      );
     },
     deleteUsers(ids) {
       if (!ids) {

@@ -2093,3 +2093,47 @@ DELIMITER ;
 CALL add_Problem_pdfDescription ;
 
 DROP PROCEDURE add_Problem_pdfDescription;
+
+/*
+* 添加 user_cloc 用户提交代码统计行数
+
+*/
+DROP PROCEDURE
+IF EXISTS add_user_cloc;
+DELIMITER $$
+
+CREATE PROCEDURE add_user_cloc ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'user_cloc'
+) THEN
+	CREATE TABLE `user_cloc` (
+	  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+	  `uid` varchar(255) DEFAULT NULL COMMENT '用户编号',
+	  `username` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+	  `realname` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '真实姓名',
+	  `time` varchar(255) DEFAULT NULL COMMENT '日期',
+	  `json` longtext DEFAULT NULL COMMENT '代码数据',
+	  `sum`  bigint unsigned DEFAULT 0 COMMENT '代码量',
+	  `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	  `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	  PRIMARY KEY (`id`),
+	  KEY `uid` (`uid`),
+	  KEY `username` (`username`),
+	  CONSTRAINT `user_cloc_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `user_info` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE,
+      CONSTRAINT `user_cloc_ibfk_2` FOREIGN KEY (`username`) REFERENCES `user_info` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_user_cloc ;
+
+DROP PROCEDURE add_user_cloc;
+

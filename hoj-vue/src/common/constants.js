@@ -342,6 +342,7 @@ export const RULE_TYPE = {
   NewOI: 3,
   OJ: 4,
   NewOJ: 5,
+  Code: 6,
 };
 
 export const CONTEST_TYPE_REVERSE = {

@@ -91,6 +91,31 @@
         ORDER BY sum DESC, codeforces_rating DESC, nowcoder_rating DESC
     </select>
 
+    <select id="getCODERankList" resultType="top.hcode.hoj.pojo.vo.CODERankVO" useCache="true">
+        SELECT *
+        FROM (
+            SELECT u.uuid as uid, u.nickname, u.username, left(u.signature,100) as signature, u.avatar,
+            u.title_name, u.title_color, u.status,
+            us.realname as realname, us.course as course,
+            uc.time as time, uc.json as json, uc.sum as sum,
+            ROW_NUMBER() OVER (PARTITION BY u.username ORDER BY uc.gmt_create DESC) as row_num
+            FROM user_info u
+            LEFT JOIN user_cloc uc ON u.uuid = uc.uid
+            LEFT JOIN user_sign us ON u.uuid = us.uid
+            WHERE json is not null AND u.status = 0
+        ) AS temp
+        <where>
+            row_num = 1 AND json is not null AND status = 0
+            <if test="uidList!=null">
+                AND temp.uid in
+                <foreach collection="uidList" item="uid" open="(" separator="," close=")">
+                    #{uid}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY sum DESC
+    </select>
+
     <resultMap id="map_UserHomeVo" type="top.hcode.hoj.pojo.vo.UserHomeVO">
         <id column="uid" property="uid"></id>
         <result column="username" property="username"></result>

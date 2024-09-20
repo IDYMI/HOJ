@@ -92,6 +92,11 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
+    public CommonResult<ClocDTO> getClocConfig() {
+        return CommonResult.successResponse(configManager.getClocConfig());
+    }
+
+    @Override
     public CommonResult<Void> setEmailConfig(EmailConfigDTO config) {
         try {
             configManager.setEmailConfig(config);
@@ -105,6 +110,16 @@ public class ConfigServiceImpl implements ConfigService {
     public CommonResult<Void> setHtmltopdfConfig(HtmltopdfDTO config) {
         try {
             configManager.setHtmltopdfConfig(config);
+            return CommonResult.successResponse();
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<Void> setClocConfig(ClocDTO config) {
+        try {
+            configManager.setClocConfig(config);
             return CommonResult.successResponse();
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());

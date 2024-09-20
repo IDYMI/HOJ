@@ -25,6 +25,7 @@ const ExaminationRoom = () => import('@/views/admin/examination/ExaminationRoom'
 const ExaminationRoomList = () => import('@/views/admin/examination/ExaminationRoomList');
 const ExaminationSeat = () => import('@/views/admin/examination/ExaminationSeat');
 const ExaminationList = () => import('@/views/admin/examination/ExaminationList');
+const Cloc = () => import('@/views/admin/cloc/Cloc');
 
 const adminRoutes = [
   {
@@ -235,6 +236,12 @@ const adminRoutes = [
         name: 'admin-edit-examinationRoom',
         component: ExaminationSeat,
         meta: { title: 'Assign ExaminationSeat' },
+      },
+      {
+        path: 'cloc',
+        name: 'admin-cloc',
+        component: Cloc,
+        meta: { requireMainRoleAdmin: true, title: 'Cloc Admin' },
       },
     ],
   },

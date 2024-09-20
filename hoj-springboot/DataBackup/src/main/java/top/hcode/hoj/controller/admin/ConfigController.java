@@ -7,6 +7,7 @@ import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import top.hcode.hoj.common.result.CommonResult;
+import top.hcode.hoj.pojo.dto.ClocDTO;
 import top.hcode.hoj.pojo.dto.DBAndRedisConfigDTO;
 import top.hcode.hoj.pojo.dto.EmailConfigDTO;
 import top.hcode.hoj.pojo.dto.TestEmailDTO;
@@ -101,6 +102,13 @@ public class ConfigController {
     }
 
     @RequiresPermissions("system_info_admin")
+    @RequestMapping("/get-cloc-config")
+    public CommonResult<ClocDTO> getClocConfig() {
+
+        return configService.getClocConfig();
+    }
+
+    @RequiresPermissions("system_info_admin")
     @PutMapping("/set-email-config")
     public CommonResult<Void> setEmailConfig(@RequestBody EmailConfigDTO config) {
         return configService.setEmailConfig(config);
@@ -110,6 +118,12 @@ public class ConfigController {
     @PutMapping("/set-htmltopdf-config")
     public CommonResult<Void> setHtmltopdfConfig(@RequestBody HtmltopdfDTO config) {
         return configService.setHtmltopdfConfig(config);
+    }
+
+    @RequiresPermissions("system_info_admin")
+    @PutMapping("/set-cloc-config")
+    public CommonResult<Void> setClocConfig(@RequestBody ClocDTO config) {
+        return configService.setClocConfig(config);
     }
 
     @RequiresPermissions("system_info_admin")

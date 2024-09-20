@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.vo.ACMRankVO;
+import top.hcode.hoj.pojo.vo.CODERankVO;
 import top.hcode.hoj.pojo.entity.user.UserRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
 import top.hcode.hoj.pojo.vo.OIRankVO;
@@ -33,6 +34,8 @@ public interface UserRecordEntityService extends IService<UserRecord> {
     IPage<OJRankVO> getOJRankList(Page<OJRankVO> page, List<String> uidList, Boolean isNew);
 
     IPage<ACMRankVO> getACMRankList(Page<ACMRankVO> page, List<String> uidList, Boolean isNew);
+
+    IPage<CODERankVO> getCODERankList(Page<CODERankVO> page, List<String> uidList);
 
     IPage<OIRankVO> getGroupRankList(Page<OIRankVO> page, Long gid, List<String> uidList, String rankType,
             Boolean useCache);

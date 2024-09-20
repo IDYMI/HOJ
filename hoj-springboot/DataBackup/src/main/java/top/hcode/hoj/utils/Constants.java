@@ -136,6 +136,7 @@ public class Constants {
         TYPE_NEWOI(3, "NEWOI"),
         TYPE_OJ(4, "OJ"),
         TYPE_NEWOJ(5, "NEWOJ"),
+        TYPE_CODE(6, "CODE"),
 
         STATUS_SCHEDULED(-1, "Scheduled"),
         STATUS_RUNNING(0, "Running"),
@@ -243,6 +244,8 @@ public class Constants {
         OJ_RANK_CACHE("oj_rank_cache"),
         NEW_OJ_RANK_CACHE("new_oj_rank_cache"),
 
+        CODE_RANK_CACHE("code_rank_cache"),
+
         GROUP_RANK_CACHE("group_rank_cache"),
 
         SUPER_ADMIN_UID_LIST_CACHE("super_admin_uid_list_case"),
@@ -288,6 +291,8 @@ public class Constants {
         // docker 容器中的映像路径
         DOCKER_PROBLEM_FILE_FOLDER("/tmp/htmltopdf"),
 
+        DOCKER_CODE_FOLDE("/tmp/code"),
+
         CONTEST_TEXT_PRINT_FOLDER("/hoj/file/contest_print"),
 
         IMG_API("/api/public/img/"),
@@ -304,7 +309,9 @@ public class Constants {
 
         FILE_DOWNLOAD_TMP_FOLDER("/hoj/file/zip/download"),
 
-        CONTEST_AC_SUBMISSION_TMP_FOLDER("/hoj/file/zip/contest_ac");
+        CONTEST_AC_SUBMISSION_TMP_FOLDER("/hoj/file/zip/contest_ac"),
+
+        CODE_FOLDER("/hoj/file/code");
 
         private final String path;
 

@@ -1556,12 +1556,12 @@ const adminApi = {
   },
 
   // 获取用户列表
-  admin_getUserList(currentPage, limit, keyword, onlyAdmin) {
+  admin_getUserList(currentPage, limit, keyword, type) {
     let params = { currentPage, limit };
     if (keyword) {
       params.keyword = keyword;
     }
-    params.onlyAdmin = onlyAdmin;
+    params.type = type;
     return ajax('/api/admin/user/get-user-list', 'get', {
       params: params,
     });
@@ -1664,6 +1664,14 @@ const adminApi = {
   },
   admin_editHtmltopdfConfig(data) {
     return ajax('/api/admin/config/set-htmltopdf-config', 'put', {
+      data,
+    });
+  },
+  admin_getClocConfig() {
+    return ajax('/api/admin/config/get-cloc-config', 'get');
+  },
+  admin_editClocConfig(data) {
+    return ajax('/api/admin/config/set-cloc-config', 'put', {
       data,
     });
   },
@@ -2220,6 +2228,9 @@ const adminApi = {
     return ajax('/api/examination-seat', 'get', {
       params: params,
     });
+  },
+  getUserCodeRecord(data) {
+    return ajax('/api/get-user-code-record', 'post', { data });
   },
 };
 

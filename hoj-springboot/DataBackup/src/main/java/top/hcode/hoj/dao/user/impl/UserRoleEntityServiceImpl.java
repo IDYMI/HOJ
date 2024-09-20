@@ -50,13 +50,15 @@ public class UserRoleEntityServiceImpl extends ServiceImpl<UserRoleMapper, UserR
     }
 
     @Override
-    public IPage<UserRolesVO> getUserList(int limit, int currentPage, String keyword, Boolean onlyAdmin) {
+    public IPage<UserRolesVO> getUserList(int limit, int currentPage, String keyword, Integer type) {
         // 新建分页
         Page<UserRolesVO> page = new Page<>(currentPage, limit);
-        if (onlyAdmin) {
+        if (type == 0) {
             return userRoleMapper.getAdminUserList(page, limit, currentPage, keyword);
-        } else {
+        } else if (type == 1) {
             return userRoleMapper.getUserList(page, limit, currentPage, keyword);
+        } else {
+            return userRoleMapper.getNewUserList(page, limit, currentPage, keyword);
         }
     }
 

@@ -35,9 +35,11 @@ import top.hcode.hoj.pojo.entity.msg.AdminSysNotice;
 import top.hcode.hoj.pojo.entity.msg.UserSysNotice;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.user.Session;
+import top.hcode.hoj.pojo.entity.user.UserInfo;
 import top.hcode.hoj.pojo.entity.user.UserMultiOj;
 import top.hcode.hoj.pojo.entity.user.UserRecord;
 import top.hcode.hoj.service.admin.rejudge.RejudgeService;
+import top.hcode.hoj.utils.ClocUtils;
 import top.hcode.hoj.utils.Constants;
 import top.hcode.hoj.utils.JsoupUtils;
 import top.hcode.hoj.utils.RedisUtils;
@@ -115,6 +117,9 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Autowired
     private UserMultiOjEntityService userMultiOjEntityService;
+
+    @Autowired
+    private ClocUtils clocUtils;
 
     /**
      * @MethodName deleteAvatar
@@ -493,6 +498,30 @@ public class ScheduleServiceImpl implements ScheduleService {
             }
         }
         log.info("获取Leetcode成功！");
+    }
+
+    /**
+     * 每隔1小时获取用户所有的代码量
+     */
+    @Scheduled(cron = "0 0 0/1 * * *")
+    // @Scheduled(cron = "0 * * * * *")
+    @Override
+    public void getCodeLines() {
+        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
+
+        // 所有用户
+        List<String> uidList = userInfoEntityService.list(userInfoQueryWrapper)
+                .stream()
+                .map(UserInfo::getUuid)
+                .collect(Collectors.toList());
+
+        try {
+            clocUtils.getUserCodeLines(uidList, null, null, true);
+        } catch (Exception e) {
+            log.error("用户每日代码异常----------------------->{}", e.getMessage());
+        }
+
+        log.info("获取用户每日代码统计成功！");
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 1.4))

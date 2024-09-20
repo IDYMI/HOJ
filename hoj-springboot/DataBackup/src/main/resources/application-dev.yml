@@ -39,6 +39,11 @@ htmltopdf-host: http://172.17.0.1
 htmltopdf-port: 8001
 htmltopdf-ec: true
 
+# cloc
+cloc-host: http://172.17.0.1
+cloc-port: 8002
+cloc-start-time: 2024-07-22T16:00:00.000Z
+
 # 以下为各个remote judge平台的账号配置
 hdu-username-list:
 hdu-password-list:

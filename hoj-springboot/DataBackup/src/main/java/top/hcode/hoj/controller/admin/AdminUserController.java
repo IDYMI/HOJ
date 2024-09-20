@@ -30,9 +30,9 @@ public class AdminUserController {
     @RequiresPermissions("user_admin")
     public CommonResult<IPage<UserRolesVO>> getUserList(@RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage,
-            @RequestParam(value = "onlyAdmin", defaultValue = "false") Boolean onlyAdmin,
+            @RequestParam(value = "type", defaultValue = "false") Integer type,
             @RequestParam(value = "keyword", required = false) String keyword) {
-        return adminUserService.getUserList(limit, currentPage, onlyAdmin, keyword);
+        return adminUserService.getUserList(limit, currentPage, type, keyword);
     }
 
     @PutMapping("/edit-user")

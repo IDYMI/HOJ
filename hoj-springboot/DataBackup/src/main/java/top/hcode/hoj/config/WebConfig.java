@@ -31,6 +31,13 @@ public class WebConfig {
 
     private Boolean htmltopdfEc = true;
 
+    // cloc配置
+    private String clochost;
+
+    private Integer clocport;
+
+    private String clocstartTime;
+
     private Boolean emailSsl = true;
 
     private String emailBGImg = "https://cdn.jsdelivr.net/gh/HimitZH/CDN/images/HCODE.png";

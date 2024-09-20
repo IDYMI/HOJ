@@ -65,7 +65,7 @@ public class AdminUserManager {
     @Autowired
     private RedisUtils redisUtils;
 
-    public IPage<UserRolesVO> getUserList(Integer limit, Integer currentPage, Boolean onlyAdmin, String keyword) {
+    public IPage<UserRolesVO> getUserList(Integer limit, Integer currentPage, Integer type, String keyword) {
         if (currentPage == null || currentPage < 1)
             currentPage = 1;
         if (limit == null || limit < 1)
@@ -73,7 +73,7 @@ public class AdminUserManager {
         if (keyword != null) {
             keyword = keyword.trim();
         }
-        return userRoleEntityService.getUserList(limit, currentPage, keyword, onlyAdmin);
+        return userRoleEntityService.getUserList(limit, currentPage, keyword, type);
     }
 
     public void editUser(AdminEditUserDTO adminEditUserDto) throws StatusFailException {

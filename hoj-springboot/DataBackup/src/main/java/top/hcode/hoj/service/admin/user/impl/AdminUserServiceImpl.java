@@ -25,9 +25,9 @@ public class AdminUserServiceImpl implements AdminUserService {
     private AdminUserManager adminUserManager;
 
     @Override
-    public CommonResult<IPage<UserRolesVO>> getUserList(Integer limit, Integer currentPage, Boolean onlyAdmin,
+    public CommonResult<IPage<UserRolesVO>> getUserList(Integer limit, Integer currentPage, Integer type,
             String keyword) {
-        return CommonResult.successResponse(adminUserManager.getUserList(limit, currentPage, onlyAdmin, keyword));
+        return CommonResult.successResponse(adminUserManager.getUserList(limit, currentPage, type, keyword));
     }
 
     @Override

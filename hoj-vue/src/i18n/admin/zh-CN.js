@@ -68,6 +68,7 @@ export const m = {
   Created_Time: '创建时间',
   Delete: '删除',
   OnlyAdmin: '仅显示管理员',
+  OnlyNew: '仅显示新生',
   User_Type: '用户角色',
   Normal: '正常',
   Disable: '封禁',
@@ -191,6 +192,7 @@ export const m = {
   Related_IconClass: '展示按钮',
   Htmltopdf_Config: 'Htmltopdf 设置（转PDF的程序）',
   Htmltopdf_Ec: '英文/中文',
+  Cloc_Config: 'Cloc 设置（代码量统计）',
 
   // /views/admin/general/SysSwitch.vue
   Judge_Config: '评测配置',
@@ -546,4 +548,10 @@ export const m = {
   Spaced: '是否隔开',
   StudentInfo: '考生信息',
   Subject: '科目',
+
+  // cloc
+  Cloc_Admin: '万码行动',
+  Cloc_Query: '题量查询',
+  Query_User_Tips: '用于查询特定时间段内用户的做题量',
+  To_Query: '查询',
 };

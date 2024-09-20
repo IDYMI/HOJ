@@ -1145,3 +1145,84 @@ $body$
    ```
 
 2024 年 5 月 20 日 20 点
+
+# 增加 代码量统计
+
+   容器配置
+   app.py
+   ```python
+   from flask import Flask, request
+   import subprocess
+
+   app = Flask(__name__)
+
+
+   @app.route("/", methods=["POST"])
+   def execute_command():
+      command = request.form.get("command", "")
+      if command:
+         command = command.encode("utf-8").decode("utf-8")
+         result = subprocess.run(command, shell=True, capture_output=True, text=True)
+         return result.stdout, 200
+      else:
+         return "No command provided", 400
+
+
+   if __name__ == "__main__":
+      app.run(host="0.0.0.0", port=80)
+   ```
+   Dockerfile
+   ```cmd
+   FROM python:3.9-slim
+
+   # 安装 cloc
+   RUN apt-get update && \
+      DEBIAN_FRONTEND=noninteractive \
+      apt-get install -y --no-install-recommends \
+      perl \
+      wget \
+      ca-certificates && \
+      wget -nv https://github.com/AlDanial/cloc/releases/download/v2.00/cloc-2.00.pl \
+      -O /usr/local/bin/cloc && \
+      apt-get remove -y wget ca-certificates && \
+      apt-get autoremove -y && \
+      apt-get autoclean && \
+      rm -r /var/lib/apt/lists/* && \
+      chmod +x /usr/local/bin/cloc
+
+   WORKDIR /app
+
+   COPY requirements.txt requirements.txt
+   RUN pip install -r requirements.txt
+
+   COPY . .
+
+   CMD ["python", "app.py"]
+
+   ```
+   requirements.txt
+   ```txt
+   Flask==2.0.2
+   werkzeug==2.0.2
+   ```
+   创建容器
+   ```docker
+   docker build -t hoj-cloc .
+   ```
+   docker-compose.yml 中添加
+   ```yml
+  hoj-cloc:
+    image: hoj-cloc
+    container_name: hoj-cloc
+    volumes:
+        - ${HOJ_DATA_DIRECTORY}/file/code:/tmp/code
+    restart: always
+    ports:
+        - "8002:80"
+    networks:
+      hoj-network:
+        ipv4_address: 172.20.0.10
+
+   ```
+
+2024 年 5 月 25 日 14 点

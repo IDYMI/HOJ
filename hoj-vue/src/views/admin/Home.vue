@@ -150,6 +150,17 @@
             }}
           </el-menu-item>
         </el-submenu>
+        <el-submenu index="cloc" v-if="isMainAdminRole">
+          <template slot="title">
+            <i class="el-icon-cloudy" aria-hidden="true" style="font-size: 20px"></i>
+            {{ $t("m.Cloc_Admin") }}
+          </template>
+          <el-menu-item index="/admin/cloc">
+            {{
+            $t("m.Cloc_Query")
+            }}
+          </el-menu-item>
+        </el-submenu>
       </el-menu>
       <div id="header">
         <el-row>
@@ -630,6 +641,41 @@
               <mu-list-item-title>
                 {{
                 $t("m.Assign_ExaminationSeat")
+                }}
+              </mu-list-item-title>
+            </mu-list-item>
+          </mu-list-item>
+
+          <mu-list-item
+            v-if="isMainAdminRole"
+            button
+            :ripple="false"
+            nested
+            :open="openSideMenu === 'cloc'"
+            @toggle-nested="openSideMenu = arguments[0] ? 'cloc' : ''"
+          >
+            <mu-list-item-action>
+              <mu-icon value=":el-icon-cloudy fa-size" size="24"></mu-icon>
+            </mu-list-item-action>
+            <mu-list-item-title>
+              {{
+              $t("m.Cloc_Admin")
+              }}
+            </mu-list-item-title>
+            <mu-list-item-action>
+              <mu-icon class="toggle-icon" size="24" value=":el-icon-arrow-down"></mu-icon>
+            </mu-list-item-action>
+            <mu-list-item
+              button
+              :ripple="false"
+              slot="nested"
+              to="/admin/cloc"
+              @click="opendrawer = !opendrawer"
+              active-class="mobile-menu-active"
+            >
+              <mu-list-item-title>
+                {{
+                $t("m.Cloc_Query")
                 }}
               </mu-list-item-title>
             </mu-list-item>

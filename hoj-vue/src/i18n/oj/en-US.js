@@ -20,6 +20,7 @@ export const m = {
   NavBar_ACM_Rank: 'ACM Rank',
   NavBar_OI_Rank: 'OI Rank',
   NavBar_MultiOj_Rank: 'OJ Rank',
+  NavBar_Code_Rank: 'CODERank',
   NavBar_Discussion: 'Discussion',
   NavBar_Group: 'Group',
   NavBar_About: 'About',
@@ -387,6 +388,12 @@ export const m = {
 
   // /views/oj/rank/OJRank.vue
   OJ_Ranklist: 'OJ Ranklist',
+
+  // /views/oj/rank/CODERank.vue
+  Submit_Count: 'Submit Count',
+  Blank_Lines: 'Blank Lines',
+  Comment_Lines: 'Comment Lines',
+  Code_Lines: 'Code Lines',
 
   // /views/oj/discussion/discussionList.vue
   Go_to_problem: 'Go to Problem',

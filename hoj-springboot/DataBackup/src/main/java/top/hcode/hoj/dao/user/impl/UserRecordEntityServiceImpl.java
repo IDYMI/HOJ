@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import top.hcode.hoj.mapper.JudgeMapper;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.vo.ACMRankVO;
+import top.hcode.hoj.pojo.vo.CODERankVO;
 import top.hcode.hoj.pojo.entity.user.UserRecord;
 import top.hcode.hoj.mapper.UserRecordMapper;
 import top.hcode.hoj.pojo.vo.OIRankVO;
@@ -71,6 +72,11 @@ public class UserRecordEntityServiceImpl extends ServiceImpl<UserRecordMapper, U
     @Override
     public IPage<ACMRankVO> getACMRankList(Page<ACMRankVO> page, List<String> uidList, Boolean isNew) {
         return userRecordMapper.getACMRankList(page, uidList, isNew);
+    }
+
+    @Override
+    public IPage<CODERankVO> getCODERankList(Page<CODERankVO> page, List<String> uidList) {
+        return userRecordMapper.getCODERankList(page, uidList);
     }
 
     @Override

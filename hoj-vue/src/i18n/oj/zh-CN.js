@@ -20,6 +20,7 @@ export const m = {
   NavBar_ACM_Rank: 'ACM 排名',
   NavBar_OI_Rank: 'OI 排名',
   NavBar_MultiOj_Rank: 'OJ 排行',
+  NavBar_Code_Rank: '万码行动',
   NavBar_Discussion: '讨论',
   NavBar_Group: '团队',
   NavBar_About: '关于',
@@ -387,6 +388,12 @@ export const m = {
 
   // /views/oj/rank/OJRank.vue
   OJ_Ranklist: 'OJ 排行榜',
+
+  // /views/oj/rank/CODERank.vue
+  Submit_Count: '提交数',
+  Blank_Lines: '空白行',
+  Comment_Lines: '注释行',
+  Code_Lines: '代码行',
 
   // /views/oj/discussion/discussionList.vue
   Go_to_problem: '前往原题',

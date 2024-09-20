@@ -72,6 +72,11 @@
                 $t("m.NavBar_MultiOj_Rank")
                 }}
               </el-menu-item>
+              <el-menu-item index="/code-rank">
+                {{
+                $t("m.NavBar_Code_Rank")
+                }}
+              </el-menu-item>
             </el-submenu>
           </template>
           <template v-else-if="mode == 'training'">
@@ -596,6 +601,20 @@
                 <mu-list-item-title>
                   {{
                   $t("m.NavBar_MultiOj_Rank")
+                  }}
+                </mu-list-item-title>
+              </mu-list-item>
+              <mu-list-item
+                button
+                :ripple="false"
+                slot="nested"
+                to="/code-rank"
+                @click="opendrawer = !opendrawer"
+                active-class="mobile-menu-active"
+              >
+                <mu-list-item-title>
+                  {{
+                  $t("m.NavBar_Code_Rank")
                   }}
                 </mu-list-item-title>
               </mu-list-item>

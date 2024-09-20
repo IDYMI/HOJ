@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import top.hcode.hoj.pojo.vo.ACMRankVO;
+import top.hcode.hoj.pojo.vo.CODERankVO;
 import top.hcode.hoj.pojo.entity.user.UserRecord;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import top.hcode.hoj.pojo.vo.OIRankVO;
@@ -35,6 +36,8 @@ public interface UserRecordMapper extends BaseMapper<UserRecord> {
 
     IPage<OJRankVO> getOJRankList(Page<OJRankVO> page, @Param("uidList") List<String> uidList,
             @Param("isNew") Boolean isNew);
+
+    IPage<CODERankVO> getCODERankList(Page<CODERankVO> page, @Param("uidList") List<String> uidList);
 
     UserHomeVO getUserHomeInfo(@Param("uid") String uid, @Param("username") String username);
 

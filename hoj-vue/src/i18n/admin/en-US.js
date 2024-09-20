@@ -68,6 +68,7 @@ export const m = {
   Created_Time: 'Created Time',
   Delete: 'Delete',
   OnlyAdmin: 'OnlyAdmin',
+  OnlyNew: 'OnlyNew',
   User_Type: 'User Type',
   Normal: 'Normal',
   Disable: 'Disable',
@@ -191,6 +192,7 @@ export const m = {
   Related_IconClass: 'Icon Class',
   Htmltopdf_Config: 'Htmltopdf Config',
   Htmltopdf_Ec: 'English/Chinese',
+  Cloc_Config: 'Cloc Config',
 
   // /views/admin/general/SysSwitch.vue
   Judge_Config: 'Judge Config',
@@ -547,4 +549,10 @@ export const m = {
   Spaced: 'Spaced',
   StudentInfo: 'Student Info',
   Subject: 'Subject',
+
+  // cloc
+  Cloc_Admin: 'Cloc Admin',
+  Cloc_Query: 'Cloc Query',
+  Query_User_Tips: 'Used to query the number of codes writed by users within a specific time period.',
+  To_Query: 'Query',
 };

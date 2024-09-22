@@ -1910,7 +1910,7 @@ export default {
       };
 
       if (!problem.pdfDescription) {
-        api.getProblemPdf(problem.id, this.descriptionID).then(
+        api.getProblemPdf(problem.id, this.descriptionID, this.contestID).then(
           (res) => openPdf(res.data.msg),
           (err) => {}
         );

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.common.exception.StatusForbiddenException;
+import top.hcode.hoj.common.exception.StatusNotFoundException;
 import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.common.result.ResultStatus;
 import top.hcode.hoj.manager.admin.contest.AdminContestProblemManager;
@@ -13,6 +14,7 @@ import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.contest.ContestProblem;
 import top.hcode.hoj.service.admin.contest.AdminContestProblemService;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -131,6 +133,21 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             return CommonResult.successResponse();
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<String> getContestPdf(Long cid, Boolean isCoverPage) {
+        try {
+            return CommonResult.successResponse(adminContestProblemManager.getContestPdf(cid, isCoverPage));
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusNotFoundException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.NOT_FOUND);
+        } catch (IOException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
         }
     }
 }

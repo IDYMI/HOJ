@@ -432,6 +432,7 @@ export const m = {
   SplitType_User: 'Split folders by username',
   SplitType_Problem: 'Split folders by problem id',
   Delete_Contest_Tips: 'This operation will delete the contest and its submission, discussion, announcement, record and other data. Do you want to continue?',
+  Create_Contest_PDF: 'Create Contest PDF',
 
   // /views/admin/contest/Contest.vue
   Contest_Title: 'Contest Title',

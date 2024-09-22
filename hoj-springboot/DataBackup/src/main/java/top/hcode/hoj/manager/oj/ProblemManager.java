@@ -321,11 +321,11 @@ public class ProblemManager {
 
             // 查询题目详情，题目标签，题目语言，题目做题情况
             problem = problemEntityService.getProblemRes(trainingProblem.getPid(), trainingProblem.getPeid(),
-                    null, null);
+                    null, null, null);
             problemDescriptionList = problemEntityService.getProblemDescriptionList(
                     trainingProblem.getPid(), trainingProblem.getPeid(), null, null);
         } else {
-            problem = problemEntityService.getProblemRes(null, peid, problemId, gid);
+            problem = problemEntityService.getProblemRes(null, peid, problemId, gid, null);
             problemDescriptionList = problemEntityService.getProblemDescriptionList(null, null, problemId, gid);
         }
 
@@ -401,11 +401,11 @@ public class ProblemManager {
         return new ProblemInfoVO(problem, problemDescriptionList, tags, languagesStr, problemCount, LangNameAndCode);
     }
 
-    public String getProblemPdf(Long pid, Long peid)
+    public String getProblemPdf(Long pid, Long peid, Long cid)
             throws StatusForbiddenException, StatusNotFoundException, IOException, StatusFailException {
 
         // 查询题目详情
-        ProblemRes problem = problemEntityService.getProblemRes(pid, peid, null, null);
+        ProblemRes problem = problemEntityService.getProblemRes(pid, peid, null, null, cid);
         if (problem == null) {
             throw new StatusNotFoundException("该题号对应的题目不存在");
         }

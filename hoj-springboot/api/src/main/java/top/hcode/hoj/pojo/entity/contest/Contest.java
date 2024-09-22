@@ -141,6 +141,9 @@ public class Contest implements Serializable {
     @ApiModelProperty(value = "队员上限(最大为3)")
     private Integer maxParticipants;
 
+    @ApiModelProperty(value = "PDF题面")
+    private String pdfDescription;
+
     @TableField(fill = FieldFill.INSERT)
     private Date gmtCreate;
 

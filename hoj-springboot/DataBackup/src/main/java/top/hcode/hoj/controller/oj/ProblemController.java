@@ -113,8 +113,9 @@ public class ProblemController {
     @RequestMapping(value = "/get-problem-pdf", method = RequestMethod.GET)
     @AnonApi
     public CommonResult<String> getProblemPdf(@RequestParam(value = "pid") Long pid,
-            @RequestParam(value = "peid", required = false) Long peid) {
-        return problemService.getProblemPdf(pid, peid);
+            @RequestParam(value = "peid", required = false) Long peid,
+            @RequestParam(value = "cid", required = false) Long cid) {
+        return problemService.getProblemPdf(pid, peid, cid);
     }
 
     /**

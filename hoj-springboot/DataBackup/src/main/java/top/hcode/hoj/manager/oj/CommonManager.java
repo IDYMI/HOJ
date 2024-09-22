@@ -164,7 +164,7 @@ public class CommonManager {
 
         String oj = "ME";
         if (pid != null) {
-            ProblemRes problem = problemEntityService.getProblemRes(pid, null, null, null);
+            ProblemRes problem = problemEntityService.getProblemRes(pid, null, null, null, null);
             if (problem.getIsRemote()) {
                 oj = problem.getProblemId().split("-")[0];
             }

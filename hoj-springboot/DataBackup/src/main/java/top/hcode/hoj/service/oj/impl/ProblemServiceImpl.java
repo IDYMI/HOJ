@@ -82,9 +82,9 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public CommonResult<String> getProblemPdf(Long pid, Long peid) {
+    public CommonResult<String> getProblemPdf(Long pid, Long peid, Long cid) {
         try {
-            return CommonResult.successResponse(problemManager.getProblemPdf(pid, peid));
+            return CommonResult.successResponse(problemManager.getProblemPdf(pid, peid, cid));
         } catch (StatusNotFoundException e) {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.NOT_FOUND);
         } catch (StatusForbiddenException e) {

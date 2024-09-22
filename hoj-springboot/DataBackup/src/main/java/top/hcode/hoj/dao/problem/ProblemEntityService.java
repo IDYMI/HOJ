@@ -37,7 +37,7 @@ public interface ProblemEntityService extends IService<Problem> {
 
     ProblemResDTO getProblemResDTO(Long pid, Long peid, String problemId, Long gid);
 
-    ProblemRes getProblemRes(Long pid, Long peid, String problemId, Long gid);
+    ProblemRes getProblemRes(Long pid, Long peid, String problemId, Long gid, Long cid);
 
     String getDefaultProblemTitle(Problem problem);
 

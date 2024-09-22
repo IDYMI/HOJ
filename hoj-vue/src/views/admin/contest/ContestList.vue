@@ -120,7 +120,7 @@
             <p>Creator: {{ row.author }}</p>
           </template>
         </vxe-table-column>
-        <vxe-table-column min-width="150" :title="$t('m.Option')">
+        <vxe-table-column min-width="200" :title="$t('m.Option')">
           <template v-slot="{ row }">
             <template v-if="isMainAdminRole || userInfo.uid == row.uid">
               <div style="margin-bottom:10px">
@@ -143,6 +143,11 @@
                     @click.native="goContestProblemList(row.id)"
                     type="success"
                   ></el-button>
+                </el-tooltip>
+                <el-tooltip effect="dark" :content="$t('m.Create_Contest_PDF')" placement="top">
+                  <el-button size="mini" @click.native="getContestPdf(row.id)">
+                    <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+                  </el-button>
                 </el-tooltip>
               </div>
               <div style="margin-bottom:10px">
@@ -352,6 +357,11 @@ export default {
     ContestListChangeFilter() {
       this.currentPage = 1;
       this.getContestList();
+    },
+    getContestPdf(contestId) {
+      api.admin_getContestPdf(contestId).then((res) => {
+        myMessage.success(this.$i18n.t("m.Update_Successfully"));
+      });
     },
   },
 };

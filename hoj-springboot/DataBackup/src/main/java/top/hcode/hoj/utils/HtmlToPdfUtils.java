@@ -1,13 +1,20 @@
 package top.hcode.hoj.utils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -24,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import top.hcode.hoj.common.exception.StatusNotFoundException;
 import top.hcode.hoj.config.NacosSwitchConfig;
 import top.hcode.hoj.config.WebConfig;
+import top.hcode.hoj.pojo.bo.Pair_;
 import top.hcode.hoj.pojo.dto.ProblemRes;
 
 @Component
@@ -53,6 +61,67 @@ public class HtmlToPdfUtils {
     private String RootUrl;
     private String Host;
     private Boolean EC;
+
+    /**
+     * 合并多个pdf文件
+     *
+     * @param problemList 题目信息
+     * @param outputName  保存文件名称
+     * @return 转换成功返回保存的文件名称
+     */
+    public List<Pair_<Long, String>> convertByPdf(List<ProblemRes> problemList, String outputName)
+            throws StatusNotFoundException, IOException {
+
+        // 如果 outputName 为空，生成一个唯一 ID
+        if (outputName == null) {
+            outputName = IdUtil.fastSimpleUUID();
+        }
+
+        // 准备工作目录路径
+        String workspace = Constants.File.DOCKER_PROBLEM_FILE_FOLDER.getPath() + "/";
+
+        // 创建一个映射来存储原始索引
+        Map<Long, Integer> pidIndexMap = IntStream.range(0, problemList.size())
+                .boxed()
+                .collect(Collectors.toMap(i -> problemList.get(i).getId(), Function.identity()));
+
+        // 创建一个临时对象来存储 displayId 和生成的 fileName
+        List<Pair_<Long, String>> pidToFileNameList = problemList.parallelStream().map(problem -> {
+            String pdfDescription = problem.getPdfDescription();
+            String fileName = getProblemDescriptionName(pdfDescription);
+            Long pid = problem.getId();
+
+            // 如果题目有pdf题面直接返回对应位置
+            if (!StringUtils.isEmpty(pdfDescription)) {
+                return new Pair_<>(pid, fileName);
+            }
+
+            Boolean isOk = true;
+
+            try {
+                fileName = convertByHtml(problem);
+            } catch (StatusNotFoundException | IOException e) {
+                isOk = false;
+            }
+
+            // 如果 fileName 非空，返回 displayId 和 fileName 对应的 Pair，否则返回 null
+            return isOk ? new Pair_<>(pid, fileName) : null;
+        }).filter(Objects::nonNull) // 过滤掉 null 值
+                .collect(Collectors.toList()); // 将问题对应文件记录
+
+        // 按原始顺序重新排列 inputPaths
+        List<String> fileNameList = pidToFileNameList.stream()
+                .sorted(Comparator.comparing(pair -> pidIndexMap.get(pair.getKey()))) // 根据原始索引排序
+                .map(Pair_::getValue) // 提取排序后的 fileName
+                .collect(Collectors.toList());
+
+        // 合并并保存 PDF
+        saveMergePdfDetails(fileNameList, workspace + getProblemDescriptionName(outputName) + ".pdf");
+
+        pidToFileNameList.add(new Pair_<Long, String>(0L, getProblemDescriptionName(outputName)));
+
+        return pidToFileNameList;
+    }
 
     /**
      * html字符串转pdf
@@ -118,6 +187,9 @@ public class HtmlToPdfUtils {
         // 将标题转化为比赛标题
         String title = problem.getTitle();
 
+        if (!StringUtils.isEmpty(problem.getContestTitle()))
+            title = "Problem " + problem.getDisplayId() + ". " + problem.getDisplayTitle();
+
         httpRequest.header("Accept", "*/*")
                 .header("Connection", "keep-alive")
                 .form("input_path", workspace + fileName + ".html")
@@ -168,7 +240,55 @@ public class HtmlToPdfUtils {
                 .form("output_path", (workspace + fileName + ".pdf"))
                 .form("EC", EC);
 
+        Date contestTime = problem.getContestTime();
+        String contestTitle = problem.getContestTitle();
+
+        if (contestTime != null) {
+            // 根据 EC 决定日期格式
+            String pattern = EC ? "yyyy 年 M 月 d 日" : "yyyy.M.d";
+            SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+
+            // 格式化并添加比赛的相关信息
+            String formattedDate = dateFormat.format(contestTime);
+            httpRequest.form("contest_data", formattedDate);
+        }
+
+        if (!StringUtils.isEmpty(contestTitle)) {
+            httpRequest.form("contest_title", contestTitle);
+        }
+
         HttpResponse response = httpRequest.execute();
+
+        return response;
+    }
+
+    /**
+     * 合并 PDF 题面
+     *
+     * @param inputPaths 合并的 pdf 文件地址
+     * @param outputPath 返回的 pdf 文件地址
+     */
+    public HttpResponse saveMergePdfDetails(List<String> inputPaths, String outputPath) throws IOException {
+        String workspace = Constants.File.DOCKER_PROBLEM_FILE_FOLDER.getPath() + "/";
+
+        String inputPath = inputPaths.stream()
+                .map(path -> workspace + path + ".pdf") // 给每个元素加头部和尾部
+                .collect(Collectors.joining(" ")); // 用空格连接
+
+        HttpRequest httpRequest = HttpRequest.post(Host + "/merge-pdf")
+                .header("Accept", "*/*")
+                .header("Connection", "keep-alive")
+                .form("input_path", inputPath)
+                .form("output_path", outputPath)
+                .form("EC", EC);
+
+        HttpResponse response = httpRequest.execute();
+
+        if (!response.isOk()) {
+            String error = "InputPaths {" + inputPaths + "} Merge PDF Error: {" + response.body() + "}";
+            log.error(error);
+            throw new IOException(error);
+        }
 
         return response;
     }

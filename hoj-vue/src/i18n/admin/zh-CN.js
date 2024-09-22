@@ -431,6 +431,7 @@ export const m = {
   SplitType_User: '以用户名分割文件夹',
   SplitType_Problem: '以题目ID分割文件夹',
   Delete_Contest_Tips: '此操作将删除该比赛以及比赛的提交、讨论、公告、记录等数据, 是否继续?',
+  Create_Contest_PDF: '生成比赛PDF',
 
   // /views/admin/contest/Contest.vue
   Contest_Title: '比赛标题',

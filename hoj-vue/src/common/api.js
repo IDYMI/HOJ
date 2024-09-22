@@ -329,9 +329,9 @@ const ojApi = {
   },
 
   // Problem的pdf链接
-  getProblemPdf(pid, peid) {
+  getProblemPdf(pid, peid, cid) {
     return ajax('/api/get-problem-pdf', 'get', {
-      params: { pid, peid },
+      params: { pid, peid, cid },
     });
   },
 
@@ -1804,6 +1804,11 @@ const adminApi = {
         cid,
         displayId,
       },
+    });
+  },
+  admin_getContestPdf(cid) {
+    return ajax('/api/admin/contest/get-contest-pdf', 'get', {
+      params: { cid },
     });
   },
   admin_changeContestProblemDescription(data) {

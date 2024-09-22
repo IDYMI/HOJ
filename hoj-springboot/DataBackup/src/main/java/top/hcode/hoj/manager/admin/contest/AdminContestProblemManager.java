@@ -3,6 +3,8 @@ package top.hcode.hoj.manager.admin.contest;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
+
+import com.alibaba.excel.util.CollectionUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.common.exception.StatusForbiddenException;
+import top.hcode.hoj.common.exception.StatusNotFoundException;
 import top.hcode.hoj.crawler.problem.ProblemStrategy;
 import top.hcode.hoj.dao.contest.ContestEntityService;
 import top.hcode.hoj.dao.contest.ContestProblemEntityService;
@@ -22,8 +25,11 @@ import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.manager.admin.problem.RemoteProblemManager;
 import top.hcode.hoj.manager.group.GroupManager;
+import top.hcode.hoj.mapper.ContestProblemMapper;
+import top.hcode.hoj.pojo.bo.Pair_;
 import top.hcode.hoj.pojo.dto.ContestProblemDTO;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
+import top.hcode.hoj.pojo.dto.ProblemRes;
 import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.contest.ContestProblem;
@@ -35,6 +41,7 @@ import top.hcode.hoj.utils.Constants;
 import top.hcode.hoj.utils.HtmlToPdfUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -67,6 +74,9 @@ public class AdminContestProblemManager {
 
     @Autowired
     private HtmlToPdfUtils htmlToPdfUtils;
+
+    @Autowired
+    private ContestProblemMapper contestProblemMapper;
 
     public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword,
             Long cid, Integer problemType, String oj, Integer difficulty, Integer type, Long gid)
@@ -424,6 +434,59 @@ public class AdminContestProblemManager {
         log.info("[{}],[{}],cid:[{}],pid:[{}],problemId:[{}],operatorUid:[{}],operatorUsername:[{}]",
                 "Admin_Contest", "Add_Remote_Problem", cid, problem.getId(), problem.getProblemId(),
                 userRolesVo.getUid(), userRolesVo.getUsername());
+    }
+
+    public String getContestPdf(Long cid, Boolean isCoverPage)
+            throws StatusFailException, StatusNotFoundException, IOException, StatusForbiddenException {
+        Contest contest = contestEntityService.getById(cid);
+        // 获取当前登录的用户
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
+
+        // 只有超级管理员和题目管理员、题目创建者才能操作
+        if (!isRoot && !userRolesVo.getUsername().equals(contest.getAuthor())) {
+            throw new StatusForbiddenException("对不起，你无权限制作Pdf题目！");
+        }
+
+        List<ContestProblem> contestProblemList = contestProblemMapper.getContestProblemList(cid);
+
+        if (CollectionUtils.isEmpty(contestProblemList)) {
+            throw new StatusFailException("该比赛暂时还没有题目！");
+        }
+
+        // 提取 ContestProblem 列表中的 pid，并获取对应的 ProblemRes 列表
+        List<ProblemRes> problemResList = contestProblemList.stream()
+                .map(contestProblem -> {
+                    return problemEntityService.getProblemRes(contestProblem.getPid(), contestProblem.getPeid(), null,
+                            null, cid);
+                })
+                .collect(Collectors.toList());
+
+        List<Pair_<Long, String>> pidToFileNameList = htmlToPdfUtils.convertByPdf(problemResList,
+                contest.getPdfDescription());
+
+        if (CollectionUtils.isEmpty(pidToFileNameList)) {
+            throw new StatusFailException("生成比赛题目失败！");
+        }
+
+        String outputPath = null;
+        for (Pair_<Long, String> entry : pidToFileNameList) {
+            Long pid = entry.getKey();
+            String fileName = entry.getValue();
+            String file = Constants.File.FILE_API.getPath() + fileName + ".pdf";
+
+            if (pid == 0) {
+                outputPath = file;
+                contest.setPdfDescription(file);
+                contestEntityService.updateById(contest);
+            } else {
+                problemEntityService.updateProblemDescription(pid, null, file);
+            }
+        }
+
+        return outputPath;
     }
 
 }

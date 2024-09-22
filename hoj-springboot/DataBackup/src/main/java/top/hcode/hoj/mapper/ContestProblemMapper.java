@@ -22,11 +22,13 @@ import java.util.List;
 @Mapper
 @Repository
 public interface ContestProblemMapper extends BaseMapper<ContestProblem> {
-    List<ContestProblemVO> getContestProblemList(@Param("cid") Long cid, @Param("startTime") Date startTime,
+    List<ContestProblemVO> getContestProblemVoList(@Param("cid") Long cid, @Param("startTime") Date startTime,
             @Param("endTime") Date endTime, @Param("sealTime") Date sealTime,
             @Param("isAdmin") Boolean isAdmin, @Param("adminList") List<String> adminList,
             @Param("isHideContestEndJudge") Boolean isHideContestEndJudge,
             @Param("selectedTime") Date selectedTime);
+
+    List<ContestProblem> getContestProblemList(@Param("cid") Long cid);
 
     List<ProblemFullScreenListVO> getContestFullScreenProblemList(@Param("cid") Long cid);
 }

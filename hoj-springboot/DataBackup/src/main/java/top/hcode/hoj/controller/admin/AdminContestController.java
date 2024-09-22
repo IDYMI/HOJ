@@ -194,6 +194,13 @@ public class AdminContestController {
         return adminContestProblemService.importContestRemoteOJProblem(name, problemId, cid, displayId, gid);
     }
 
+    @GetMapping("/get-contest-pdf")
+    @RequiresAuthentication
+    public CommonResult<String> getContestPdf(@RequestParam(value = "cid", required = true) Long cid,
+            @RequestParam(value = "isCoverPage", required = false) Boolean isCoverPage) {
+        return adminContestProblemService.getContestPdf(cid, isCoverPage);
+    }
+
     /**
      * 以下处理比赛公告的操作请求
      */

@@ -33,4 +33,5 @@ public interface AdminContestProblemService {
     public CommonResult<Void> importContestRemoteOJProblem(String name, String problemId, Long cid,
             String displayId, Long gid);
 
+    public CommonResult<String> getContestPdf(Long cid, Boolean isCoverPage);
 }

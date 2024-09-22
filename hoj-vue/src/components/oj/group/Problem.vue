@@ -1904,6 +1904,8 @@ export default {
       problemDto["isUploadTestCase"] = this.problem.isUploadCase;
       problemDto["uploadTestcaseDir"] = this.problem.uploadTestcaseDir;
       problemDto["judgeMode"] = this.problem.judgeMode;
+      problemDto["cid"] = this.$route.params.contestId;
+
       if (this.problem.isUploadCase) {
         problemDto["samples"] = this.problem.testCaseScore;
       } else {

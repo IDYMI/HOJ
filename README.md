@@ -349,6 +349,13 @@ import html
 from bs4 import BeautifulSoup
 import re
 import json
+import PyPDF2
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
+from reportlab.lib.units import mm
+from PyPDF2 import PdfWriter, PdfReader
+import sys, os
 
 
 app = Flask(__name__)
@@ -475,6 +482,8 @@ def generate_pdf():
     # 从表单获取输入参数
     input_path = request.form.get("input_path")
     output_path = request.form.get("output_path")
+    contest_title = request.form.get("contest_title")
+    contest_data = request.form.get("contest_data")
     EC = request.form.get("EC", "false").lower() == "true"
 
     # 构建 Pandoc 命令
@@ -492,6 +501,12 @@ def generate_pdf():
 
     # 添加 EC 参数
     command += ["-M", "ec={}".format(str(EC).lower())]
+
+    if contest_title:
+        command += ["-M", "contest_title={}".format(contest_title)]
+
+    if contest_data:
+        command += ["-M", "contest_data={}".format(contest_data)]
 
     if input_path:
         try:
@@ -517,6 +532,53 @@ def generate_pdf():
 
         except Exception as e:
             return "Failed to run command: {} , Error: {}".format(command, str(e)), 500
+
+
+# 路由：处理多个 PDF 文件的合并操作
+@app.route("/merge-pdf", methods=["POST"])
+def generate_merge_pdf():
+    """
+    将多个 PDF 文件合并为一个 PDF 文件。
+
+    请求参数:
+    - input_path (str): 通过 POST 请求传入的 PDF 文件路径字符串，多个文件路径用空格分隔。
+    - output_path (str): 合并后的输出文件路径。
+
+    返回:
+    - str: 成功或失败的消息。
+    - int: HTTP 状态码。
+    """
+
+    # 获取 POST 请求中的 input_path 和 output_path 参数
+    input_path = request.form.get("input_path", None)
+    output_path = request.form.get("output_path", None)
+    EC = request.form.get("EC", "false").lower() == "true"
+
+    # 检查 input_path 是否存在
+    if input_path:
+        try:
+            # 创建 PDF 合并对象
+            merger = PyPDF2.PdfMerger()
+
+            # 将 input_path 按空格分割，得到多个 PDF 文件名
+            filenames = input_path.split()
+
+            # 遍历文件名列表并将每个 PDF 文件添加到合并器中
+            for filename in filenames:
+                merger.append(PyPDF2.PdfReader(filename))
+
+            # 写入合并后的 PDF 文件到指定的 output_path
+            merger.write(output_path)
+
+            # 重新生成页码
+            write_pdf_page(output_path, EC)
+
+            # 返回成功消息及 HTTP 200 状态码
+            return "PDF generated successfully at {}".format(output_path), 200
+
+        except Exception as e:
+            # 如果出现异常，返回错误消息及 HTTP 500 状态码
+            return "Failed to run Error: {}".format(str(e)), 500
 
 
 # 将传入的测试数据加入 template.tex 模板中，并生成新的模板
@@ -1009,6 +1071,8 @@ Flask==2.0.2
 werkzeug==2.0.2
 Jinja2==3.0.3
 beautifulsoup4==4.12.2
+PyPDF2==3.0.1
+reportlab==4.2.2
 
    ```
    创建容器
@@ -1159,6 +1223,9 @@ docker build -t hoj-htmltopdf .
 % 设置页眉页脚样式
 \pagestyle{fancy}
 \fancyhf{}
+% 页眉中间显示比赛标题和学校、日期，居中显示，两行
+\fancyhead[C]{\textbf{$contest_title$} \\
+$if(ec)$南阳理工学院$else$NYIST NYOJ$endif$ \textbf{$contest_data$}}
 
 % 调整页眉和页脚高度
 \setlength{\headheight}{40pt}  % 页眉高度

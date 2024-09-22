@@ -1950,6 +1950,7 @@ export default {
       problemDto["isUploadTestCase"] = this.problem.isUploadCase;
       problemDto["uploadTestcaseDir"] = this.problem.uploadTestcaseDir;
       problemDto["judgeMode"] = this.problem.judgeMode;
+      problemDto["cid"] = this.$route.params.contestId;
 
       // 如果选择上传文件，则使用上传后的结果
       if (this.problem.isUploadCase) {

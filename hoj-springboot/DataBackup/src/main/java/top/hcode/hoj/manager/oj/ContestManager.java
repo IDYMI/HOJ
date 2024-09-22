@@ -493,7 +493,7 @@ public class ContestManager {
 
         // 查询题目详情，题目标签，题目语言，题目做题情况
         ProblemRes problem = problemEntityService.getProblemRes(contestProblem.getPid(), contestProblem.getPeid(), null,
-                contest.getGid());
+                contest.getGid(), null);
 
         List<ProblemDescription> problemDescriptionList = problemEntityService.getProblemDescriptionList(
                 contestProblem.getPid(), contestProblem.getPeid(), null, contest.getGid());

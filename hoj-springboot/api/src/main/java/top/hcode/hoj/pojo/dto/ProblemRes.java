@@ -13,6 +13,18 @@ public class ProblemRes {
 
     private Long id;
 
+    @ApiModelProperty(value = "比赛标题")
+    private String contestTitle;
+
+    @ApiModelProperty(value = "比赛时间")
+    private Date contestTime;
+
+    @ApiModelProperty(value = "该题目在比赛中的顺序id")
+    private String displayId;
+
+    @ApiModelProperty(value = "该题目在比赛中的标题，默认为原名字")
+    private String displayTitle;
+
     @ApiModelProperty(value = "题目的自定义ID 例如（HOJ-1000）")
     private String problemId;
 

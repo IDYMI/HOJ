@@ -58,7 +58,7 @@ public class ContestProblemEntityServiceImpl extends ServiceImpl<ContestProblemM
             AdminUidList.addAll(groupRootUidList);
         }
 
-        return contestProblemMapper.getContestProblemList(cid, startTime, endTime, sealTime, isAdmin, AdminUidList,
+        return contestProblemMapper.getContestProblemVoList(cid, startTime, endTime, sealTime, isAdmin, AdminUidList,
                 !isContainsContestEndJudge, selectedTime);
     }
 

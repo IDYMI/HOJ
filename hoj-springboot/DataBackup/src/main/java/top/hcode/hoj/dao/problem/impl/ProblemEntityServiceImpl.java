@@ -23,6 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
+
+import top.hcode.hoj.dao.contest.ContestEntityService;
+import top.hcode.hoj.dao.contest.ContestProblemEntityService;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.problem.*;
 import top.hcode.hoj.exception.ProblemIDRepeatException;
@@ -33,6 +36,8 @@ import top.hcode.hoj.pojo.bo.Pair_;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
 import top.hcode.hoj.pojo.dto.ProblemRes;
 import top.hcode.hoj.pojo.dto.ProblemResDTO;
+import top.hcode.hoj.pojo.entity.contest.Contest;
+import top.hcode.hoj.pojo.entity.contest.ContestProblem;
 import top.hcode.hoj.pojo.entity.problem.*;
 import top.hcode.hoj.pojo.vo.ImportProblemVO;
 import top.hcode.hoj.pojo.vo.ProblemCountVO;
@@ -93,6 +98,12 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
     @Autowired
     private ProblemDescriptionEntityService problemDescriptionEntityService;
+
+    @Autowired
+    private ContestProblemEntityService contestProblemEntityService;
+
+    @Autowired
+    private ContestEntityService contestEntityService;
 
     private final static Pattern EOL_PATTERN = Pattern.compile("[^\\S\\n]+(?=\\n)");
 
@@ -407,7 +418,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         boolean problemUpdateResult = problemMapper.updateById(problem) == 1;
 
         // 更新对应的题面
-        boolean problemDescriptionResult = dealProblemDescriptionList(problemDescriptionList, pid);
+        boolean problemDescriptionResult = dealProblemDescriptionList(problemDescriptionList, pid, problemDto.getCid());
 
         if (problemUpdateResult && problemDescriptionResult && checkProblemCase && deleteLanguagesFromProblemResult
                 && deleteTagsFromProblemResult
@@ -468,7 +479,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             problemMapper.insert(problem);
         }
         Long pid = problem.getId();
-        dealProblemDescriptionList(problemDescriptionList, pid);
+        dealProblemDescriptionList(problemDescriptionList, pid, problemDto.getCid());
 
         if (pid == null) {
             throw new ProblemIDRepeatException(
@@ -887,7 +898,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     }
 
     @Override
-    public ProblemRes getProblemRes(Long pid, Long peid, String problemId, Long gid) {
+    public ProblemRes getProblemRes(Long pid, Long peid, String problemId, Long gid, Long cid) {
         ProblemRes problemRes = new ProblemRes();
 
         Problem problem = getProblem(pid, peid, problemId, gid);
@@ -903,6 +914,22 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             }
             // 将题目信息合并
             BeanUtil.copyProperties(problem, problemRes);
+
+            // 查询该题目是否在比赛中
+            QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
+            contestProblemQueryWrapper.eq("cid", cid).eq("pid", pid);
+            ContestProblem contestProblem = contestProblemEntityService.getOne(contestProblemQueryWrapper);
+
+            if (contestProblem != null) {
+                Contest contest = contestEntityService.getById(contestProblem.getCid());
+
+                // 给题目添加比赛信息
+                problemRes.setContestTitle(contest.getTitle());
+                problemRes.setContestTime(contest.getStartTime());
+                problemRes.setDisplayId(contestProblem.getDisplayId());
+                problemRes.setDisplayTitle(contestProblem.getDisplayTitle());
+            }
+
             return problemRes;
         }
         return null;
@@ -1037,7 +1064,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     }
 
     // 更新对应的题面
-    public Boolean dealProblemDescriptionList(List<ProblemDescription> problemDescriptionList, Long pid) {
+    public Boolean dealProblemDescriptionList(List<ProblemDescription> problemDescriptionList, Long pid, Long cid) {
 
         // 获取问题描述 ID 列表
         List<Long> peidList = getProblemDescription(pid, null)
@@ -1057,7 +1084,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
                         if (peid == null) { // 添加
                             result = problemDescriptionMapper.insert(problemDescription.setPid(pid)) == 1;
-                            addProblemPdf(problemDescription);
+                            addProblemPdf(problemDescription, cid);
                         } else if (peidList.remove(peid)) { // 更新
 
                             UpdateWrapper<ProblemDescription> updateWrapper = new UpdateWrapper<>();
@@ -1067,7 +1094,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
                             result = problemDescriptionMapper.updateById(problemDescription) == 1;
 
-                            addProblemPdf(problemDescription);
+                            addProblemPdf(problemDescription, cid);
                         }
 
                         return result;
@@ -1116,13 +1143,13 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         return problemDescriptionResult;
     }
 
-    public void addProblemPdf(ProblemDescription problemDescription) {
+    public void addProblemPdf(ProblemDescription problemDescription, Long cid) {
         Long pid = problemDescription.getPid();
         Long peid = problemDescription.getId();
 
         try {
             // 查询题目详情并生成PDF
-            ProblemRes problem = getProblemRes(pid, peid, null, null);
+            ProblemRes problem = getProblemRes(pid, peid, null, null, cid);
 
             String pdfName = htmlToPdfUtils.convertByHtml(problem);
 

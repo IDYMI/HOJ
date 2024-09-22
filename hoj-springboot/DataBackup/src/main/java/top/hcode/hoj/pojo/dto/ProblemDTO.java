@@ -37,4 +37,5 @@ public class ProblemDTO {
 
     private List<CodeTemplate> codeTemplates;
 
+    private Long cid;
 }

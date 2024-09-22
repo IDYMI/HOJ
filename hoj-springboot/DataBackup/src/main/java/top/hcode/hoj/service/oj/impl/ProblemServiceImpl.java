@@ -19,6 +19,7 @@ import top.hcode.hoj.pojo.vo.RandomProblemVO;
 import top.hcode.hoj.service.oj.ProblemService;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -77,6 +78,21 @@ public class ProblemServiceImpl implements ProblemService {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.NOT_FOUND);
         } catch (StatusForbiddenException e) {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
+    }
+
+    @Override
+    public CommonResult<String> getProblemPdf(Long pid) {
+        try {
+            return CommonResult.successResponse(problemManager.getProblemPdf(pid));
+        } catch (StatusNotFoundException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.NOT_FOUND);
+        } catch (StatusForbiddenException e) {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        } catch (IOException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
         }
     }
 

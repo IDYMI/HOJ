@@ -189,6 +189,8 @@ export const m = {
   Please_input_your_email: 'Please input your email',
   Related_Title: 'Title',
   Related_IconClass: 'Icon Class',
+  Htmltopdf_Config: 'Htmltopdf Config',
+  Htmltopdf_Ec: 'English/Chinese',
 
   // /views/admin/general/SysSwitch.vue
   Judge_Config: 'Judge Config',

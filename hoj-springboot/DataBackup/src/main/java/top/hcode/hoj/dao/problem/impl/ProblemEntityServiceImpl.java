@@ -382,6 +382,8 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
                 }
             }
         }
+        // 将题面清空
+        problemDto.getProblem().setPdfDescription(null);
 
         // 更新problem表
         boolean problemUpdateResult = problemMapper.updateById(problem) == 1;

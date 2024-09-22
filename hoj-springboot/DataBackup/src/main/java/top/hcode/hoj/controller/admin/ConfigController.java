@@ -11,6 +11,7 @@ import top.hcode.hoj.pojo.dto.DBAndRedisConfigDTO;
 import top.hcode.hoj.pojo.dto.EmailConfigDTO;
 import top.hcode.hoj.pojo.dto.TestEmailDTO;
 import top.hcode.hoj.pojo.dto.WebConfigDTO;
+import top.hcode.hoj.pojo.dto.HtmltopdfDTO;
 import top.hcode.hoj.service.admin.system.ConfigService;
 
 import java.util.List;
@@ -93,9 +94,22 @@ public class ConfigController {
     }
 
     @RequiresPermissions("system_info_admin")
+    @RequestMapping("/get-htmltopdf-config")
+    public CommonResult<HtmltopdfDTO> getHtmltopdfConfig() {
+
+        return configService.getHtmltopdfConfig();
+    }
+
+    @RequiresPermissions("system_info_admin")
     @PutMapping("/set-email-config")
     public CommonResult<Void> setEmailConfig(@RequestBody EmailConfigDTO config) {
         return configService.setEmailConfig(config);
+    }
+
+    @RequiresPermissions("system_info_admin")
+    @PutMapping("/set-htmltopdf-config")
+    public CommonResult<Void> setHtmltopdfConfig(@RequestBody HtmltopdfDTO config) {
+        return configService.setHtmltopdfConfig(config);
     }
 
     @RequiresPermissions("system_info_admin")

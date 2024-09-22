@@ -123,6 +123,16 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${email-port}")
     private Integer emailPort;
 
+    // htmltopdf配置
+    @Value("${htmltopdf-host}")
+    private String htmltopdfHost;
+
+    @Value("${htmltopdf-port}")
+    private Integer htmltopdfPort;
+
+    @Value("${htmltopdf-ec}")
+    private Boolean htmltopdfEc;
+
     @Value("${hdu-username-list}")
     private List<String> hduUsernameList;
 
@@ -195,12 +205,14 @@ public class StartupRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        // 修改nacos上的默认、web、switch配置文件
+        // 修改nacos上的默认、web、switch、wkhtmltopdf配置文件
         initDefaultConfig();
 
         initWebConfig();
 
         initSwitchConfig();
+
+        initWKHTMLTOPDFConfig();
 
         upsertHOJLanguageV2();
         // upsertHOJLanguage("PHP", "PyPy2", "PyPy3", "JavaScript Node", "JavaScript
@@ -480,6 +492,30 @@ public class StartupRunner implements CommandLineRunner {
                     switchConfig.getMossUsernameList(),
                     null);
             checkRemoteOJLanguage(Constants.RemoteOJ.SPOJ, Constants.RemoteOJ.ATCODER);
+        }
+    }
+
+    private void initWKHTMLTOPDFConfig() {
+        WebConfig webConfig = nacosSwitchConfig.getWebConfig();
+        boolean isChanged = false;
+        if (!Objects.equals(webConfig.getHtmltopdfHost(), htmltopdfHost)
+                && (webConfig.getHtmltopdfHost() == null || !"http://172.17.0.1".equals(htmltopdfHost))) {
+            webConfig.setHtmltopdfHost(htmltopdfHost);
+            isChanged = true;
+        }
+        if (!Objects.equals(webConfig.getHtmltopdfPort(), htmltopdfPort)
+                && (webConfig.getHtmltopdfPort() == null || htmltopdfPort != 8001)) {
+            webConfig.setHtmltopdfPort(htmltopdfPort);
+            isChanged = true;
+        }
+        if (!Objects.equals(webConfig.getHtmltopdfEc(), htmltopdfEc)
+                && (webConfig.getHtmltopdfEc() == null)) {
+            webConfig.setHtmltopdfEc(htmltopdfEc);
+            isChanged = true;
+        }
+
+        if (isChanged) {
+            nacosSwitchConfig.publishWebConfig();
         }
     }
 

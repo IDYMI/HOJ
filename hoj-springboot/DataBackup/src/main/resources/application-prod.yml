@@ -36,6 +36,11 @@ email-username: ${EMAIL_USERNAME:your_email_username}
 # 邮箱授权码
 email-password: ${EMAIL_PASSWORD:your_email_password}
 
+# htmltopdf
+htmltopdf-host: ${HTMLTOPDF_HOST:http://172.17.0.1}
+htmltopdf-port: ${HTMLTOPDF_PORT:8001}
+htmltopdf-ec: ${HTMLTOPDF_EC:true}
+
 # 以下为各个remote judge平台的账号配置
 hdu-username-list: ${HDU_ACCOUNT_USERNAME_LIST:}
 hdu-password-list: ${HDU_ACCOUNT_PASSWORD_LIST:}

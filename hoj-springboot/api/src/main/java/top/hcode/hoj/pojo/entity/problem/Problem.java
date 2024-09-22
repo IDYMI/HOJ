@@ -141,6 +141,9 @@ public class Problem implements Serializable {
     @TableField(value = "io_write_file_name")
     private String ioWriteFileName;
 
+    @ApiModelProperty(value = "PDF题面")
+    private String pdfDescription;
+
     @TableField(fill = FieldFill.INSERT)
     private Date gmtCreate;
 

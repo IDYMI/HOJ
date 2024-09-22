@@ -3,6 +3,7 @@ package top.hcode.hoj.manager.oj;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,12 @@ import top.hcode.hoj.pojo.entity.problem.*;
 import top.hcode.hoj.pojo.vo.*;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
+import top.hcode.hoj.utils.HtmlToPdfUtils;
 import top.hcode.hoj.validator.AccessValidator;
 import top.hcode.hoj.validator.ContestValidator;
 import top.hcode.hoj.validator.GroupValidator;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.regex.Pattern;
@@ -80,6 +83,9 @@ public class ProblemManager {
 
     @Autowired
     private ContestManager contestManager;
+
+    @Autowired
+    private HtmlToPdfUtils htmlToPdfUtils;
 
     /**
      * @MethodName getProblemList
@@ -372,6 +378,43 @@ public class ProblemManager {
 
         // 将数据统一写入到一个Vo返回数据实体类中
         return new ProblemInfoVO(problem, tags, languagesStr, problemCount, LangNameAndCode);
+    }
+
+    public String getProblemPdf(Long pid)
+            throws StatusForbiddenException, StatusNotFoundException, IOException, StatusFailException {
+
+        QueryWrapper<Problem> wrapper = new QueryWrapper<Problem>();
+        wrapper.eq("id", pid);
+
+        // 查询题目详情
+        Problem problem = problemEntityService.getOne(wrapper, false);
+        if (problem == null) {
+            throw new StatusNotFoundException("该题号对应的题目不存在");
+        }
+
+        // 屏蔽一些题目参数
+        problem.setJudgeExtraFile(null)
+                .setSpjCode(null)
+                .setSpjLanguage(null);
+
+        String fileName = problem.getPdfDescription();
+
+        // 如果不存在对应pdf题面则创建
+        if (StringUtils.isEmpty(fileName)) {
+            fileName = htmlToPdfUtils.convertByHtml(problem);
+            if (StringUtils.isEmpty(fileName)) {
+                throw new IOException("PDF题面保存失败！");
+            }
+
+            // 更新对应数据库
+            UpdateWrapper<Problem> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("id", problem.getId()).set("pdf_description",
+                    Constants.File.FILE_API.getPath() + fileName + ".pdf");
+            problemEntityService.update(updateWrapper);
+
+        }
+
+        return fileName;
     }
 
     public LastAcceptedCodeVO getUserLastAcceptedCode(Long pid, Long cid) {

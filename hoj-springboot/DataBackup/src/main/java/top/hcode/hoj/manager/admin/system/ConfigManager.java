@@ -264,6 +264,15 @@ public class ConfigManager {
                 .build();
     }
 
+    public HtmltopdfDTO getHtmltopdfConfig() {
+        WebConfig webConfig = nacosSwitchConfig.getWebConfig();
+        return HtmltopdfDTO.builder()
+                .htmltopdfHost(webConfig.getHtmltopdfHost())
+                .htmltopdfPort(webConfig.getHtmltopdfPort())
+                .htmltopdfEc(webConfig.getHtmltopdfEc())
+                .build();
+    }
+
     public void setEmailConfig(EmailConfigDTO config) throws StatusFailException {
         WebConfig webConfig = nacosSwitchConfig.getWebConfig();
         if (!StringUtils.isEmpty(config.getEmailHost())) {
@@ -289,6 +298,23 @@ public class ConfigManager {
             webConfig.setEmailSsl(config.getEmailSsl());
         }
 
+        boolean isOk = nacosSwitchConfig.publishWebConfig();
+        if (!isOk) {
+            throw new StatusFailException("修改失败");
+        }
+    }
+
+    public void setHtmltopdfConfig(HtmltopdfDTO config) throws StatusFailException {
+        WebConfig webConfig = nacosSwitchConfig.getWebConfig();
+        if (!StringUtils.isEmpty(config.getHtmltopdfHost())) {
+            webConfig.setHtmltopdfHost(config.getHtmltopdfHost());
+        }
+        if (config.getHtmltopdfPort() != null) {
+            webConfig.setHtmltopdfPort(config.getHtmltopdfPort());
+        }
+        if (config.getHtmltopdfEc() != null) {
+            webConfig.setHtmltopdfEc(config.getHtmltopdfEc());
+        }
         boolean isOk = nacosSwitchConfig.publishWebConfig();
         if (!isOk) {
             throw new StatusFailException("修改失败");

@@ -328,6 +328,8 @@ export const m = {
   OK: 'OK',
   Copied_successfully: 'Copied successfully',
   Copied_failed: 'Copied failed',
+  View_as_PDF: 'View PDF',
+  Get_PDF_Failed: 'Get PDF Failed',
 
   // /views/oj/status/SubmissionList.vue
   Mine: 'Mine',

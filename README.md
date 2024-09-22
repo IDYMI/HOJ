@@ -333,3 +333,815 @@
    ![image.png](docs/docs/.vuepress/public/239c092b4cce4c5bbf9e2488881997e0.png)
 
 2024 年 5 月 19 日 19 点
+
+# 增加 PDF 题面
+   ![image.png](docs/docs/.vuepress/public/9bd3850f233d4cb49a01771fd4cd9320.png)
+
+   容器配置
+   app.py
+   ```python
+# -*- coding: utf-8 -*-
+
+from flask import Flask, request
+import subprocess
+from jinja2 import Environment, FileSystemLoader
+import html
+from bs4 import BeautifulSoup
+import re
+import json
+
+app = Flask(__name__)
+
+TEX_TABLE_START = """\\begin{longtable}{ l l }
+\\toprule % 设置上方的粗线
+"""
+TEX_TABLE_HEAD_1 = """
+\\begin{minipage}[b]{0.47\\columnwidth}\\raggedright
+"""
+TEX_TABLE_HEAD_2 = """\n\\strut
+\\end{minipage} &
+\\begin{minipage}[b]{0.47\\columnwidth}\\raggedright
+"""
+TEX_TABLE_HEAD_3 = """\n\\strut
+\\end{minipage} \\\\
+\\toprule % 设置标题和内容之间的细线
+\\endhead
+"""
+TEX_TABLE_CARD_START_1 = "\\begin{minipage}[t]{0.47\\columnwidth}\\raggedright\n\\begin{verbatim}\n"
+TEX_TABLE_CARD_START_2 = "\\begin{minipage}[t]{\\linewidth}\\raggedright\n\\begin{verbatim}\n"
+TEX_TABLE_CARD_END = "\n\\end{verbatim}\n\\strut\n\\end{minipage} "
+TEX_TABLE_END = """
+\\bottomrule % 设置下方的粗线
+\\end{longtable}"""
+
+
+# 路由：接收带有 KaTeX 字符串的 POST 请求并转换为 HTML
+@app.route("/html", methods=["POST"])
+def generate_html():
+    """
+    接收 POST 请求中的数据，处理 LaTeX 和 Markdown 内容，并生成 HTML 文件。
+
+    请求参数:
+    - input_path (str): 生成的 HTML 文件路径。
+    - timeLimit (str): 时间限制。
+    - memoryLimit (str): 空间限制。
+    - title (str): 标题。
+    - description (str): 问题描述。
+    - input (str): 输入格式。
+    - output (str): 输出格式。
+    - hint (str): 补充说明。
+    - examples (str): 样例。
+    - selections (str): 选项。
+    - EC (str): 标题是否使用字段名称，值为 "true" 或 "false"。
+
+    返回:
+    - str: 成功或失败的消息。
+    """
+    try:
+        # 获取 POST 请求中的参数
+        keys = [
+            "input_path",
+            "timeLimit",
+            "memoryLimit",
+            "title",
+            "description",
+            "input",
+            "output",
+            "hint",
+            "examples",
+            "selections",
+            "EC",
+        ]
+        params = {key: request.form.get(key, None) for key in keys}
+        params["EC"] = params["EC"].lower() == "true" if params["EC"] else False
+
+        context = {"title": params["title"]}
+
+        # 字段和标题的映射
+        fields = {
+            "timeLimit": "时间限制",
+            "memoryLimit": "空间限制",
+            "description": "问题描述",
+            "input": "输入格式",
+            "output": "输出格式",
+            "hint": "补充",
+            "examples": "样例",
+            "selections": "选项",
+        }
+
+        # 加载 Jinja2 模板
+        template = Environment(loader=FileSystemLoader(".")).get_template(
+            "template.html"
+        )
+
+        isSave = True
+        # 处理每个字段
+        for field, ch_title in fields.items():
+            param = params[field]
+            if param:
+                context[f"{field}_title"] = (
+                    ch_title if params["EC"] else field.capitalize()
+                )
+                if field in ["examples", "selections"]:
+                    param = json.loads(param)
+                    # 处理样例和选项，转换为 LaTeX 并生成模板
+                    write_example_to_template(
+                        param, params["input_path"], field == "examples", params["EC"]
+                    )
+                    isSave = False
+                    param = convert_examples(param, field == "examples")
+                elif field not in ["timeLimit", "memoryLimit"]:
+                    param = convert_latex(param)
+                context[field] = param
+
+        if isSave:
+            write_example_to_template(None, params["input_path"], params["EC"])
+        # 渲染并写入最终 HTML 文件
+        write_(params["input_path"], template.render(**context), True)
+        return f"HTML generated successfully at {params['input_path']}", 200
+
+    except Exception as e:
+        return "Failed to run problem: {}, Error: ".format(params["title"], str(e)), 500
+
+
+# 路由：将 HTML 转换为 PDF
+@app.route("/pdf", methods=["POST"])
+def generate_pdf():
+    """
+    使用 Pandoc 命令将输入文件转换为 PDF 并应用自定义模板和 Lua 过滤器。
+    参数通过 HTTP POST 请求传入，包括输入文件路径、输出文件路径、比赛标题和比赛数据。
+    """
+    # 从表单获取输入参数
+    input_path = request.form.get("input_path")
+    output_path = request.form.get("output_path")
+    EC = request.form.get("EC", "false").lower() == "true"
+
+    # 构建 Pandoc 命令
+    command = [
+        "pandoc",
+        input_path,
+        "-t",
+        "pdf",
+        "-o",
+        output_path,
+        "--pdf-engine=xelatex",
+        "--lua-filter=/app/filter.lua",
+        f"--template={output_path.replace('.pdf', '.tex')}",
+    ]
+
+    # 添加 EC 参数
+    command += ["-M", "ec={}".format(str(EC).lower())]
+
+    if input_path:
+        try:
+            result = subprocess.run(command, stderr=subprocess.PIPE, text=True)
+
+            command = " ".join(command)
+
+            # 检查命令执行结果
+            if result.returncode != 0:
+                return (
+                    "Failed to execute command: {} , Error: {}".format(
+                        command, result.stderr
+                    ),
+                    500,
+                )
+
+            return (
+                "Success to execute command: {} , PDF generated successfully at {}".format(
+                    command, output_path
+                ),
+                200,
+            )
+
+        except Exception as e:
+            return "Failed to run command: {} , Error: {}".format(command, str(e)), 500
+
+
+# 将传入的测试数据加入 template.tex 模板中，并生成新的模板
+def write_example_to_template(examples_lt, outputPath, is_table=True, EC=True):
+    """
+    将传入的测试数据插入到 LaTeX 模板中，生成包含测试样例的表格，并将其输出为 .tex 文件。
+
+    参数:
+    examples_lt (list): 包含测试样例的列表，列表元素为字典，包含 "input" 和 "output" 字段。
+    outputPath (str): 输出文件的路径（默认值为空字符串），将会保存为 .tex 文件。
+    is_table (bool): 表示是否生成表格形式的输出 (默认值为 True)。
+    """
+    if examples_lt == None or len(examples_lt) == 0:
+        # 将最终生成的 LaTeX 内容写入到输出路径中（将输出路径中的 .pdf 后缀替换为 .tex）
+        write_(outputPath.replace(".html", ".tex"), read_("/app/template.tex"))
+        return
+
+    fields = {
+        "input": "输入",
+        "output": "输出",
+    }
+
+    # 定义表格起始部分，只有当 is_table 为 True 时添加表头部分
+    if is_table:
+        body = "{}{}{}{}{}{}".format(
+            TEX_TABLE_START,
+            TEX_TABLE_HEAD_1,
+            fields["input"] if EC else "Input",
+            TEX_TABLE_HEAD_2,
+            fields["output"] if EC else "Output",
+            TEX_TABLE_HEAD_3,
+        )
+    else:
+        body = TEX_TABLE_START
+
+    # 遍历传入的测试样例列表，生成每一行的表格内容
+    for index, entry in enumerate(examples_lt):
+        # 获取 "input" 和 "output" 内容，替换换行符为 LaTeX 格式
+        input_text = entry.get("input", "").replace("<br>", " \n")
+        output_text = entry.get("output", "").replace("<br>", " \n")
+
+        if is_table:
+            body += "{}{}{}&\n{}{}{}\\\\".format(
+                TEX_TABLE_CARD_START_1,
+                input_text,
+                TEX_TABLE_CARD_END,
+                TEX_TABLE_CARD_START_1,
+                output_text,
+                TEX_TABLE_CARD_END,
+            )
+        else:
+            body += (
+                "{}{}{}".format(TEX_TABLE_CARD_START_2, output_text, TEX_TABLE_CARD_END)
+                + "\\\\"
+            )
+
+        # 插入中间的分割线
+        body += (
+            "\n\\midrule % 设置各行之间的细线\n" if index < len(examples_lt) - 1 else ""
+        )
+
+    # 添加表格的结束部分
+    body += TEX_TABLE_END
+
+    # 使用正则表达式匹配 \strut 之前的多个连续的 \\，并只保留最后一个 \\
+    body = re.sub(r"(\\\\)(\s*\\\\)+(\s*\\strut)", r"\1\3", body)
+
+    # 读取模板文件，并将生成的表格内容插入到模板中的 $body$ 占位符处
+    tex_template = read_("/app/template.tex").replace("$body$", "$body$\n" + body)
+
+    # 将最终生成的 LaTeX 内容写入到输出路径中（将输出路径中的 .pdf 后缀替换为 .tex）
+    write_(outputPath.replace(".html", ".tex"), tex_template)
+
+
+# 将传入的数据列表转化为字符串，生成 HTML 表格
+def convert_examples(data, is_table=True):
+    """
+    将传入的测试数据列表转换为 HTML 字符串格式，支持生成表格或简单的无表格展示。
+
+    参数:
+    data (list): 包含测试样例的列表，列表元素为字典，包含 "input" 和 "output" 字段。
+    is_table (bool): 表示是否生成表格形式的输出 (默认值为 True)。
+
+    返回:
+    str: 转换后的 HTML 字符串，如果 data 为空则返回 None。
+    """
+
+    # 如果 data 不为空，则继续处理
+    if data:
+        html_builder = []  # 用于拼接 HTML 片段的列表
+        index = 0  # 用于无表格时的样例索引
+
+        # 添加表格的起始部分
+        html_builder.append(
+            '<table class="table table-bordered table-text-center table-vertical-middle">\n'
+        )
+
+        # 如果需要生成表格形式，添加表头 (thead)
+        if is_table:
+            html_builder.append(
+                "<thead>\n<tr>\n<th>Input</th>\n<th>Output</th>\n</tr>\n</thead>\n"
+            )
+
+        # 添加表格的主体部分 (tbody)
+        html_builder.append("<tbody>\n")
+
+        # 遍历传入的数据列表，生成每一行的内容
+        for entry in data:
+            input_text = entry.get("input", "")  # 获取 input 字段
+            output_text = entry.get("output", "")  # 获取 output 字段
+
+            if is_table:
+                # 生成表格形式的行
+                html_builder.append("<tr><td>{}</td>".format(input_text))
+                html_builder.append("<td>{}</td></tr>".format(output_text))
+            else:
+                # 无表格形式，添加索引标识
+                html_builder.append(
+                    "<tr><td>{}&nbsp;&nbsp;:&nbsp;&nbsp;{}</td></tr>".format(
+                        chr(ord("A") + index), output_text
+                    )
+                )
+
+            index += 1
+
+        # 关闭表格主体和表格结束标记
+        html_builder.append("</tbody></table>")
+
+        # 返回生成的 HTML 字符串
+        return "".join(html_builder)
+
+    return None
+
+
+# 将 Markdown 中的 LaTeX 公式转换为 HTML
+def convert_latex(markdown):
+    """
+    将 Markdown 中的 LaTeX 公式转换为 HTML 格式。
+
+    参数:
+    - markdown (str): 包含 LaTeX 公式的 Markdown 文本。
+
+    返回:
+    - content (str): 转换后的 HTML 内容。
+    """
+
+    def convert_latex_to_mathml(latex):
+        """
+        将 LaTeX 公式转换为 MathML 格式。
+
+        参数:
+        - latex (str): LaTeX 公式。
+
+        返回:
+        - mathml_content (str): 转换后的 MathML 内容。
+        """
+
+        latex = convert_pandoc(latex, "markdown", "html")
+
+        # 读取转换后的 HTML 文件，并移除不必要的 <p> 标签
+        mathml_content = re.sub(r"^<p>|</p>$", "", latex.strip())
+        return mathml_content
+
+    # 查找并将 Markdown 中的 LaTeX 公式用 MathML 替换
+    markdown = re.sub(
+        r"\$(.*?)\$", lambda m: convert_latex_to_mathml(m.group(0)), markdown
+    )
+
+    # 读取转换后的 HTML 文件
+    content = convert_pandoc(markdown, "markdown", "html")
+
+    # 清理 HTML 内容：替换中划线标记为 <span> 标签
+    content = re.sub(r"<s\s*>", '<span style="text-decoration: line-through">', content)
+    content = re.sub(r"</s>", "</span>", content)
+
+    # 使用正则表达式匹配并去除 <figcaption>...</figcaption> 结构
+    content = re.sub(r"<figcaption>.*?</figcaption>", "", content, flags=re.DOTALL)
+
+    # 去除字符串最外层的 <figure> 标签，但保留内部内容
+    content = re.sub(r"<figure.*?>(.*?)</figure>", r"\1", content, flags=re.DOTALL)
+
+    # 去除图片中的alt标签
+    content = re.sub(r'\s*alt="[^"]*"', "", content)
+
+    # 在图片前后添加换行符
+    content = re.sub(r"(<img[^>]*>)", r"<p>\1</p>", content)
+    return content
+
+
+# 字符串传入转化为对应格式字符串
+def convert_pandoc(input_text, from_format="markdown", to_format="html"):
+    """
+    使用 Pandoc 将输入字符串从一种格式转换为另一种格式。
+
+    支持的格式包括：
+            - markdown: Markdown 格式
+            - html: HTML
+            - latex: LaTeX
+            - docx: Microsoft Word 文档
+            - odt: OpenDocument 文本
+            - rst: reStructuredText
+            - mediawiki: MediaWiki 标记
+            - asciidoc: AsciiDoc
+            - epub: EPUB 电子书
+            - json: Pandoc JSON
+            - org: Emacs Org-mode 文档
+            - textile: Textile 格式
+            - pptx: Microsoft PowerPoint
+            - pdf: PDF 文件 (输出支持，输入不直接支持)
+
+    参数:
+        input_text (str): 要转换的输入字符串内容。
+        from_format (str): 输入格式（默认为 'markdown'），可为 pandoc 支持的格式之一。
+        to_format (str): 输出格式（默认为 'html'），可为 pandoc 支持的格式之一。
+
+    返回:
+        str: 转换后的字符串内容，若转换成功则返回转换后的结果。
+        如果发生错误则返回相应的错误信息。
+
+    异常:
+        如果 pandoc 出现错误，会捕获异常并返回错误描述。
+    """
+    try:
+        # 使用 subprocess 运行 pandoc 命令并传入输入字符串
+        result = subprocess.run(
+            ["pandoc", "--from", from_format, "--to", to_format],
+            input=input_text.encode("utf-8"),  # 将输入字符串编码为字节传给 Pandoc
+            stdout=subprocess.PIPE,  # 捕获 Pandoc 的标准输出
+            stderr=subprocess.PIPE,  # 捕获 Pandoc 的错误信息
+        )
+
+        # 检查 Pandoc 命令的执行结果
+        if result.returncode == 0:
+            # 如果成功执行，返回 Pandoc 输出的字符串
+            return result.stdout.decode("utf-8")  # 将字节解码为字符串
+        else:
+            # 如果 Pandoc 返回了非零状态码，说明发生了错误，返回错误信息
+            raise Exception(f"Pandoc 转换错误: {result.stderr.decode('utf-8')}")
+
+    except Exception as e:
+        # 捕获异常并返回错误信息
+        return f"出错了: {str(e)}"
+
+
+# 写入文件，支持美化 HTML
+def write_(file_name, content, is_beauty=False):
+    """
+    将内容写入文件，并可选地美化 HTML 内容。
+
+    参数:
+    - file_name (str): 要写入的文件名。
+    - content (str): 要写入的内容，通常是 HTML 文本。
+    - is_beauty (bool): 是否美化 HTML 内容，默认为 False。
+    """
+    with open(file_name, "w", encoding="utf-8") as f:
+        if is_beauty:
+            # 解析 HTML 内容
+            soup = BeautifulSoup(content, "html.parser")
+            # 对文本节点进行 HTML 转义
+            for element in soup.descendants:
+                if isinstance(element, str) and element.parent.name not in [
+                    "script",
+                    "style",
+                ]:
+                    element.replace_with(html.escape(element))
+            # 美化 HTML 输出
+            content = soup.prettify()
+            # 添加 HTML 文档类型声明
+            content = re.sub(r"^html", "<!DOCTYPE html>\n<html>", content, count=1)
+            content = re.sub(r"^<html>", "<!DOCTYPE html>\n<html>", content, count=1)
+        f.write(content)
+
+
+# 读取文件内容
+def read_(file_name):
+    """
+    读取指定文件的内容。
+
+    参数:
+    - file_name (str): 要读取的文件名。
+
+    返回:
+    - str: 文件内容。
+    """
+    with open(file_name, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=80)
+
+
+
+   ```
+   filter.lua
+··```
+-- filter.lua
+
+-- 定义要忽略表格的标题
+local ignore_tables_after_headers = {
+    ["Examples"] = true,
+    ["样例"] = true,
+    ["Selections"] = true,
+    ["选项"] = true
+}
+
+-- 用于跟踪当前是否处于要忽略表格的标题之后
+local in_ignored_section = false
+
+-- 替换特定标题文本，并标记是否应忽略后续的表格
+function Header(elem)
+    local header_text = pandoc.utils.stringify(elem.content)
+
+    -- 检查当前标题是否在忽略列表中
+    if ignore_tables_after_headers[header_text] then
+        -- 将标题内容替换为对应的英文版本（如果需要）
+
+        -- 设置标志，表明后续内容需要忽略表格
+        in_ignored_section = true
+    else
+        -- 如果标题不在忽略列表中，则关闭忽略模式
+        in_ignored_section = false
+    end
+
+    return elem
+end
+
+-- 忽略特定标题下的表格
+function Table(elem)
+    if in_ignored_section then
+        -- 忽略表格
+        return pandoc.Null()
+    else
+        -- 否则正常返回表格
+        return elem
+    end
+end
+
+   ```
+   Dockerfile
+   ```cmd
+# 使用基础镜像
+FROM ubuntu:22.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+ENV TZ=Asia/Shanghai
+
+# 更新软件包列表并安装 Python、pandoc、LaTeX 和字体依赖
+RUN apt-get update && \
+    apt-get install -y \
+    python3.10 \
+    python3-pip \
+    pandoc \
+    texlive-full \
+    vim \
+    fonts-wqy-microhei \
+    ttf-mscorefonts-installer \
+    wget \
+    unzip \
+    cabextract && \
+    apt-get autoremove -y && \
+    apt-get autoclean
+
+# 从 GitHub 下载 Microsoft 核心字体
+RUN wget https://downloads.sourceforge.net/corefonts/courie32.exe -O /tmp/courie32.exe && \
+    cabextract /tmp/courie32.exe -d /usr/share/fonts/truetype/msttcorefonts/ && \
+    rm /tmp/courie32.exe
+
+# 从 GitHub 下载 Libertinus 字体
+RUN wget https://github.com/alerque/libertinus/releases/download/v7.040/Libertinus-7.040.zip && \
+    unzip Libertinus-7.040.zip && \
+    cp Libertinus-7.040/static/OTF/*.otf /usr/share/fonts/opentype/ && \
+    rm -rf Libertinus-7.040 && \
+    rm Libertinus-7.040.zip && \
+    fc-cache -fv
+
+# 从 GitHub 下载 Noto 字体
+RUN wget https://noto-website-2.storage.googleapis.com/pkgs/Noto-unhinted.zip && \
+    unzip Noto-unhinted.zip -d noto-fonts && \
+    cp noto-fonts/*.otf /usr/share/fonts/opentype/ && \
+    cp noto-fonts/*.ttf /usr/share/fonts/truetype/ && \
+    rm -rf noto-fonts && \
+    rm Noto-unhinted.zip && \
+    fc-cache -fv
+
+# 设置工作目录
+WORKDIR /app
+
+# 更新 pip 到最新版本
+RUN python3 -m pip install --upgrade pip
+
+# 复制 Python 文件
+COPY requirements.txt requirements.txt
+
+# 安装 Python 依赖
+RUN pip3 install -r requirements.txt
+
+# 复制模板文件到工作目录
+COPY app.py /app/
+COPY template.html /app/
+COPY template.tex /app/
+COPY filter.lua /app/
+
+# 启动 Flask 服务
+CMD ["python3", "app.py"]
+
+   ```
+   requirements.txt
+   ```txt
+Flask==2.0.2
+werkzeug==2.0.2
+Jinja2==3.0.3
+beautifulsoup4==4.12.2
+
+   ```
+   创建容器
+   ```docker
+docker build -t hoj-htmltopdf .
+   ```
+   template.html
+   ```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>{{ title }}</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+      }
+      .header {
+        text-align: center;
+        font-size: 14px;
+        margin-bottom: 20px;
+      }
+      .title {
+        text-align: left;
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+      .info {
+        margin-left: 15px;
+        margin-bottom: 20px;
+      }
+      .info span {
+        display: block;
+      }
+      .content {
+        margin-bottom: 20px;
+      }
+      .keyboard {
+        text-align: center;
+      }
+      .keyboard img {
+        width: 100%;
+        max-width: 600px;
+      }
+      .note {
+        margin-top: 10px;
+      }
+      table {
+        margin: 10px auto;
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid black;
+        padding: 8px;
+        width: 50%;
+      }
+      .strong {
+        font-weight: bolder;
+      }
+      .hljs-center {
+        text-align: center;
+      }
+      .hljs-right {
+        text-align: right;
+      }
+      .hljs-left {
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="title"><h1>{{ title }}</h1></div>
+    <div class="info">
+      <p><strong>{{ timeLimit_title }}: </strong> {{ timeLimit }} millisecond</p>
+      <p><strong>{{ memoryLimit_title }}: </strong> {{ memoryLimit }} megabytes</p>
+    </div>
+    {% if description %}
+    <div class="content">
+      <h2>{{ description_title }}</h2>
+      {{ description }}
+    </div>
+    {% endif %} {% if input %}
+    <div class="content">
+      <h2>{{ input_title }}</h2>
+      {{ input }}
+    </div>
+    {% endif %} {% if output %}
+    <div class="content">
+      <h2>{{ output_title }}</h2>
+      {{ output }}
+    </div>
+    {% endif %} {% if hint %}
+    <div class="content">
+      <h2>{{ hint_title }}</h2>
+      {{ hint }}
+    </div>
+    {% endif %} {% if examples_title %}
+    <h2>{{ examples_title }}</h2>
+    {{ examples }} {% endif %} {% if selections_title %}
+    <h2>{{ selections_title }}</h2>
+    {{ selections }} {% endif %}
+  </body>
+</html>
+
+   ```
+   template.tex
+   ```
+\documentclass[a4paper,12pt]{article}
+
+% 设置页边距
+\usepackage{geometry}
+\geometry{a4paper, margin=0.5in}
+
+% 加载必要的包
+\usepackage{fancyhdr}   % 控制页眉页脚
+\usepackage{lastpage}   % 获取总页数
+\usepackage[colorlinks=false, pdfborder={0 0 0}]{hyperref}   % 支持超链接
+\usepackage{fontspec}   % 支持系统字体
+\usepackage{xeCJK}      % 支持中文
+\usepackage{unicode-math}  % 数学符号支持
+\usepackage{titlesec}   % 修改标题样式
+\usepackage{enumitem}   % 自定义列表样式
+\usepackage{parskip}    % 控制段落间距
+\usepackage{multirow}   % 多行单元格合并
+\usepackage{graphicx}   % 插入图片
+\usepackage{caption}    % 图片标题控制
+\usepackage{longtable}  % 支持长表格
+\usepackage{booktabs}   % 支持表格命令
+\usepackage{tabularx}   % 自动调整列宽的表格
+% \usepackage{array}      % 处理表格中的边框
+\usepackage{lipsum}     % 生成占位符文本（测试用）
+
+% 设置字体
+\setmathfont{Libertinus Math}  % 数学字体
+\setmonofont{Courier New} % 英文等宽字体
+\setCJKmainfont{Noto Sans CJK SC}  % 中文字体
+\setCJKmonofont{Noto Sans Mono CJK SC}  % 中文等宽字体
+\setmainfont{Libertinus Serif}  % 主字体
+
+% 设置标题样式
+\titleformat{\section}[block]{\normalfont\Large\bfseries}{}{0em}{}
+\titleformat{\subsection}[block]{\normalfont\large\bfseries}{}{0em}{}
+\titleformat{\subsubsection}[block]{\normalfont\normalsize\bfseries}{}{0em}{}
+
+% 设置页眉页脚样式
+\pagestyle{fancy}
+\fancyhf{}
+% 页眉中间显示比赛标题和学校、日期，居中显示，两行
+\fancyhead[C]{\textbf{$contest_title$} \\
+$if(ec)$南阳理工学院$else$NYIST NYOJ$endif$ \textbf{$contest_data$}}
+
+% 调整页眉和页脚高度
+\setlength{\headheight}{40pt}  % 页眉高度
+\setlength{\headsep}{10pt}     % 页眉与正文之间的距离
+\setlength{\footskip}{5pt}    % 页脚与正文之间的距离
+
+% 判断是否使用中文页脚
+$if(ec)$
+    $if(ec)$
+        \fancyfoot[C]{第 \thepage\ 页，共 \pageref{LastPage} 页}  % 中文页脚
+    $else$
+        \fancyfoot[C]{Page \thepage\ of \pageref{LastPage}}  % 英文页脚
+    $endif$
+$else$
+    % 没有页脚内容
+    \fancyfoot{}
+$endif$
+
+\renewcommand{\headrulewidth}{0.8pt}  % 页眉横线的粗细
+\renewcommand{\footrulewidth}{0.8pt}  % 页脚横线的粗细
+
+% 定义 \tightlist 避免报错
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% 定义图片自适应页面宽度
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth \linewidth \else \Gin@nat@width\fi}
+\makeatother
+\setkeys{Gin}{width=\maxwidth, keepaspectratio}  % 自动调整图片尺寸并保持比例
+
+% 表格宽度自适应页面宽度，靠左对齐
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}  % 定义靠左对齐的列类型
+
+% 在每个 HTML 内容之间插入分页符
+\newcommand{\sectionbreak}{\newpage}
+
+% 文档内容从这里开始
+\begin{document}
+$body$
+\end{document}
+% 文档内容到这里结束
+
+   ```
+   docker-compose.yml 中添加
+   ```yml
+  hoj-htmltopdf:
+    image: hoj-htmltopdf
+    container_name: hoj-htmltopdf
+    volumes:
+        - ${HOJ_DATA_DIRECTORY}/file/problem:/tmp/htmltopdf
+    ports:
+        - "8001:80"
+    restart: always
+    privileged: true # 设置容器的权限为root
+    networks:
+      hoj-network:
+        ipv4_address: 172.20.0.9
+
+   ```
+
+2024 年 5 月 20 日 20 点

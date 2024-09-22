@@ -238,6 +238,38 @@
       </el-form>
       <el-button type="primary" @click.native="saveDataBaseConfig" size="small">{{ $t("m.Save") }}</el-button>
     </el-card>
+
+    <el-card style="margin-top: 15px">
+      <div slot="header">
+        <span class="panel-title home-title">{{ $t("m.Htmltopdf_Config") }}</span>
+      </div>
+      <el-form label-position="left" label-width="80px" :model="htmltopdf">
+        <el-row :gutter="20">
+          <el-col :md="12" :xs="24">
+            <el-form-item :label="$t('m.Host')" required label-width="80px">
+              <el-input v-model="htmltopdf.htmltopdfHost" :placeholder="$t('m.Host')"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :md="12" :xs="24">
+            <el-form-item :label="$t('m.Port')" required label-width="80px">
+              <el-input v-model="htmltopdf.htmltopdfPort" :placeholder="$t('m.Port')"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :md="12" :xs="24">
+            <el-form-item :label="$t('m.Htmltopdf_Ec')" required label-width="120px">
+              <el-switch v-model="htmltopdf.htmltopdfEc"></el-switch>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <el-button type="primary" @click.native="saveHtmltopdfConfig" size="small">
+        {{
+        $t("m.Save")
+        }}
+      </el-button>
+    </el-card>
   </div>
 </template>
 
@@ -259,6 +291,11 @@ export default {
         emailBGImg: "",
         emailUsername: "email@example.com",
         emailSsl: true,
+      },
+      htmltopdf: {
+        htmltopdfHost: null,
+        htmltopdfPort: null,
+        htmltopdfEc: null,
       },
       websiteConfig: {},
       databaseConfig: {},
@@ -288,6 +325,15 @@ export default {
         this.databaseConfig = res.data.data;
       })
       .catch(() => {});
+
+    api.admin_getHtmltopdfConfig().then((res) => {
+      if (res.data.data) {
+        this.htmltopdf = res.data.data;
+      } else {
+        this.init = true;
+        myMessage.warning("No Htmltopdf Config");
+      }
+    });
   },
   methods: {
     saveSMTPConfig() {
@@ -408,6 +454,17 @@ export default {
           this.$refs.xAwardTable.reloadRow(row, null, field);
         }, 300);
       }
+    },
+    saveHtmltopdfConfig() {
+      api.admin_editHtmltopdfConfig(this.htmltopdf).then(
+        (res) => {
+          myMessage.success(this.$i18n.t("m.Update_Successfully"));
+          this.saved = true;
+        },
+        () => {
+          this.saved = false;
+        }
+      );
     },
   },
 };

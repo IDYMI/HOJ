@@ -189,6 +189,8 @@ export const m = {
   Please_input_your_email: '请输入你的邮箱',
   Related_Title: '展示名称',
   Related_IconClass: '展示按钮',
+  Htmltopdf_Config: 'Htmltopdf 设置（转PDF的程序）',
+  Htmltopdf_Ec: '英文/中文',
 
   // /views/admin/general/SysSwitch.vue
   Judge_Config: '评测配置',

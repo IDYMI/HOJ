@@ -2065,3 +2065,31 @@ DROP PROCEDURE add_userInfo_lastGmtModified;
 UPDATE user_info
 SET last_gmt_modified = gmt_create
 WHERE 1 = 1;
+
+/*
+* problem 添加 pdf_description
+*/
+DROP PROCEDURE
+IF EXISTS add_Problem_pdfDescription;
+DELIMITER $$
+
+CREATE PROCEDURE add_Problem_pdfDescription ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'problem'
+	AND column_name = 'pdf_description'
+) THEN
+	ALTER TABLE problem ADD COLUMN `pdf_description` varchar(255) DEFAULT NULL COMMENT 'PDF链接';
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_Problem_pdfDescription ;
+
+DROP PROCEDURE add_Problem_pdfDescription;

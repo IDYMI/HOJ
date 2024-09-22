@@ -285,6 +285,9 @@ public class Constants {
 
         PROBLEM_FILE_FOLDER("/hoj/file/problem"),
 
+        // docker 容器中的映像路径
+        DOCKER_PROBLEM_FILE_FOLDER("/tmp/htmltopdf"),
+
         CONTEST_TEXT_PRINT_FOLDER("/hoj/file/contest_print"),
 
         IMG_API("/api/public/img/"),

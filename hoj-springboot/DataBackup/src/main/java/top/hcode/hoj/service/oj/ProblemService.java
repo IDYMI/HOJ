@@ -31,6 +31,8 @@ public interface ProblemService {
 
     public CommonResult<ProblemInfoVO> getProblemInfo(String problemId, Long gid);
 
+    public CommonResult<String> getProblemPdf(Long pid);
+
     public CommonResult<LastAcceptedCodeVO> getUserLastAcceptedCode(Long pid, Long cid);
 
     public CommonResult<List<ProblemFullScreenListVO>> getFullScreenProblemList(Long tid, Long cid);

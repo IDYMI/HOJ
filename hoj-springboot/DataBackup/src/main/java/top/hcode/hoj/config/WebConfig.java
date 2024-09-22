@@ -24,6 +24,13 @@ public class WebConfig {
 
     private Integer emailPort;
 
+    // htmltopdf配置
+    private String htmltopdfHost;
+
+    private Integer htmltopdfPort;
+
+    private Boolean htmltopdfEc = true;
+
     private Boolean emailSsl = true;
 
     private String emailBGImg = "https://cdn.jsdelivr.net/gh/HimitZH/CDN/images/HCODE.png";

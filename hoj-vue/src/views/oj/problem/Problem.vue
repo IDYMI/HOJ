@@ -105,6 +105,12 @@
                       </el-link>
                     </span>
                     <span>
+                      <el-link type="primary" :underline="false" @click="getProblemPdf()">
+                        <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+                        {{ $t('m.View_as_PDF') }}
+                      </el-link>
+                    </span>
+                    <span>
                       <el-link
                         type="primary"
                         :underline="false"
@@ -1850,6 +1856,33 @@ export default {
       const rightBottom = document.getElementById(`js-right-bottom`);
 
       return left.offsetHeight - rightBottom.offsetHeight * 1.5;
+    },
+    getProblemPdf() {
+      let problem = this.problemData.problem;
+      const regex = /\/api\/public\/file\/(.+)\.pdf/;
+
+      const openPdf = (pdfUrl) => {
+        if (!pdfUrl) {
+          myMessage.warning(this.$i18n.t("m.Get_PDF_Failed"));
+          return;
+        }
+
+        const match = pdfUrl.match(regex);
+        if (match) {
+          window.open(pdfUrl, "_blank");
+        } else {
+          myMessage.warning(this.$i18n.t("m.Get_PDF_Failed"));
+        }
+      };
+
+      if (!problem.pdfDescription) {
+        api.getProblemPdf(problem.id).then(
+          (res) => openPdf(res.data.msg),
+          (err) => {}
+        );
+      } else {
+        openPdf(problem.pdfDescription);
+      }
     },
   },
   computed: {

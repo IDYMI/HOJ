@@ -331,6 +331,13 @@ const ojApi = {
     });
   },
 
+  // Problem的pdf链接
+  getProblemPdf(pid) {
+    return ajax('/api/get-problem-pdf', 'get', {
+      params: { pid },
+    });
+  },
+
   // 获取题目代码模板
   getProblemCodeTemplate(pid) {
     return ajax('/api/get-problem-code-template', 'get', {
@@ -1652,11 +1659,11 @@ const adminApi = {
       data,
     });
   },
-  admin_getSSHConfig() {
-    return ajax('/api/admin/config/get-ssh-config', 'get');
+  admin_getHtmltopdfConfig() {
+    return ajax('/api/admin/config/get-htmltopdf-config', 'get');
   },
-  admin_editSSHConfig(data) {
-    return ajax('/api/admin/config/set-ssh-config', 'put', {
+  admin_editHtmltopdfConfig(data) {
+    return ajax('/api/admin/config/set-htmltopdf-config', 'put', {
       data,
     });
   },

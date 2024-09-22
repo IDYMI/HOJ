@@ -103,6 +103,18 @@ public class ProblemController {
     }
 
     /**
+     * @param pid
+     * @MethodName getProblemPdf
+     * @Description 获取指定题目的pdf链接
+     * @Return CommonResult
+     */
+    @RequestMapping(value = "/get-problem-pdf", method = RequestMethod.GET)
+    @AnonApi
+    public CommonResult<String> getProblemPdf(@RequestParam(value = "pid") Long pid) {
+        return problemService.getProblemPdf(pid);
+    }
+
+    /**
      * 获取用户对于该题最近AC的代码
      *
      * @param pid

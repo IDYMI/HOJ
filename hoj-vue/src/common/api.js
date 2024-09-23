@@ -4,6 +4,7 @@ import mMessage from '@/common/message';
 import router from '@/router';
 import store from '@/store';
 import utils from '@/common/utils';
+import aes from '@/common/aes';
 import i18n from '@/i18n';
 // import NProgress from 'nprogress' // nprogress插件
 // import 'nprogress/nprogress.css' // nprogress样式
@@ -33,6 +34,24 @@ axios.interceptors.request.use(
       config.headers['Url-Type'] = type;
     } else {
       config.headers['Url-Type'] = 'general';
+    }
+
+    let white_url = [];
+
+    // 检查是否是 POST 请求
+    if ((config.method === 'post' || config.method === 'put') && config.url && !config.url.startsWith('/api/file') && !white_url.includes(config.url)) {
+      let secretKey = '5A8F3C6B1D9E2F7A4B0C9D6E7F3B8A1C';
+
+      // 如果 config.data 不是字符串，则将其转换为字符串
+      const jsonData = typeof config.data === 'string' ? config.data : JSON.stringify(config.data);
+
+      const encryptedData = aes.methods.encrypt(jsonData, secretKey); // 调用 aes 的加密方法进行加密
+
+      // 将加密后的字符串赋值给 config.data
+      config.data = encryptedData;
+
+      // 保持 Content-Type 为 application/json
+      config.headers['Content-Type'] = 'application/json';
     }
 
     return config;

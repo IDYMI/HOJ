@@ -5,6 +5,7 @@ import cn.hutool.http.HtmlUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.pojo.entity.problem.Tag;
 import top.hcode.hoj.utils.CodeForcesUtils;
 import top.hcode.hoj.utils.Constants;
@@ -36,6 +37,7 @@ public class NSWOJProblemStrategy extends ProblemStrategy {
 	public RemoteProblemInfo getProblemInfo(String problemId, String author) throws Exception {
 
 		Problem info = new Problem();
+		ProblemDescription problemDescription = new ProblemDescription().setPid(info.getId());
 
 		info.setProblemId(JUDGE_NAME + "-" + problemId);
 
@@ -57,7 +59,7 @@ public class NSWOJProblemStrategy extends ProblemStrategy {
 		if (jsonObject.has("pdoc")) {
 			JSONObject pdoc = jsonObject.getJSONObject("pdoc");
 
-			info.setTitle(pdoc.getString("title"));
+			problemDescription.setTitle(pdoc.getString("title"));
 
 			String content = pdoc.getString("content");
 			if (content.startsWith("{") && content.endsWith("}")) {
@@ -69,23 +71,23 @@ public class NSWOJProblemStrategy extends ProblemStrategy {
 					String description = contentJson.getString(firstKey);
 
 					if (description.contains("@[pdf]")) {
-						info.setDescription(getPdfUrl(description, problemId));
+						problemDescription.setDescription(getPdfUrl(description, problemId));
 					} else {
-						info.setDescription(
+						problemDescription.setDescription(
 								"<pp>" + HtmlUtil.unescape(description.replaceAll("src=\"[../]*", "src=\"" + HOST + "/")
 										.replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
 					}
 				} else {
 					// 字典为空，不处理
-					info.setDescription("");
+					problemDescription.setDescription("");
 				}
 			} else {
 				String description = content;
 				if (description.contains("@[pdf]")) {
-					info.setDescription(getPdfUrl(description, problemId));
+					problemDescription.setDescription(getPdfUrl(description, problemId));
 				} else {
 					// 字符串不是一个字典，直接处理
-					info.setDescription(
+					problemDescription.setDescription(
 							"<pp>" + HtmlUtil.unescape(description.replaceAll("src=\"[../]*", "src=\"" + HOST + "/")
 									.replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
 				}
@@ -109,11 +111,11 @@ public class NSWOJProblemStrategy extends ProblemStrategy {
 		} else {
 			throw new IllegalArgumentException("[NSWOJ] Failed to Reload Html!");
 		}
+		problemDescription.setSource(String.format(
+				"<a style='color:#1A5CC8' href='%s'>%s</a>",
+				url, JUDGE_NAME + "-" + problemId));
 
 		info.setIsRemote(true)
-				.setSource(String.format(
-						"<a style='color:#1A5CC8' href='%s'>%s</a>",
-						url, JUDGE_NAME + "-" + problemId))
 				.setType(0)
 				.setAuth(1)
 				.setAuthor(author)
@@ -129,6 +131,7 @@ public class NSWOJProblemStrategy extends ProblemStrategy {
 
 		return new RemoteProblemInfo()
 				.setProblem(info)
+				.setProblemDescription(problemDescription)
 				.setTagList(tagList)
 				.setRemoteOJ(Constants.RemoteOJ.NSWOJ);
 

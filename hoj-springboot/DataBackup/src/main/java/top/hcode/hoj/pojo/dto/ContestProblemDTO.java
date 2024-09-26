@@ -15,6 +15,8 @@ public class ContestProblemDTO {
     @NotBlank(message = "题目id不能为空")
     private Long pid;
 
+    private Long peid;
+
     @NotBlank(message = "比赛id不能为空")
     private Long cid;
 

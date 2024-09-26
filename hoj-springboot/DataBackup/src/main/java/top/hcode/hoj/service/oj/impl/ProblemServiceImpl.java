@@ -71,9 +71,9 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public CommonResult<ProblemInfoVO> getProblemInfo(String problemId, Long gid) {
+    public CommonResult<ProblemInfoVO> getProblemInfo(String problemId, Long gid, Long tid, Long peid) {
         try {
-            return CommonResult.successResponse(problemManager.getProblemInfo(problemId, gid));
+            return CommonResult.successResponse(problemManager.getProblemInfo(problemId, gid, tid, peid));
         } catch (StatusNotFoundException e) {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.NOT_FOUND);
         } catch (StatusForbiddenException e) {
@@ -82,9 +82,9 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public CommonResult<String> getProblemPdf(Long pid) {
+    public CommonResult<String> getProblemPdf(Long pid, Long peid) {
         try {
-            return CommonResult.successResponse(problemManager.getProblemPdf(pid));
+            return CommonResult.successResponse(problemManager.getProblemPdf(pid, peid));
         } catch (StatusNotFoundException e) {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.NOT_FOUND);
         } catch (StatusForbiddenException e) {

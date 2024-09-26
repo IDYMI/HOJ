@@ -11,6 +11,22 @@
       <vxe-table-column min-width="64" field="id" title="ID"></vxe-table-column>
       <vxe-table-column min-width="100" field="problemId" :title="$t('m.Display_ID')"></vxe-table-column>
       <vxe-table-column field="title" min-width="150" :title="$t('m.Title')" show-overflow></vxe-table-column>
+      <vxe-table-column min-width="150" :title="$t('m.Selected_Description')">
+        <template v-slot="{ row }">
+          <el-select
+            v-model="row.peid"
+            @change="changeProblemDescription(row.id,row.peid)"
+            size="small"
+          >
+            <el-option
+              v-for="item in row.problemDescriptionList"
+              :key="item.id"
+              :label="item.title"
+              :value="item.id"
+            >{{ item.title }}</el-option>
+          </el-select>
+        </template>
+      </vxe-table-column>
 
       <vxe-table-column field="author" min-width="100" :title="$t('m.Author')" show-overflow></vxe-table-column>
       <vxe-table-column min-width="200" :title="$t('m.Training_Problem_Rank')">
@@ -243,6 +259,17 @@ export default {
           this.$i18n.t("m.Download_Testcase_Success"),
           this.$i18n.t("m.Tips")
         );
+      });
+    },
+    changeProblemDescription(pid, peid) {
+      let data = {
+        pid: pid,
+        peid: peid,
+        tid: this.trainingId,
+      };
+      api.admin_changeTrainingProblemDescription(data).then((res) => {
+        mMessage.success(this.$i18n.t("m.Update_Successfully"));
+        this.init();
       });
     },
   },

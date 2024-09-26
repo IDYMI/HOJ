@@ -247,6 +247,10 @@ export const m = {
   The_Problem_Display_ID_in_the_Contest_is_required: 'The Problem Display ID in the Contest is required',
   Balloon_Color: 'Balloon Color',
   Update_Balloon_Color_Successfully: 'Update the Balloon color of the problem successfully!',
+  Enter_The_Problem_Description_ID: 'Enter The Problem Description ID',
+  Selected_Description: 'Selected Description',
+  PDF_Description_View: 'PDF Description View',
+  Refresh_PDF_Description: 'Refresh PDF Description',
 
   // /views/admin/problem/Problem.vue
   Problem_Display_ID: 'Problem Display ID',

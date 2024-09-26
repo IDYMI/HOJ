@@ -23,6 +23,7 @@ import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.judge.Dispatcher;
 import top.hcode.hoj.pojo.dto.CompileDTO;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.problem.ProblemCase;
@@ -65,54 +66,23 @@ public class AdminProblemManager {
     @Autowired
     private RemoteProblemManager remoteProblemManager;
 
-    public IPage<Problem> getProblemList(Integer limit, Integer currentPage, String keyword, Integer auth, String oj,
+    public IPage<ProblemResDTO> getProblemList(Integer limit, Integer currentPage, String keyword, Integer auth,
+            String oj,
             Integer difficulty, Integer type) {
         if (currentPage == null || currentPage < 1)
             currentPage = 1;
         if (limit == null || limit < 1)
             limit = 10;
-        IPage<Problem> iPage = new Page<>(currentPage, limit);
-        IPage<Problem> problemList;
 
-        QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("is_group", false)
-                .orderByDesc("id");
+        IPage<ProblemResDTO> iPage = new Page<>(currentPage, limit);
 
-        // 根据oj筛选过滤
-        if (oj != null && !"All".equals(oj)) {
-            if (!Constants.RemoteOJ.isRemoteOJ(oj)) {
-                queryWrapper.eq("is_remote", false);
-            } else {
-                queryWrapper.eq("is_remote", true).likeRight("problem_id", oj);
-            }
-        }
+        Boolean isRemote = Constants.RemoteOJ.isRemoteOJ(oj);
 
-        if (auth != null && auth != 0) {
-            queryWrapper.eq("auth", auth);
-        }
-
-        if (difficulty != null) {
-            queryWrapper.eq("difficulty", difficulty);
-        }
-
-        if (type != null) {
-            queryWrapper.eq("type", type);
-        }
-
-        if (!StringUtils.isEmpty(keyword)) {
-            final String key = keyword.trim();
-            queryWrapper.and(wrapper -> wrapper.like("title", key).or()
-                    .like("author", key).or()
-                    .like("problem_id", key));
-            problemList = problemEntityService.page(iPage, queryWrapper);
-        } else {
-            problemList = problemEntityService.page(iPage, queryWrapper);
-        }
-        return problemList;
+        return problemEntityService.getAdminProblemList(iPage, keyword, auth, oj, difficulty, type, isRemote);
     }
 
-    public Problem getProblem(Long pid) throws StatusForbiddenException, StatusFailException {
-        Problem problem = problemEntityService.getById(pid);
+    public ProblemResDTO getProblem(Long pid, Long peid) throws StatusForbiddenException, StatusFailException {
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, peid, null, null);
 
         if (problem != null) { // 查询成功
             // 获取当前登录的用户
@@ -132,7 +102,7 @@ public class AdminProblemManager {
     }
 
     public void deleteProblem(Long pid) throws StatusFailException, StatusForbiddenException {
-        Problem problem = problemEntityService.getById(pid);
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, null, null, null);
 
         if (problem != null) { // 查询成功
             // 获取当前登录的用户
@@ -235,8 +205,8 @@ public class AdminProblemManager {
         }
     }
 
-    public List<ProblemCase> getProblemCases(Long pid, Boolean isUpload) throws StatusForbiddenException {
-        Problem problem = problemEntityService.getById(pid);
+    public List<ProblemCase> getProblemCases(Long pid, Long peid, Boolean isUpload) throws StatusForbiddenException {
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, peid, null, null);
 
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
@@ -309,7 +279,7 @@ public class AdminProblemManager {
         }
     }
 
-    public void changeProblemAuth(Problem problem) throws StatusFailException, StatusForbiddenException {
+    public void changeProblemAuth(ProblemResDTO problem) throws StatusFailException, StatusForbiddenException {
         // 普通管理员只能将题目变成隐藏题目和比赛题目
         boolean root = SecurityUtils.getSubject().hasRole("root");
 

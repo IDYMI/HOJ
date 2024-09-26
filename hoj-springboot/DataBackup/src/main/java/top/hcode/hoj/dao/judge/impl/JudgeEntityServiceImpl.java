@@ -12,10 +12,11 @@ import org.springframework.util.CollectionUtils;
 import top.hcode.hoj.dao.contest.ContestRecordEntityService;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.mapper.JudgeMapper;
+import top.hcode.hoj.mapper.ProblemDescriptionMapper;
 import top.hcode.hoj.mapper.ProblemMapper;
 import top.hcode.hoj.pojo.entity.contest.ContestRecord;
 import top.hcode.hoj.pojo.entity.judge.Judge;
-import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.pojo.vo.ContestScrollBoardSubmissionVO;
 import top.hcode.hoj.pojo.vo.JudgeVO;
 import top.hcode.hoj.pojo.vo.ProblemCountVO;
@@ -46,7 +47,7 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
     private ContestRecordEntityService contestRecordEntityService;
 
     @Autowired
-    private ProblemMapper problemMapper;
+    private ProblemDescriptionMapper problemDescriptionMapper;
 
     @Override
     public IPage<JudgeVO> getCommonJudgeList(Integer limit,
@@ -68,10 +69,10 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
         List<JudgeVO> records = commonJudgeList.getRecords();
         if (!CollectionUtils.isEmpty(records)) {
             List<Long> pidList = records.stream().map(JudgeVO::getPid).collect(Collectors.toList());
-            QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
+            QueryWrapper<ProblemDescription> problemQueryWrapper = new QueryWrapper<>();
             problemQueryWrapper.select("id", "title")
                     .in("id", pidList);
-            List<Problem> problemList = problemMapper.selectList(problemQueryWrapper);
+            List<ProblemDescription> problemList = problemDescriptionMapper.selectList(problemQueryWrapper);
             HashMap<Long, String> storeMap = new HashMap<>(limit);
             for (JudgeVO judgeVo : records) {
                 judgeVo.setTitle(getProblemTitleByPid(judgeVo.getPid(), problemList, storeMap));
@@ -80,12 +81,13 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
         return commonJudgeList;
     }
 
-    private String getProblemTitleByPid(Long pid, List<Problem> problemList, HashMap<Long, String> storeMap) {
+    private String getProblemTitleByPid(Long pid, List<ProblemDescription> problemList,
+            HashMap<Long, String> storeMap) {
         String title = storeMap.get(pid);
         if (title != null) {
             return title;
         }
-        for (Problem problem : problemList) {
+        for (ProblemDescription problem : problemList) {
             if (problem.getId().equals(pid)) {
                 storeMap.put(pid, problem.getTitle());
                 return problem.getTitle();

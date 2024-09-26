@@ -247,6 +247,10 @@ export const m = {
   The_Problem_Display_ID_in_the_Contest_is_required: '题目在比赛中的展示ID不能为空',
   Balloon_Color: '气球颜色',
   Update_Balloon_Color_Successfully: '更新该题气球颜色成功！',
+  Enter_The_Problem_Description_ID: '请选择该题目的题目ID',
+  Selected_Description: '选择题面',
+  PDF_Description_View: 'PDF 题面预览',
+  Refresh_PDF_Description: '重置 PDF 题面',
 
   // /views/admin/problem/Problem.vue
   Problem_Display_ID: '题目展示ID',

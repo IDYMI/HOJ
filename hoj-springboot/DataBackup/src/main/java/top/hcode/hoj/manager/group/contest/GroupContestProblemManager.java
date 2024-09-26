@@ -19,6 +19,7 @@ import top.hcode.hoj.manager.admin.contest.AdminContestProblemManager;
 import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.pojo.dto.ContestProblemDTO;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.contest.ContestProblem;
 import top.hcode.hoj.pojo.entity.group.Group;
@@ -106,6 +107,7 @@ public class GroupContestProblemManager {
             throws StatusNotFoundException, StatusForbiddenException, StatusFailException {
 
         problemValidator.validateGroupProblem(problemDto.getProblem());
+        problemValidator.validateGroupProblemDescription(problemDto.getProblemDescriptionList());
 
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
@@ -286,8 +288,9 @@ public class GroupContestProblemManager {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
         Long pid = contestProblemDto.getPid();
+        Long peid = contestProblemDto.getPeid();
 
-        Problem problem = problemEntityService.getById(pid);
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, peid, null, null);
 
         if (problem == null
                 || problem.getAuth().intValue() != Constants.ProblemAuth.PUBLIC.getAuth()
@@ -333,7 +336,7 @@ public class GroupContestProblemManager {
             throw new StatusFailException("添加失败，该题目已添加或者题目的比赛展示ID已存在！");
         }
 
-        String displayName = problem.getTitle();
+        String displayName = problem.getProblemDescriptionList().get(0).getTitle();
 
         ContestProblem newCProblem = new ContestProblem();
 
@@ -394,7 +397,7 @@ public class GroupContestProblemManager {
         }
 
         ContestProblem newCProblem = new ContestProblem();
-        String displayName = problem.getTitle();
+        String displayName = problemEntityService.getDefaultProblemTitle(problem);
 
         boolean updateProblem = problemEntityService.saveOrUpdate(problem.setAuth(3));
 

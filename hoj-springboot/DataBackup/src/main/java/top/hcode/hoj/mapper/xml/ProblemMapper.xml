@@ -12,10 +12,61 @@
         </collection>
     </resultMap>
 
+    <resultMap id="map_ProblemRes" type="top.hcode.hoj.pojo.dto.ProblemResDTO">
+        <id column="id" property="id"></id>
+        <result column="problem_id" property="problemId"></result>
+        <result column="title" property="title"></result>
+        <result column="type" property="type"></result>
+        <result column="judge_mode" property="judgeMode"></result>
+        <result column="judge_case_mode" property="judgeCaseMode"></result>
+        <result column="time_limit" property="timeLimit"></result>
+        <result column="memory_limit" property="memoryLimit"></result>
+        <result column="stack_limit" property="stackLimit"></result>
+        <result column="is_remote" property="isRemote"></result>
+        <result column="difficulty" property="difficulty"></result>
+        <result column="auth" property="auth"></result>
+        <result column="io_score" property="ioScore"></result>
+        <result column="code_share" property="codeShare"></result>
+        <result column="spj_code" property="spjCode"></result>
+        <result column="spj_language" property="spjLanguage"></result>
+        <result column="user_extra_file" property="userExtraFile"></result>
+        <result column="judge_extra_file" property="judgeExtraFile"></result>
+        <result column="is_remove_end_blank" property="isRemoveEndBlank"></result>
+        <result column="open_case_result" property="openCaseResult"></result>
+        <result column="is_upload_case" property="isUploadCase"></result>
+        <result column="case_version" property="caseVersion"></result>
+        <result column="modified_user" property="modifiedUser"></result>
+        <result column="is_group" property="isGroup"></result>
+        <result column="gid" property="gid"></result>
+        <result column="apply_public_progress" property="applyPublicProgress"></result>
+        <result column="is_file_iO" property="isFileIO"></result>
+        <result column="io_read_file_name" property="ioReadFileName"></result>
+        <result column="io_write_file_name" property="ioWriteFileName"></result>
+        <result column="author" property="author"></result>
+        <result column="modified_user" property="modifiedUser"></result>
+        <result column="gmt_create" property="gmtCreate"></result>
+        <result column="gmt_modified" property="gmtModified"></result>
+        <collection property="problemDescriptionList" ofType="top.hcode.hoj.pojo.entity.problem.ProblemDescription">
+            <id column="description_id" property="id"></id>
+            <result column="title" property="title"></result>
+            <result column="description" property="description"></result>
+            <result column="input" property="input"></result>
+            <result column="output" property="output"></result>
+            <result column="examples" property="examples"></result>
+            <result column="source" property="source"></result>
+            <result column="hint" property="hint"></result>
+            <result column="rank" property="rank"></result>
+            <result column="author" property="author"></result>
+            <result column="pdf_description" property="pdfDescription"></result>
+            <result column="html" property="html"></result>
+        </collection>
+    </resultMap>
+
     <!-- 主查询 -->
-    <select id="getProblemList" resultMap="map_ProblemList" useCache="true">
-        SELECT DISTINCT p.id AS pid, p.problem_id, p.title, p.difficulty, p.type
+    <select id="getProblemList" resultMap="map_ProblemList">
+        SELECT p.id as pid, p.problem_id, pd.title, p.difficulty, p.type
         FROM problem p
+        LEFT JOIN problem_description pd ON p.id = pd.pid
         <if test="tid != null and tid.size() > 0">
             RIGHT JOIN
             (
@@ -32,13 +83,20 @@
             ON p.id = pt.pid
         </if>
         <where>
-            p.auth = 1 and p.is_group = false
+            p.auth = 1 and p.is_group = false and pd.`rank` = 0
             <if test="keyword != null and keyword != ''">
-                and (
-                p.title like concat('%',#{keyword},'%') or p.problem_id like concat('%',#{keyword},'%')
-                <if test="pid != null and pid != ''">
-                    or p.id = #{pid}
-                </if>
+                and
+                (
+                    p.problem_id like concat('%',#{keyword},'%')
+                    <if test="pid != null and pid != ''">
+                        or p.id = #{pid}
+                    </if>
+                    or EXISTS (
+                        SELECT 1
+                        FROM problem_description pd_sub
+                        WHERE pd_sub.pid = p.id
+                        AND pd_sub.title LIKE CONCAT('%', #{keyword}, '%')
+                    )
                 )
             </if>
             <if test="difficulty != null">
@@ -47,14 +105,198 @@
             <if test="type != null">
                 and p.type = #{type}
             </if>
-            <if test="oj != null and oj !='Mine'">
+            <if test="oj != null and oj !='Mine' and oj != 'All'">
                 and p.problem_id like concat(#{oj},'%') and p.is_remote=true
             </if>
             <if test="oj != null and oj =='Mine'">
                 and p.is_remote=false
             </if>
         </where>
-        order by length(p.problem_id) asc,p.problem_id asc
+        order by length(p.problem_id) asc,p.problem_id asc, `rank` ASC
+    </select>
+
+    <select id="getAdminProblemList" resultMap="map_ProblemRes" useCache="true">
+        SELECT p.*, pd.*, pd.id AS description_id, pd.title as title
+        FROM problem p
+        LEFT JOIN problem_description pd ON p.id = pd.pid
+        <where>
+            p.is_group = false AND p.gid IS NULL
+            <if test="oj != null and oj !='Mine' and oj != 'All'">
+                AND p.problem_id like concat(#{oj},'%') and p.is_remote=true
+            </if>
+            <if test="oj != null and oj =='Mine'">
+                AND p.is_remote=false
+            </if>
+            <if test="auth != null and auth != 0">
+                AND p.auth = #{auth}
+            </if>
+            <if test="difficulty != null">
+                AND p.difficulty = #{difficulty}
+            </if>
+            <if test="type != null">
+                AND p.type = #{type}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    p.author LIKE CONCAT('%', #{keyword}, '%')
+                    OR p.problem_id LIKE CONCAT('%', #{keyword}, '%')
+                    OR EXISTS (
+                        SELECT 1
+                        FROM problem_description pd_sub
+                        WHERE pd_sub.pid = p.id
+                        AND pd_sub.title LIKE CONCAT('%', #{keyword}, '%')
+                    )
+                )
+            </if>
+        </where>
+        ORDER BY p.id DESC, p.problem_id ASC, pd.`rank` ASC
+    </select>
+
+    <select id="getAdminGroupProblemList" resultMap="map_ProblemRes" useCache="true">
+        SELECT p.id, p.gid, p.apply_public_progress, p.problem_id, pd.title, p.author, p.type, p.judge_mode, pd.id AS description_id
+        FROM problem p
+        LEFT JOIN problem_description pd ON p.id = pd.pid
+        <where>
+            gid IS NOT NULL AND apply_public_progress IS NOT NULL
+            <if test="gid != null">
+                AND gid = #{gid}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    p.author LIKE CONCAT('%', #{keyword}, '%')
+                    OR p.problem_id LIKE CONCAT('%', #{keyword}, '%')
+                    OR EXISTS (
+                        SELECT 1
+                        FROM problem_description pd_sub
+                        WHERE pd_sub.pid = p.id
+                        AND pd_sub.title LIKE CONCAT('%', #{keyword}, '%')
+                    )
+                )
+            </if>
+        </where>
+        ORDER BY p.apply_public_progress ASC, p.gid ASC, `rank` ASC
+    </select>
+
+    <select id="getAdminContestProblemList" resultMap="map_ProblemRes" useCache="true">
+        SELECT *, pd.title, pd.id AS description_id
+        FROM problem p
+        LEFT JOIN problem_description pd ON p.id = pd.pid
+        <where>
+            <if test="problemType != null">
+                AND p.is_group = false
+                <if test="contestGid != null">
+                    AND p.auth != 3
+                </if>
+                AND (
+                    (p.type = #{problemType} OR p.is_remote = true)
+                )
+                AND p.auth != 2
+            </if>
+
+            <if test="pidList != null and pidList.size > 0">
+                <if test="problemType != null">
+                    AND p.id NOT IN
+                </if>
+                <if test="problemType == null">
+                    AND p.id IN
+                </if>
+                <foreach item="pid" collection="pidList" open="(" separator="," close=")">
+                    #{pid}
+                </foreach>
+            </if>
+
+            <if test="oj != null and oj !='Mine' and oj != 'All'">
+                and p.problem_id like concat(#{oj},'%') and p.is_remote=true
+            </if>
+            <if test="oj != null and oj =='Mine'">
+                and p.is_remote=false
+            </if>
+
+            <if test="difficulty != null">
+                AND p.difficulty = #{difficulty}
+            </if>
+
+            <if test="type != null">
+                AND p.type = #{type}
+            </if>
+
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    p.author LIKE CONCAT('%', #{keyword}, '%')
+                    OR p.problem_id LIKE CONCAT('%', #{keyword}, '%')
+                    OR EXISTS (
+                        SELECT 1
+                        FROM problem_description pd_sub
+                        WHERE pd_sub.pid = p.id
+                        AND pd_sub.title LIKE CONCAT('%', #{keyword}, '%')
+                    )
+                )
+            </if>
+
+            <if test="pidList.size == 0 and problemType == null">
+                AND p.id IS NULL
+            </if>
+        </where>
+        ORDER BY p.id DESC, p.problem_id ASC, `rank` ASC
+    </select>
+
+    <select id="getAdminTrainingProblemList" resultMap="map_ProblemRes" useCache="true">
+        SELECT *, pd.title, pd.id AS description_id
+        FROM problem p
+        LEFT JOIN problem_description pd ON p.id = pd.pid
+        <where>
+            <!-- 判断是查询已有的问题 -->
+            <if test="queryExisted">
+                <if test="pidList != null and pidList.size > 0">
+                    AND p.id IN
+                    <foreach item="pid" collection="pidList" open="(" separator="," close=")">
+                        #{pid}
+                    </foreach>
+                </if>
+            </if>
+
+            <!-- 查询不重复的问题并且公开的问题 -->
+            <if test="!queryExisted">
+                AND p.auth = 1
+                AND p.is_group = false
+                <if test="pidList != null and pidList.size > 0">
+                    AND p.id NOT IN
+                    <foreach item="pid" collection="pidList" open="(" separator="," close=")">
+                        #{pid}
+                    </foreach>
+                </if>
+            </if>
+
+            <!-- 关键词搜索 -->
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    p.author LIKE CONCAT('%', #{keyword}, '%')
+                    OR p.problem_id LIKE CONCAT('%', #{keyword}, '%')
+                    OR EXISTS (
+                        SELECT 1
+                        FROM problem_description pd_sub
+                        WHERE pd_sub.pid = p.id
+                        AND pd_sub.title LIKE CONCAT('%', #{keyword}, '%')
+                    )
+                )
+            </if>
+
+            <!-- 如果pidList为空且queryExisted为true，则不返回任何结果 -->
+            <if test="pidList.size == 0 and queryExisted">
+                AND p.id IS NULL
+            </if>
+        </where>
+        ORDER BY p.id DESC, p.problem_id ASC, `rank` ASC
+    </select>
+
+    <select id="getRecentUpdatedProblemList" resultMap="map_ProblemRes" useCache="true">
+        SELECT p.id, p.problem_id, pd.title, p.type, p.gmt_modified, p.gmt_create, pd.id AS description_id
+        FROM problem p
+        LEFT JOIN problem_description pd ON p.id = pd.pid
+        <where>
+            p.auth = 1 AND p.is_group = false
+        </where>
+        ORDER BY p.id DESC, p.problem_id ASC, `rank` ASC
     </select>
 
     <!-- 子查询 :为了防止分页总数据数出错-->

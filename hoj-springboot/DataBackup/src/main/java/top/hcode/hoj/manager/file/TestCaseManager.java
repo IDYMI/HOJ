@@ -24,7 +24,7 @@ import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.pojo.bo.File_;
 import top.hcode.hoj.manager.group.GroupManager;
 
-import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.problem.ProblemCase;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
@@ -176,7 +176,7 @@ public class TestCaseManager {
                 || SecurityUtils.getSubject().hasRole("admin");
 
         if (pid != null) {
-            Problem problem = problemEntityService.getById(pid);
+            ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, null, null, null);
 
             Long gid = problem.getGid();
 
@@ -186,7 +186,8 @@ public class TestCaseManager {
                     throw new StatusForbiddenException("对不起，您无权限操作！");
                 }
             } else {
-                if (!isRoot && !problem.getAuthor().equals(userRolesVo.getUsername())) {
+                if (!isRoot
+                        && !problem.getAuthor().equals(userRolesVo.getUsername())) {
                     throw new StatusForbiddenException("对不起，您无权限操作！");
                 }
             }
@@ -201,6 +202,11 @@ public class TestCaseManager {
                 : fileListDir);
 
         File file = new File(workDir);
+
+        File zip_file = new File(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath());
+        if (!zip_file.exists()) {
+            FileUtil.mkdir(zip_file);
+        }
 
         if (pid != null && !file.exists()) { // 本地为空 尝试去数据库查找
             QueryWrapper<ProblemCase> problemCaseQueryWrapper = new QueryWrapper<>();

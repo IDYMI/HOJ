@@ -350,6 +350,7 @@ from bs4 import BeautifulSoup
 import re
 import json
 
+
 app = Flask(__name__)
 
 TEX_TABLE_START = """\\begin{longtable}{ l l }
@@ -588,6 +589,84 @@ def write_example_to_template(examples_lt, outputPath, is_table=True, EC=True):
 
     # 将最终生成的 LaTeX 内容写入到输出路径中（将输出路径中的 .pdf 后缀替换为 .tex）
     write_(outputPath.replace(".html", ".tex"), tex_template)
+
+
+# 重写 PDF 文件的页码
+def write_pdf_page(path, EC):
+
+    # 创建 PDF 页面并添加页码
+    def rewrite_page(num_pages, tmp_file, EC):
+        """
+        创建一个 PDF 文件，并在每一页添加当前页码。
+
+        :param num_pages: PDF 中的总页数
+        :param tmp_file: 临时 PDF 文件的路径
+        """
+        c = canvas.Canvas(tmp_file)
+
+        for i in range(1, num_pages + 1):
+            page_width = 210 * mm  # A4 纸宽度
+            footer_margin = 3 * mm  # 页码距页面底部的距离
+
+            # 覆盖原有页码区域
+            c.setFillColorRGB(1, 1, 1)
+            c.rect(
+                (page_width / 2) - 20 * mm,
+                footer_margin - 2 * mm,
+                40 * mm,
+                6 * mm,
+                fill=True,
+                stroke=False,
+            )
+
+            # 添加新页码
+            c.setFont("font", 10)
+            c.setFillColorRGB(0, 0, 0)
+            c.drawCentredString(
+                page_width / 2,
+                footer_margin,
+                (
+                    "第 {} 页，共 {} 页".format(i, num_pages)
+                    if EC
+                    else "Page {} of {}".format(i, num_pages)
+                ),
+            )
+            c.showPage()  # 换页
+
+        c.save()  # 保存 PDF
+    """
+    重写 PDF 文件的页码，覆盖原有页码。
+
+    :param path: 原始 PDF 文件的路径
+    """
+
+    # 系统中文字体
+    pdfmetrics.registerFont(
+        TTFont("font", "/usr/share/fonts/truetype/arphic-gkai00mp/gkai00mp.ttf")
+    )
+
+    tmp_file = "__tmp.pdf"  # 临时文件
+    output = PdfWriter()
+
+    with open(path, "rb") as f:
+        pdf = PdfReader(f)
+        num_pages = len(pdf.pages)
+
+        rewrite_page(num_pages, tmp_file, EC)  # 创建新页码 PDF
+
+        with open(tmp_file, "rb") as ftmp:
+            number_pdf = PdfReader(ftmp)
+
+            for p in range(num_pages):
+                page = pdf.pages[p]
+                number_layer = number_pdf.pages[p]
+                page.merge_page(number_layer)  # 合并页码层
+                output.add_page(page)
+
+        with open(path, "wb") as f:
+            output.write(f)  # 保存覆盖原始文件
+
+    os.remove(tmp_file)  # 删除临时文件
 
 
 # 将传入的数据列表转化为字符串，生成 HTML 表格
@@ -1080,9 +1159,6 @@ docker build -t hoj-htmltopdf .
 % 设置页眉页脚样式
 \pagestyle{fancy}
 \fancyhf{}
-% 页眉中间显示比赛标题和学校、日期，居中显示，两行
-\fancyhead[C]{\textbf{$contest_title$} \\
-$if(ec)$南阳理工学院$else$NYIST NYOJ$endif$ \textbf{$contest_data$}}
 
 % 调整页眉和页脚高度
 \setlength{\headheight}{40pt}  % 页眉高度

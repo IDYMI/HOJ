@@ -9,8 +9,8 @@ import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.common.result.ResultStatus;
 import top.hcode.hoj.manager.admin.problem.AdminProblemManager;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.dto.CompileDTO;
-import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.problem.ProblemCase;
 import top.hcode.hoj.service.admin.problem.AdminProblemService;
 
@@ -29,17 +29,17 @@ public class AdminProblemServiceImpl implements AdminProblemService {
     private AdminProblemManager adminProblemManager;
 
     @Override
-    public CommonResult<IPage<Problem>> getProblemList(Integer limit, Integer currentPage, String keyword, Integer auth,
-            String oj, Integer difficulty, Integer type) {
-        IPage<Problem> problemList = adminProblemManager.getProblemList(limit, currentPage, keyword, auth, oj,
+    public CommonResult<IPage<ProblemResDTO>> getProblemList(Integer limit, Integer currentPage, String keyword,
+            Integer auth, String oj, Integer difficulty, Integer type) {
+        IPage<ProblemResDTO> problemList = adminProblemManager.getProblemList(limit, currentPage, keyword, auth, oj,
                 difficulty, type);
         return CommonResult.successResponse(problemList);
     }
 
     @Override
-    public CommonResult<Problem> getProblem(Long pid) {
+    public CommonResult<ProblemResDTO> getProblem(Long pid, Long peid) {
         try {
-            Problem problem = adminProblemManager.getProblem(pid);
+            ProblemResDTO problem = adminProblemManager.getProblem(pid, peid);
             return CommonResult.successResponse(problem);
         } catch (StatusForbiddenException e) {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
@@ -83,9 +83,9 @@ public class AdminProblemServiceImpl implements AdminProblemService {
     }
 
     @Override
-    public CommonResult<List<ProblemCase>> getProblemCases(Long pid, Boolean isUpload) {
+    public CommonResult<List<ProblemCase>> getProblemCases(Long pid, Long peid, Boolean isUpload) {
         try {
-            List<ProblemCase> problemCaseList = adminProblemManager.getProblemCases(pid, isUpload);
+            List<ProblemCase> problemCaseList = adminProblemManager.getProblemCases(pid, peid, isUpload);
             return CommonResult.successResponse(problemCaseList);
         } catch (StatusForbiddenException e) {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
@@ -113,7 +113,7 @@ public class AdminProblemServiceImpl implements AdminProblemService {
     }
 
     @Override
-    public CommonResult<Void> changeProblemAuth(Problem problem) {
+    public CommonResult<Void> changeProblemAuth(ProblemResDTO problem) {
         try {
             adminProblemManager.changeProblemAuth(problem);
             return CommonResult.successResponse();

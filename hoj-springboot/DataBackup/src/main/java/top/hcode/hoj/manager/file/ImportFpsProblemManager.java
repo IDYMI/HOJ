@@ -23,6 +23,7 @@ import top.hcode.hoj.pojo.entity.problem.CodeTemplate;
 import top.hcode.hoj.pojo.entity.problem.Language;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.problem.ProblemCase;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
 
@@ -93,11 +94,11 @@ public class ImportFpsProblemManager {
                         failedCount++;
                     }
                 } catch (ProblemIDRepeatException e) {
-                    repeatProblemTitleSet.add(problemDto.getProblem().getTitle());
+                    repeatProblemTitleSet.add(problemEntityService.getDefaultProblemTitle(problemDto.getProblem()));
                     failedCount++;
                 } catch (Exception e) {
                     log.error("", e);
-                    failedProblemTitleSet.add(problemDto.getProblem().getTitle());
+                    failedProblemTitleSet.add(problemEntityService.getDefaultProblemTitle(problemDto.getProblem()));
                     failedCount++;
                 }
             }
@@ -145,6 +146,7 @@ public class ImportFpsProblemManager {
         for (Element item : XmlUtil.getElements(rootElement, "item")) {
 
             Problem problem = new Problem();
+            ProblemDescription problemDescription = new ProblemDescription().setPid(problem.getId());
 
             problem.setAuthor(username)
                     .setType(0)
@@ -158,8 +160,6 @@ public class ImportFpsProblemManager {
                     .setIsGroup(false);
 
             Element title = XmlUtil.getElement(item, "title");
-            // 标题
-            problem.setTitle(title.getTextContent());
 
             HashMap<String, String> srcMapUrl = new HashMap<>();
             List<Element> images = XmlUtil.getElements(item, "img");
@@ -180,29 +180,26 @@ public class ImportFpsProblemManager {
                 srcMapUrl.put(src, Constants.File.IMG_API.getPath() + fileName);
             }
 
+            // 题目描述
             Element descriptionElement = XmlUtil.getElement(item, "description");
             String description = descriptionElement.getTextContent();
             for (Map.Entry<String, String> entry : srcMapUrl.entrySet()) {
                 description = description.replaceAll(entry.getKey(), entry.getValue());
             }
-            // 题目描述
-            problem.setDescription(description);
 
+            // 输入描述
             Element inputElement = XmlUtil.getElement(item, "input");
             String input = inputElement.getTextContent();
             for (Map.Entry<String, String> entry : srcMapUrl.entrySet()) {
                 input = input.replaceAll(entry.getKey(), entry.getValue());
             }
-            // 输入描述
-            problem.setInput(input);
 
+            // 输出描述
             Element outputElement = XmlUtil.getElement(item, "output");
             String output = outputElement.getTextContent();
             for (Map.Entry<String, String> entry : srcMapUrl.entrySet()) {
                 output = output.replaceAll(entry.getKey(), entry.getValue());
             }
-            // 输出描述
-            problem.setOutput(output);
 
             // 提示
             Element hintElement = XmlUtil.getElement(item, "hint");
@@ -210,12 +207,10 @@ public class ImportFpsProblemManager {
             for (Map.Entry<String, String> entry : srcMapUrl.entrySet()) {
                 hint = hint.replaceAll(entry.getKey(), entry.getValue());
             }
-            problem.setHint(hint);
 
             // 来源
             Element sourceElement = XmlUtil.getElement(item, "source");
             String source = sourceElement.getTextContent();
-            problem.setSource(source);
 
             // ms
             Integer timeLimit = getTimeLimit(version, item);
@@ -233,7 +228,14 @@ public class ImportFpsProblemManager {
                 sb.append("<input>").append(sampleInputs.get(i).getTextContent()).append("</input>");
                 sb.append("<output>").append(sampleOutputs.get(i).getTextContent()).append("</output>");
             }
-            problem.setExamples(sb.toString());
+
+            problemDescription.setTitle(title.getTextContent()) // 标题
+                    .setDescription(description)
+                    .setInput(input)
+                    .setOutput(output)
+                    .setHint(hint)
+                    .setSource(source)
+                    .setExamples(sb.toString());
 
             QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();
             languageQueryWrapper.eq("oj", "ME");
@@ -293,13 +295,15 @@ public class ImportFpsProblemManager {
             }
             if (CollectionUtils.isEmpty(problemSamples)) {
                 throw new StatusFailException(
-                        "[" + problem.getTitle() + "] 题目的评测数据不能为空，请检查FPS文件内该题目是否有test_input和test_output!");
+                        "[" + problemDescription.getTitle() + "] 题目的评测数据不能为空，请检查FPS文件内该题目是否有test_input和test_output!");
             }
             String mode = Constants.JudgeMode.DEFAULT.getMode();
             if (problem.getSpjLanguage() != null) {
                 mode = Constants.JudgeMode.SPJ.getMode();
             }
             ProblemDTO problemDto = new ProblemDTO();
+
+            List<ProblemDescription> problemDescriptionDtoList = Collections.singletonList(problemDescription);
             problemDto.setSamples(problemSamples)
                     .setIsUploadTestCase(true)
                     .setUploadTestcaseDir(problemTestCaseDir)
@@ -307,6 +311,7 @@ public class ImportFpsProblemManager {
                     .setTags(null)
                     .setJudgeMode(mode)
                     .setProblem(problem)
+                    .setProblemDescriptionList(problemDescriptionDtoList)
                     .setCodeTemplates(codeTemplates);
 
             problemDTOList.add(problemDto);

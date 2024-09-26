@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.dto.CompileDTO;
-import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.problem.ProblemCase;
 import top.hcode.hoj.service.admin.problem.AdminProblemService;
 
@@ -31,7 +31,8 @@ public class AdminProblemController {
 
     @GetMapping("/get-problem-list")
     @RequiresAuthentication
-    public CommonResult<IPage<Problem>> getProblemList(@RequestParam(value = "limit", required = false) Integer limit,
+    public CommonResult<IPage<ProblemResDTO>> getProblemList(
+            @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "auth", required = false) Integer auth,
@@ -43,8 +44,9 @@ public class AdminProblemController {
 
     @GetMapping("")
     @RequiresAuthentication
-    public CommonResult<Problem> getProblem(@RequestParam("pid") Long pid) {
-        return adminProblemService.getProblem(pid);
+    public CommonResult<ProblemResDTO> getProblem(@RequestParam("pid") Long pid,
+            @RequestParam(value = "peid", required = false) Long peid) {
+        return adminProblemService.getProblem(pid, peid);
     }
 
     @DeleteMapping("")
@@ -67,9 +69,10 @@ public class AdminProblemController {
 
     @GetMapping("/get-problem-cases")
     @RequiresAuthentication
-    public CommonResult<List<ProblemCase>> getProblemCases(@RequestParam("pid") Long pid,
+    public CommonResult<List<ProblemCase>> getProblemCases(
+            @RequestParam("pid") Long pid, @RequestParam(value = "peid", required = false) Long peid,
             @RequestParam(value = "isUpload", defaultValue = "true") Boolean isUpload) {
-        return adminProblemService.getProblemCases(pid, isUpload);
+        return adminProblemService.getProblemCases(pid, peid, isUpload);
     }
 
     @PostMapping("/compile-spj")
@@ -94,7 +97,7 @@ public class AdminProblemController {
 
     @PutMapping("/change-problem-auth")
     @RequiresAuthentication
-    public CommonResult<Void> changeProblemAuth(@RequestBody Problem problem) {
+    public CommonResult<Void> changeProblemAuth(@RequestBody ProblemResDTO problem) {
         return adminProblemService.changeProblemAuth(problem);
     }
 

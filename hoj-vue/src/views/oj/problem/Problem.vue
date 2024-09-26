@@ -127,6 +127,22 @@
                       </el-link>
                     </span>
                   </div>
+
+                  <div class="problem-description" v-if="!contestID && !trainingID">
+                    <div style="font-size: 16px;">{{ $t('m.Problem_Descriptions') }}</div>
+                    <el-tag
+                      v-for="problemDescription in problemData.problemDescriptionList"
+                      size="medium"
+                      class="filter-item"
+                      :effect="peid == problemDescription.id ? 'dark' : 'plain'"
+                      :key="problemDescription.id"
+                      @click="goProblemDescription(problemDescription.id)"
+                    >
+                      {{ problemDescription.title ? ' Title: ' + problemDescription.title : '' }}
+                      Author: {{ problemDescription.author }}
+                    </el-tag>
+                  </div>
+
                   <div class="question-intr">
                     <template v-if="!isCFProblem">
                       <span>
@@ -608,7 +624,7 @@
             </div>
             <div id="js-right-bottom">
               <el-row>
-                <el-col :sm="24" :md="10" :lg="10" style="margin-top:4px;">
+                <el-col :sm="8" :md="8" :lg="8" style="margin-top:4px;">
                   <div v-if="!isAuthenticated">
                     <el-alert
                       type="info"
@@ -740,6 +756,8 @@
                       :closable="false"
                     >{{ $t('m.You_have_submitted_a_solution') }}</el-alert>
                   </div>
+                </el-col>
+                <el-col :sm="8" :md="8" :lg="8" style="margin-top:4px;">
                   <div v-if="contestEnded && !statusVisible">
                     <el-alert
                       type="warning"
@@ -750,7 +768,7 @@
                   </div>
                 </el-col>
 
-                <el-col :sm="24" :md="14" :lg="14" style="margin-top:4px;">
+                <el-col :sm="8" :md="8" :lg="8" style="margin-top:4px;">
                   <template v-if="captchaRequired">
                     <div class="captcha-container">
                       <el-tooltip v-if="captchaRequired" content="Click to refresh" placement="top">
@@ -896,6 +914,7 @@ export default {
       groupID: null,
       problemID: "",
       trainingID: null,
+      descriptionID: null,
       submitting: false,
       code: "",
       language: "",
@@ -916,6 +935,7 @@ export default {
         problem: {
           difficulty: 0,
         },
+        problemDescriptionList: [],
         problemCount: {},
         tags: [],
         languages: [],
@@ -958,6 +978,7 @@ export default {
       type: 0,
       selectedList: [],
       orderList: [{ output: "YES" }, { output: "NO" }],
+      peid: null,
     };
   },
   created() {
@@ -1239,7 +1260,7 @@ export default {
           left.style.width = "100%";
         }
 
-        let problemLeftHight = totalHeight - (headerHeight + 64);
+        let problemLeftHight = totalHeight - (headerHeight + 94);
         if (this.showProblemHorizontalMenu) {
           let footerMenuHeight =
             document.getElementById("problem-footer").offsetHeight;
@@ -1321,13 +1342,23 @@ export default {
       if (this.$route.params.trainingID) {
         this.trainingID = this.$route.params.trainingID;
       }
+      if (this.$route.params.descriptionID) {
+        this.descriptionID = this.$route.params.descriptionID;
+      }
       let func =
         this.$route.name === "ContestProblemDetails" ||
         this.$route.name === "ContestFullProblemDetails"
           ? "getContestProblem"
           : "getProblem";
       this.loading = true;
-      api[func](this.problemID, this.contestID, this.groupID, true).then(
+      api[func](
+        this.problemID,
+        this.contestID,
+        this.groupID,
+        true,
+        this.trainingID,
+        this.descriptionID
+      ).then(
         (res) => {
           let result = res.data.data;
           this.changeDomTitle({ title: result.problem.title });
@@ -1342,6 +1373,9 @@ export default {
 
           this.problemData = result;
           this.changeType();
+          this.peid = this.descriptionID
+            ? this.descriptionID
+            : this.problemData.problemDescriptionList[0].id;
           this.loading = false;
 
           if (this.isAuthenticated) {
@@ -1876,12 +1910,25 @@ export default {
       };
 
       if (!problem.pdfDescription) {
-        api.getProblemPdf(problem.id).then(
+        api.getProblemPdf(problem.id, this.descriptionID).then(
           (res) => openPdf(res.data.msg),
           (err) => {}
         );
       } else {
         openPdf(problem.pdfDescription);
+      }
+    },
+    goProblemDescription(peid) {
+      if (this.groupID) {
+        this.$router.push({
+          name: "GroupProblemDetails",
+          params: { submitID: this.submissionId, gid: this.groupID },
+        });
+      } else {
+        this.$router.push({
+          name: "ProblemDetails",
+          params: { descriptionID: peid },
+        });
       }
     },
   },
@@ -2054,8 +2101,8 @@ a {
   font-size: 14px !important;
   color: #909399 !important;
 }
-.question-intr {
-  margin-top: 30px;
+.question-intr,
+.problem-description {
   border-radius: 4px;
   border: 1px solid #ddd;
   border-left: 2px solid #3498db;
@@ -2064,6 +2111,12 @@ a {
   line-height: 1.8;
   margin-bottom: 10px;
   font-size: 14px;
+}
+.question-intr {
+  margin-top: 30px;
+}
+.problem-description {
+  margin-top: 10px;
 }
 
 .extra-file {
@@ -2329,5 +2382,13 @@ a {
   background-color: #67c23a;
   border-color: #67c23a;
   color: #fff;
+}
+.filter-item {
+  margin-right: 1em;
+  margin-top: 0.5em;
+  font-size: 13px;
+}
+.filter-item:hover {
+  cursor: pointer;
 }
 </style>

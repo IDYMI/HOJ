@@ -14,8 +14,58 @@
         </collection>
     </resultMap>
 
+    <resultMap id="map_ProblemRes" type="top.hcode.hoj.pojo.dto.ProblemResDTO">
+        <id column="id" property="id"></id>
+        <result column="problem_id" property="problemId"></result>
+        <result column="title" property="title"></result>
+        <result column="type" property="type"></result>
+        <result column="judge_mode" property="judgeMode"></result>
+        <result column="judge_case_mode" property="judgeCaseMode"></result>
+        <result column="time_limit" property="timeLimit"></result>
+        <result column="memory_limit" property="memoryLimit"></result>
+        <result column="stack_limit" property="stackLimit"></result>
+        <result column="is_remote" property="isRemote"></result>
+        <result column="difficulty" property="difficulty"></result>
+        <result column="auth" property="auth"></result>
+        <result column="io_score" property="ioScore"></result>
+        <result column="code_share" property="codeShare"></result>
+        <result column="spj_code" property="spjCode"></result>
+        <result column="spj_language" property="spjLanguage"></result>
+        <result column="user_extra_file" property="userExtraFile"></result>
+        <result column="judge_extra_file" property="judgeExtraFile"></result>
+        <result column="is_remove_end_blank" property="isRemoveEndBlank"></result>
+        <result column="open_case_result" property="openCaseResult"></result>
+        <result column="is_upload_case" property="isUploadCase"></result>
+        <result column="case_version" property="caseVersion"></result>
+        <result column="modified_user" property="modifiedUser"></result>
+        <result column="is_group" property="isGroup"></result>
+        <result column="gid" property="gid"></result>
+        <result column="apply_public_progress" property="applyPublicProgress"></result>
+        <result column="is_file_iO" property="isFileIO"></result>
+        <result column="io_read_file_name" property="ioReadFileName"></result>
+        <result column="io_write_file_name" property="ioWriteFileName"></result>
+        <result column="author" property="author"></result>
+        <result column="modified_user" property="modifiedUser"></result>
+        <result column="gmt_create" property="gmtCreate"></result>
+        <result column="gmt_modified" property="gmtModified"></result>
+        <collection property="problemDescriptionList" ofType="top.hcode.hoj.pojo.entity.problem.ProblemDescription">
+            <id column="description_id" property="id"></id>
+            <result column="title" property="title"></result>
+            <result column="description" property="description"></result>
+            <result column="input" property="input"></result>
+            <result column="output" property="output"></result>
+            <result column="examples" property="examples"></result>
+            <result column="source" property="source"></result>
+            <result column="hint" property="hint"></result>
+            <result column="rank" property="rank"></result>
+            <result column="author" property="author"></result>
+            <result column="pdf_description" property="pdfDescription"></result>
+            <result column="html" property="html"></result>
+        </collection>
+    </resultMap>
+
     <select id="getProblemList" resultMap="map_ProblemList">
-        SELECT DISTINCT p.id AS pid, p.problem_id, p.title, p.difficulty, p.type,
+        SELECT DISTINCT p.id AS pid, p.problem_id, pd.title, p.difficulty, p.type,
         (SELECT COUNT(*)
             FROM judge j
             WHERE j.cid = 0 AND j.pid = p.id AND j.status = 0 AND j.gid = #{gid}
@@ -25,7 +75,8 @@
             WHERE j.cid = 0 AND j.pid = p.id AND j.gid = #{gid}
         ) as total
         FROM problem p
-        WHERE p.auth = 1 AND p.gid = #{gid}
+        LEFT JOIN problem_description pd ON p.id = pd.pid
+        WHERE p.auth = 1 AND p.gid = #{gid} AND pd.`rank` = 0
         ORDER BY LENGTH(p.problem_id) ASC, p.problem_id ASC
     </select>
 
@@ -33,10 +84,11 @@
         select t.* from tag t,problem_tag pt where t.id = pt.tid and pt.pid = #{pid}
     </select>
 
-    <select id="getAdminProblemList" resultType="top.hcode.hoj.pojo.entity.problem.Problem">
-        SELECT p.id,p.problem_id,p.title,p.author,p.gmt_create,p.modified_user,p.auth,p.apply_public_progress,p.gid
+    <select id="getAdminProblemList" resultMap="map_ProblemRes" useCache="true">
+        SELECT p.*, pd.*, pd.id AS description_id, pd.title as title
         FROM problem p
+        LEFT JOIN problem_description pd ON p.id = pd.pid
         WHERE p.gid = #{gid}
-        ORDER BY p.id DESC
+        ORDER BY p.id DESC, pd.`rank` ASC
     </select>
 </mapper>

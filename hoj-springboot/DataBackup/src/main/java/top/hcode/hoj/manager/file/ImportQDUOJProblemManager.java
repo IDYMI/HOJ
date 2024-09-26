@@ -25,6 +25,7 @@ import top.hcode.hoj.pojo.dto.QDOJProblemDTO;
 import top.hcode.hoj.pojo.entity.problem.Language;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.problem.ProblemCase;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.pojo.entity.problem.Tag;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
@@ -167,6 +168,7 @@ public class ImportQDUOJProblemManager {
             }
 
             Problem problem = qdojProblemDto.getProblem();
+            ProblemDescription problemDescription = qdojProblemDto.getProblemDescription();
             if (problem.getAuthor() == null) {
                 problem.setAuthor(userRolesVo.getUsername());
             }
@@ -177,8 +179,10 @@ public class ImportQDUOJProblemManager {
                 mode = Constants.JudgeMode.SPJ.getMode();
             }
 
+            List<ProblemDescription> problemDescriptionDtoList = Collections.singletonList(problemDescription);
             problemDto.setJudgeMode(mode)
                     .setProblem(problem)
+                    .setProblemDescriptionList(problemDescriptionDtoList)
                     .setCodeTemplates(qdojProblemDto.getCodeTemplates())
                     .setTags(tags)
                     .setLanguages(languages)
@@ -201,11 +205,11 @@ public class ImportQDUOJProblemManager {
                         failedCount++;
                     }
                 } catch (ProblemIDRepeatException e) {
-                    repeatProblemTitleSet.add(problemDto.getProblem().getTitle());
+                    repeatProblemTitleSet.add(problemDto.getProblemDescriptionList().get(0).getTitle());
                     failedCount++;
                 } catch (Exception e) {
                     log.error("", e);
-                    failedProblemTitleSet.add(problemDto.getProblem().getTitle());
+                    failedProblemTitleSet.add(problemDto.getProblemDescriptionList().get(0).getTitle());
                     failedCount++;
                 }
             }
@@ -232,26 +236,23 @@ public class ImportQDUOJProblemManager {
         qdojProblemDto.setIsSpj(isSpj);
 
         Problem problem = new Problem();
+        ProblemDescription problemDescription = new ProblemDescription().setPid(problem.getId());
+
         if (isSpj) {
             JSONObject spjJson = JSONUtil.parseObj(spj);
             problem.setSpjCode(spjJson.getStr("code"))
                     .setSpjLanguage(spjJson.getStr("language"));
         }
+
         problem.setAuth(1)
                 .setIsGroup(false)
                 .setIsUploadCase(true)
-                .setSource(problemJson.getStr("source", null))
                 .setDifficulty(1)
                 .setProblemId(problemJson.getStr("display_id"))
                 .setIsRemoveEndBlank(true)
                 .setOpenCaseResult(true)
                 .setCodeShare(false)
                 .setType(problemJson.getStr("rule_type").equals("ACM") ? 0 : 1)
-                .setTitle(problemJson.getStr("title"))
-                .setDescription(UnicodeUtil.toString(problemJson.getJSONObject("description").getStr("value")))
-                .setInput(UnicodeUtil.toString(problemJson.getJSONObject("input_description").getStr("value")))
-                .setOutput(UnicodeUtil.toString(problemJson.getJSONObject("output_description").getStr("value")))
-                .setHint(UnicodeUtil.toString(problemJson.getJSONObject("hint").getStr("value")))
                 .setTimeLimit(problemJson.getInt("time_limit"))
                 .setMemoryLimit(problemJson.getInt("memory_limit"));
 
@@ -264,7 +265,14 @@ public class ImportQDUOJProblemManager {
             sb.append("<input>").append(input).append("</input>");
             sb.append("<output>").append(output).append("</output>");
         }
-        problem.setExamples(sb.toString());
+
+        problemDescription.setSource(problemJson.getStr("source", null))
+                .setTitle(problemJson.getStr("title"))
+                .setDescription(UnicodeUtil.toString(problemJson.getJSONObject("description").getStr("value")))
+                .setInput(UnicodeUtil.toString(problemJson.getJSONObject("input_description").getStr("value")))
+                .setOutput(UnicodeUtil.toString(problemJson.getJSONObject("output_description").getStr("value")))
+                .setHint(UnicodeUtil.toString(problemJson.getJSONObject("hint").getStr("value")))
+                .setExamples(sb.toString());
 
         int sumScore = 0;
         JSONArray testcaseList = problemJson.getJSONArray("test_case_score");
@@ -283,6 +291,7 @@ public class ImportQDUOJProblemManager {
         problem.setIoScore(sumScore);
         qdojProblemDto.setSamples(problemSamples);
         qdojProblemDto.setProblem(problem);
+        qdojProblemDto.setProblemDescription(problemDescription);
         return qdojProblemDto;
 
     }

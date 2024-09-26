@@ -331,6 +331,7 @@ export const m = {
   Copied_failed: '复制失败',
   View_as_PDF: 'PDF题面',
   Get_PDF_Failed: '获取 PDF 失败',
+  Problem_Descriptions: '全部题面',
 
   // /views/oj/status/SubmissionList.vue
   Mine: '我的',

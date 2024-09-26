@@ -2211,6 +2211,7 @@ CALL add_Contest_oj ;
 
 DROP PROCEDURE add_Contest_oj;
 
+
 /*
 * 添加 statistic 记录系列比赛对应 cids
 
@@ -2248,7 +2249,6 @@ DELIMITER ;
 CALL add_StatisticContest ;
 
 DROP PROCEDURE add_StatisticContest;
-
 
 /*
 * 添加 statistic_rank 系列比赛对应榜单信息
@@ -2295,5 +2295,156 @@ DELIMITER ;
 CALL add_StatisticRank ;
 
 DROP PROCEDURE add_StatisticRank;
+
+
+/*
+* 添加 Problem_description
+
+*/
+DROP PROCEDURE
+IF EXISTS add_problemDescription;
+DELIMITER $$
+
+CREATE PROCEDURE add_problemDescription ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'problem_description'
+) THEN
+	CREATE TABLE `problem_description` (
+	`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+	`pid` bigint(20) unsigned NOT NULL COMMENT '题目id',
+	`title` varchar(255) COMMENT '题目',
+	`description` longtext COMMENT '描述',
+	`input` longtext COMMENT '输入描述',
+	`output` longtext COMMENT '输出描述',
+	`examples` longtext COMMENT '题面样例',
+	`source` text COMMENT '题目来源',
+	`hint` longtext COMMENT '备注,提醒',
+	`rank` int DEFAULT '0' COMMENT '编号，升序',
+	`author` varchar(255) DEFAULT NULL COMMENT '创建者用户名',
+	`pdf_description` varchar(255) DEFAULT NULL COMMENT 'PDF链接',
+	`html` longtext COMMENT '题面',
+	`gmt_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	`gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`),
+	KEY `pid` (`pid`),
+    CONSTRAINT `problem_description_ibfk_1` FOREIGN KEY (`pid`) REFERENCES `problem` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_problemDescription ;
+
+DROP PROCEDURE add_problemDescription;
+
+/*
+* 将Problem 中的description 转移到 problem_description
+
+*/
+
+INSERT INTO problem_description(`pid`, `title`, `author`, `description`, `input`, `output`, `examples`, `source`, `hint`, `pdf_description`, `gmt_create`, `gmt_modified`)
+SELECT `id`, `title`, `author`, `description`, `input`, `output`, `examples`, `source`, `hint`, `pdf_description`, `gmt_create`, `gmt_modified` FROM problem;
+
+/*
+* 将Problem 中的题面元素去除
+
+*/
+
+DROP PROCEDURE
+IF EXISTS problem_Delete_description;
+DELIMITER $$
+
+CREATE PROCEDURE problem_Delete_description ()
+BEGIN
+
+IF EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'problem'
+	AND column_name = 'title'
+) THEN
+    ALTER TABLE `hoj`.`problem` DROP COLUMN `title`;
+    ALTER TABLE `hoj`.`problem` DROP COLUMN `description`;
+    ALTER TABLE `hoj`.`problem` DROP COLUMN `input`;
+    ALTER TABLE `hoj`.`problem` DROP COLUMN `output`;
+    ALTER TABLE `hoj`.`problem` DROP COLUMN `examples`;
+    ALTER TABLE `hoj`.`problem` DROP COLUMN `source`;
+    ALTER TABLE `hoj`.`problem` DROP COLUMN `hint`;
+    ALTER TABLE `hoj`.`problem` DROP COLUMN `pdf_description`;
+END
+IF ; END$$
+
+DELIMITER ;
+CALL problem_Delete_description ;
+
+DROP PROCEDURE problem_Delete_description;
+
+/*
+* contest_problem 添加 peid
+*/
+DROP PROCEDURE
+IF EXISTS add_ContestProblem_peid;
+DELIMITER $$
+
+CREATE PROCEDURE add_ContestProblem_peid ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'contest_problem'
+	AND column_name = 'peid'
+) THEN
+	ALTER TABLE contest_problem ADD COLUMN `peid` bigint(20) DEFAULT NULL COMMENT '题面id';
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_ContestProblem_peid ;
+
+DROP PROCEDURE add_ContestProblem_peid;
+
+
+/*
+* training_problem 添加 peid
+*/
+DROP PROCEDURE
+IF EXISTS add_TrainingProblem_peid;
+DELIMITER $$
+
+CREATE PROCEDURE add_TrainingProblem_peid ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'training_problem'
+	AND column_name = 'peid'
+) THEN
+	ALTER TABLE training_problem ADD COLUMN `peid` bigint(20) DEFAULT NULL COMMENT '题面id';
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_TrainingProblem_peid ;
+
+DROP PROCEDURE add_TrainingProblem_peid;
+
 
 

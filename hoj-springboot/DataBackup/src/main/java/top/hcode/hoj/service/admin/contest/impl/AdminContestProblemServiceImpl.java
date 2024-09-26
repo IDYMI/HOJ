@@ -9,8 +9,8 @@ import top.hcode.hoj.common.result.ResultStatus;
 import top.hcode.hoj.manager.admin.contest.AdminContestProblemManager;
 import top.hcode.hoj.pojo.dto.ContestProblemDTO;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.contest.ContestProblem;
-import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.service.admin.contest.AdminContestProblemService;
 
 import java.util.HashMap;
@@ -41,9 +41,9 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
     }
 
     @Override
-    public CommonResult<Problem> getProblem(Long pid) {
+    public CommonResult<ProblemResDTO> getProblem(Long pid, Long peid) {
         try {
-            Problem problem = adminContestProblemManager.getProblem(pid);
+            ProblemResDTO problem = adminContestProblemManager.getProblem(pid, peid);
             return CommonResult.successResponse(problem);
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
@@ -114,7 +114,18 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
     }
 
     @Override
-    public CommonResult<Void> importContestRemoteOJProblem(String name, String problemId, Long cid, String displayId, Long gid) {
+    public CommonResult<Void> changeProblemDescription(ContestProblemDTO contestProblemDto) {
+        try {
+            adminContestProblemManager.changeProblemDescription(contestProblemDto);
+            return CommonResult.successResponse();
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<Void> importContestRemoteOJProblem(String name, String problemId, Long cid, String displayId,
+            Long gid) {
         try {
             adminContestProblemManager.importContestRemoteOJProblem(name, problemId, cid, displayId, gid);
             return CommonResult.successResponse();

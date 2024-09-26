@@ -1,5 +1,6 @@
 package top.hcode.hoj.manager.admin.contest;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -23,12 +24,15 @@ import top.hcode.hoj.manager.admin.problem.RemoteProblemManager;
 import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.pojo.dto.ContestProblemDTO;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.contest.ContestProblem;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
+import top.hcode.hoj.utils.HtmlToPdfUtils;
 
 import java.io.File;
 import java.util.*;
@@ -61,6 +65,9 @@ public class AdminContestProblemManager {
     @Autowired
     private GroupManager groupManager;
 
+    @Autowired
+    private HtmlToPdfUtils htmlToPdfUtils;
+
     public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword,
             Long cid, Integer problemType, String oj, Integer difficulty, Integer type, Long gid)
             throws StatusForbiddenException {
@@ -81,7 +88,7 @@ public class AdminContestProblemManager {
             currentPage = 1;
         if (limit == null || limit < 1)
             limit = 10;
-        IPage<Problem> iPage = new Page<>(currentPage, limit);
+        IPage<ProblemResDTO> iPage = new Page<>(currentPage, limit);
         // 根据cid在ContestProblem表中查询到对应pid集合
         QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
         contestProblemQueryWrapper.eq("cid", cid);
@@ -94,63 +101,33 @@ public class AdminContestProblemManager {
             pidList.add(contestProblem.getPid());
         });
 
-        HashMap<String, Object> contestProblem = new HashMap<>();
+        HashMap<String, Object> contestProblemHashMap = new HashMap<>();
 
-        QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
+        Boolean isRemote = Constants.RemoteOJ.isRemoteOJ(oj);
 
-        if (problemType != null) { // 必备条件 隐藏的不可取来做比赛题目
-            problemQueryWrapper.eq("is_group", false)
-                    // vj题目不限制赛制
-                    .and(wrapper -> wrapper.eq("type", problemType)
-                            .or().eq("is_remote", true))
-                    .ne("auth", 2); // 同时需要与比赛相同类型的题目，权限需要是公开的（隐藏的不可加入！）
-            if (contest.getGid() != null) { // 团队比赛不能查看公共题库的隐藏题目
-                problemQueryWrapper.ne("auth", 3);
-            }
-        }
-
-        // 逻辑判断，如果是查询已有的就应该是in，如果是查询不要重复的，使用not in
-        if (problemType != null) {
-            problemQueryWrapper.notIn(pidList.size() > 0, "id", pidList);
-        } else {
-            problemQueryWrapper.in(pidList.size() > 0, "id", pidList);
-        }
-
-        // 根据oj筛选过滤
-        if (oj != null && !"All".equals(oj)) {
-            if (!Constants.RemoteOJ.isRemoteOJ(oj)) {
-                problemQueryWrapper.eq("is_remote", false);
-            } else {
-                problemQueryWrapper.eq("is_remote", true).likeRight("problem_id", oj);
-            }
-        }
-
-        if (difficulty != null) {
-            problemQueryWrapper.eq("difficulty", difficulty);
-        }
-
-        if (type != null) {
-            problemQueryWrapper.eq("type", type);
-        }
-
-        if (!StringUtils.isEmpty(keyword)) {
-            problemQueryWrapper.and(wrapper -> wrapper.like("title", keyword).or()
-                    .like("problem_id", keyword).or()
-                    .like("author", keyword));
-        }
-
-        if (pidList.size() == 0 && problemType == null) {
-            problemQueryWrapper = new QueryWrapper<>();
-            problemQueryWrapper.eq("id", null);
-        }
-
-        IPage<Problem> problemListPage = problemEntityService.page(iPage, problemQueryWrapper);
+        Long contestGid = contest.getGid();
+        IPage<ProblemResDTO> problemListPage = problemEntityService.getAdminContestProblemList(iPage, keyword, cid,
+                problemType, oj, difficulty, type, gid, isRemote, contestGid, pidList);
 
         if (pidList.size() > 0 && problemType == null) {
-            List<Problem> problemList = problemListPage.getRecords();
+            List<ProblemResDTO> problemList = problemListPage.getRecords();
 
-            List<Problem> sortedProblemList = problemList.stream()
-                    .sorted(Comparator.comparing(Problem::getId, (a, b) -> {
+            problemList.forEach(problemResDto -> {
+                ContestProblem contestProblem = contestProblemMap.get(problemResDto.getId());
+                List<ProblemDescription> problemDescriptionList = problemResDto.getProblemDescriptionList();
+
+                // 获取对应的 peid 或第一个 problemDescription 的 title 和 id
+                problemDescriptionList.stream()
+                        .filter(pd -> contestProblem.getPeid() == null || pd.getId().equals(contestProblem.getPeid()))
+                        .findFirst()
+                        .ifPresent(problemDescription -> {
+                            problemResDto.setTitle(problemDescription.getTitle())
+                                    .setPeid(problemDescription.getId());
+                        });
+            });
+
+            List<ProblemResDTO> sortedProblemList = problemList.stream()
+                    .sorted(Comparator.comparing(ProblemResDTO::getId, (a, b) -> {
                         ContestProblem x = contestProblemMap.get(a);
                         ContestProblem y = contestProblemMap.get(b);
                         if (x == null && y != null) {
@@ -166,15 +143,15 @@ public class AdminContestProblemManager {
             problemListPage.setRecords(sortedProblemList);
         }
 
-        contestProblem.put("problemList", problemListPage);
-        contestProblem.put("contestProblemMap", contestProblemMap);
+        contestProblemHashMap.put("problemList", problemListPage);
+        contestProblemHashMap.put("contestProblemMap", contestProblemMap);
 
-        return contestProblem;
+        return contestProblemHashMap;
     }
 
-    public Problem getProblem(Long pid) throws StatusFailException, StatusForbiddenException {
+    public ProblemResDTO getProblem(Long pid, Long peid) throws StatusFailException, StatusForbiddenException {
 
-        Problem problem = problemEntityService.getById(pid);
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, peid, null, null);
 
         if (problem != null) { // 查询成功
             // 获取当前登录的用户
@@ -322,6 +299,7 @@ public class AdminContestProblemManager {
     public void addProblemFromPublic(ContestProblemDTO contestProblemDto) throws StatusFailException {
 
         Long pid = contestProblemDto.getPid();
+        Long peid = contestProblemDto.getPeid();
         Long cid = contestProblemDto.getCid();
         String displayId = contestProblemDto.getDisplayId();
 
@@ -336,14 +314,20 @@ public class AdminContestProblemManager {
         }
 
         // 比赛中题目显示默认为原标题
-        Problem problem = problemEntityService.getById(pid);
-        String displayName = problem.getTitle();
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, peid, null, null);
+
+        String displayName = problem.getProblemDescriptionList().get(0).getTitle();
+
+        Problem problem_ = new Problem();
+        BeanUtil.copyProperties(problem, problem_);
+
+        problem_.setAuth(3); // 设置为比赛题目
 
         // 修改成比赛题目
-        boolean updateProblem = problemEntityService.saveOrUpdate(problem.setAuth(3));
+        boolean updateProblem = problemEntityService.saveOrUpdate(problem_);
 
         boolean isOk = contestProblemEntityService.saveOrUpdate(new ContestProblem()
-                .setCid(cid).setPid(pid).setDisplayTitle(displayName).setDisplayId(displayId));
+                .setCid(cid).setPid(pid).setPeid(peid).setDisplayTitle(displayName).setDisplayId(displayId));
         if (!isOk || !updateProblem) {
             throw new StatusFailException("添加失败");
         }
@@ -352,6 +336,31 @@ public class AdminContestProblemManager {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
         log.info("[{}],[{}],cid:[{}],pid:[{}],operatorUid:[{}],operatorUsername:[{}]",
                 "Admin_Contest", "Add_Public_Problem", cid, pid, userRolesVo.getUid(), userRolesVo.getUsername());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void changeProblemDescription(ContestProblemDTO contestProblemDto) throws StatusFailException {
+        Long pid = contestProblemDto.getPid();
+        Long peid = contestProblemDto.getPeid();
+        Long cid = contestProblemDto.getCid();
+
+        // 比赛中题目显示默认为原标题
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, null, null, null);
+        List<ProblemDescription> problemDescriptionList = problem.getProblemDescriptionList();
+
+        boolean isOk = problemDescriptionList.stream()
+                .anyMatch(desc -> {
+                    if (peid.equals(desc.getId())) {
+                        UpdateWrapper<ContestProblem> contestProblemUpdateWrapper = new UpdateWrapper<>();
+                        contestProblemUpdateWrapper.eq("cid", cid).eq("pid", pid).set("peid", peid);
+                        return contestProblemEntityService.update(contestProblemUpdateWrapper);
+                    }
+                    return false;
+                });
+
+        if (!isOk) {
+            throw new StatusFailException("更新失败");
+        }
     }
 
     public void importContestRemoteOJProblem(String name, String problemId, Long cid, String displayId, Long gid)
@@ -397,7 +406,8 @@ public class AdminContestProblemManager {
         }
 
         // 比赛中题目显示默认为原标题
-        String displayName = problem.getTitle();
+        String displayName = problemEntityService.getProblemResDTO(finalProblem.getId(), null, null, null)
+                .getProblemDescriptionList().get(0).getTitle();
 
         // 修改成比赛题目
         boolean updateProblem = problemEntityService.saveOrUpdate(problem.setAuth(3));

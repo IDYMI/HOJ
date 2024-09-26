@@ -5,6 +5,7 @@ import lombok.experimental.Accessors;
 import top.hcode.hoj.pojo.entity.problem.CodeTemplate;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.problem.ProblemCase;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 
 import java.io.Serializable;
 import java.util.List;
@@ -18,6 +19,8 @@ import java.util.List;
 @Accessors(chain = true)
 public class QDOJProblemDTO implements Serializable {
     private Problem problem;
+
+    private ProblemDescription problemDescription;
 
     private List<String> languages;
 
@@ -33,8 +36,16 @@ public class QDOJProblemDTO implements Serializable {
         return problem;
     }
 
+    public ProblemDescription getProblemDescription() {
+        return problemDescription;
+    }
+
     public void setProblem(Problem problem) {
         this.problem = problem;
+    }
+
+    public void setProblemDescription(ProblemDescription problemDescription) {
+        this.problemDescription = problemDescription;
     }
 
     public List<String> getLanguages() {

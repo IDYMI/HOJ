@@ -29,9 +29,9 @@ public interface ProblemService {
 
     public CommonResult<HashMap<Long, Object>> getUserProblemStatus(PidListDTO pidListDto);
 
-    public CommonResult<ProblemInfoVO> getProblemInfo(String problemId, Long gid);
+    public CommonResult<ProblemInfoVO> getProblemInfo(String problemId, Long gid, Long tid, Long peid);
 
-    public CommonResult<String> getProblemPdf(Long pid);
+    public CommonResult<String> getProblemPdf(Long pid, Long peid);
 
     public CommonResult<LastAcceptedCodeVO> getUserLastAcceptedCode(Long pid, Long cid);
 

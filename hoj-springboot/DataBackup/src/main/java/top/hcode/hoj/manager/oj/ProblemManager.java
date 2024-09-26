@@ -18,12 +18,15 @@ import top.hcode.hoj.common.exception.StatusNotFoundException;
 import top.hcode.hoj.dao.contest.ContestEntityService;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.problem.*;
+import top.hcode.hoj.dao.training.TrainingProblemEntityService;
 import top.hcode.hoj.exception.AccessException;
 import top.hcode.hoj.pojo.dto.LastAcceptedCodeVO;
 import top.hcode.hoj.pojo.dto.PidListDTO;
+import top.hcode.hoj.pojo.dto.ProblemRes;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.entity.problem.*;
+import top.hcode.hoj.pojo.entity.training.TrainingProblem;
 import top.hcode.hoj.pojo.vo.*;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
@@ -32,6 +35,7 @@ import top.hcode.hoj.validator.AccessValidator;
 import top.hcode.hoj.validator.ContestValidator;
 import top.hcode.hoj.validator.GroupValidator;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -86,6 +90,9 @@ public class ProblemManager {
 
     @Autowired
     private HtmlToPdfUtils htmlToPdfUtils;
+
+    @Autowired
+    private TrainingProblemEntityService trainingProblemEntityService;
 
     /**
      * @MethodName getProblemList
@@ -297,17 +304,31 @@ public class ProblemManager {
      * @Description 获取指定题目的详情信息，标签，所支持语言，做题情况（只能查询公开题目 也就是auth为1）
      * @Since 2020/10/27
      */
-    public ProblemInfoVO getProblemInfo(String problemId, Long gid)
+    public ProblemInfoVO getProblemInfo(String problemId, Long gid, Long tid, Long peid)
             throws StatusNotFoundException, StatusForbiddenException {
-        QueryWrapper<Problem> wrapper = new QueryWrapper<Problem>()
-                .eq("problem_id", problemId);
-        if (gid == null) {
-            wrapper.isNull("gid");
+        ProblemRes problem = new ProblemRes();
+        List<ProblemDescription> problemDescriptionList = new ArrayList<>();
+
+        if (tid != null) {
+            // 根据cid和displayId获取pid
+            QueryWrapper<TrainingProblem> trainingProblemQueryWrapper = new QueryWrapper<>();
+            trainingProblemQueryWrapper.eq("tid", tid).eq("display_id", problemId);
+            TrainingProblem trainingProblem = trainingProblemEntityService.getOne(trainingProblemQueryWrapper);
+
+            if (trainingProblem == null) {
+                throw new StatusNotFoundException("该训练题目不存在");
+            }
+
+            // 查询题目详情，题目标签，题目语言，题目做题情况
+            problem = problemEntityService.getProblemRes(trainingProblem.getPid(), trainingProblem.getPeid(),
+                    null, null);
+            problemDescriptionList = problemEntityService.getProblemDescriptionList(
+                    trainingProblem.getPid(), trainingProblem.getPeid(), null, null);
         } else {
-            wrapper.eq("gid", gid);
+            problem = problemEntityService.getProblemRes(null, peid, problemId, gid);
+            problemDescriptionList = problemEntityService.getProblemDescriptionList(null, null, problemId, gid);
         }
-        // 查询题目详情，题目标签，题目语言，题目做题情况
-        Problem problem = problemEntityService.getOne(wrapper, false);
+
         if (problem == null) {
             throw new StatusNotFoundException("该题号对应的题目不存在");
         }
@@ -377,17 +398,14 @@ public class ProblemManager {
                 .setSpjLanguage(null);
 
         // 将数据统一写入到一个Vo返回数据实体类中
-        return new ProblemInfoVO(problem, tags, languagesStr, problemCount, LangNameAndCode);
+        return new ProblemInfoVO(problem, problemDescriptionList, tags, languagesStr, problemCount, LangNameAndCode);
     }
 
-    public String getProblemPdf(Long pid)
+    public String getProblemPdf(Long pid, Long peid)
             throws StatusForbiddenException, StatusNotFoundException, IOException, StatusFailException {
 
-        QueryWrapper<Problem> wrapper = new QueryWrapper<Problem>();
-        wrapper.eq("id", pid);
-
         // 查询题目详情
-        Problem problem = problemEntityService.getOne(wrapper, false);
+        ProblemRes problem = problemEntityService.getProblemRes(pid, peid, null, null);
         if (problem == null) {
             throw new StatusNotFoundException("该题号对应的题目不存在");
         }
@@ -401,17 +419,16 @@ public class ProblemManager {
 
         // 如果不存在对应pdf题面则创建
         if (StringUtils.isEmpty(fileName)) {
-            fileName = htmlToPdfUtils.convertByHtml(problem);
-            if (StringUtils.isEmpty(fileName)) {
+            String pdfName = htmlToPdfUtils.convertByHtml(problem);
+
+            fileName = Constants.File.FILE_API.getPath() + pdfName + ".pdf";
+
+            // 更新题面对应的pdf信息
+            Boolean isOk = problemEntityService.updateProblemDescription(pid, peid, pdfName);
+
+            if (StringUtils.isEmpty(pdfName) || !isOk) {
                 throw new IOException("PDF题面保存失败！");
             }
-
-            // 更新对应数据库
-            UpdateWrapper<Problem> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.eq("id", problem.getId()).set("pdf_description",
-                    Constants.File.FILE_API.getPath() + fileName + ".pdf");
-            problemEntityService.update(updateWrapper);
-
         }
 
         return fileName;

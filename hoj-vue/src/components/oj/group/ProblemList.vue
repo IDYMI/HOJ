@@ -53,6 +53,22 @@
           <span v-else>{{ row.title }}</span>
         </template>
       </vxe-table-column>
+      <vxe-table-column min-width="150" :title="$t('m.Selected_Description')" v-if="isContest">
+        <template v-slot="{ row }">
+          <el-select
+            v-model="row.peid"
+            @change="changeProblemDescription(row.id,row.peid)"
+            size="small"
+          >
+            <el-option
+              v-for="item in row.problemDescriptionList"
+              :key="item.id"
+              :label="item.title"
+              :value="item.id"
+            >{{ item.title }}</el-option>
+          </el-select>
+        </template>
+      </vxe-table-column>
       <vxe-table-column field="author" min-width="130" :title="$t('m.Author')" show-overflow></vxe-table-column>
       <vxe-table-column min-width="130" :title="$t('m.Created_Time')" v-if="!contestId">
         <template v-slot="{ row }">{{ row.gmtCreate | localtime }}</template>
@@ -406,6 +422,17 @@ export default {
         },
         () => {}
       );
+    },
+    changeProblemDescription(pid, peid) {
+      let data = {
+        pid: pid,
+        peid: peid,
+        cid: this.contestId,
+      };
+      api.admin_changeContestProblemDescription(data).then((res) => {
+        mMessage.success(this.$i18n.t("m.Update_Successfully"));
+        this.init();
+      });
     },
   },
   computed: {

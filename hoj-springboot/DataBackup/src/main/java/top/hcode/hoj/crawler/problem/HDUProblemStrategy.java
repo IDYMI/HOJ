@@ -8,6 +8,7 @@ import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.springframework.util.Assert;
 import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.utils.Constants;
 import top.hcode.hoj.utils.JsoupUtils;
 
@@ -32,22 +33,24 @@ public class HDUProblemStrategy extends ProblemStrategy {
                 // 验证题号是否符合规范
                 Assert.isTrue(problemId.matches("[1-9]\\d*"), "HDU题号格式错误！");
                 Problem info = new Problem();
+                ProblemDescription problemDescription = new ProblemDescription().setPid(info.getId());
+
                 String url = HOST + String.format(PROBLEM_URL, problemId);
                 Connection connection = JsoupUtils.getConnectionFromUrl(url, null, null, false);
                 Document document = JsoupUtils.getDocument(connection, null);
                 String html = document.html();
                 info.setProblemId(JUDGE_NAME + "-" + problemId);
-                info.setTitle(ReUtil.get("color:#1A5CC8\">([\\s\\S]*?)</h1>", html, 1).trim());
+                problemDescription.setTitle(ReUtil.get("color:#1A5CC8\">([\\s\\S]*?)</h1>", html, 1).trim());
                 info.setTimeLimit(Integer.parseInt(ReUtil.get("(\\d*) MS", html, 1)));
                 info.setMemoryLimit(Integer.parseInt(ReUtil.get("/(\\d*) K", html, 1)) / 1024);
-                info.setDescription("<pp>" + HtmlUtil.unescape(
+                problemDescription.setDescription("<pp>" + HtmlUtil.unescape(
                                 ReUtil.get(">Problem Description</div> <div class=.*?>([\\s\\S]*?)</div>", html, 1)
                                                 .replaceAll("src=\"[../]*", "src=\"" + HOST + "/")
                                                 .replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
-                info.setInput("<pp>" + HtmlUtil
+                problemDescription.setInput("<pp>" + HtmlUtil
                                 .unescape(ReUtil.get(">Input</div> <div class=.*?>([\\s\\S]*?)</div>", html, 1)
                                                 .replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
-                info.setOutput("<pp>" + HtmlUtil
+                problemDescription.setOutput("<pp>" + HtmlUtil
                                 .unescape(ReUtil.get(">Output</div> <div class=.*?>([\\s\\S]*?)</div>", html, 1)
                                                 .replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
                 StringBuilder sb = new StringBuilder("<input>");
@@ -56,12 +59,12 @@ public class HDUProblemStrategy extends ProblemStrategy {
                 sb.append(ReUtil.get(
                                 ">Sample Output</div><div .*?monospace;\">([\\s\\S]*?)(<div style=.*?</div><i style=.*?</i>)*?</div></pre>",
                                 html, 1)).append("</output>");
-                info.setExamples(sb.toString());
-                info.setHint("<pp>" + HtmlUtil.unescape(
+                problemDescription.setExamples(sb.toString());
+                problemDescription.setHint("<pp>" + HtmlUtil.unescape(
                                 ReUtil.get("<i>Hint</i></div>([\\s\\S]*?)</div><i .*?<br><[^<>]*?panel_title[^<>]*?>",
                                                 html, 1).replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
                 info.setIsRemote(true);
-                info.setSource(String.format(
+                problemDescription.setSource(String.format(
                                 "<a style='color:#1A5CC8' href='https://acm.hdu.edu.cn/showproblem.php?pid=%s'>%s</a>",
                                 problemId, JUDGE_NAME + "-" + problemId));
                 info.setType(0)
@@ -74,6 +77,7 @@ public class HDUProblemStrategy extends ProblemStrategy {
 
                 return new RemoteProblemInfo()
                                 .setProblem(info)
+                                .setProblemDescription(problemDescription)
                                 .setTagList(null)
                                 .setRemoteOJ(Constants.RemoteOJ.HDU);
         }

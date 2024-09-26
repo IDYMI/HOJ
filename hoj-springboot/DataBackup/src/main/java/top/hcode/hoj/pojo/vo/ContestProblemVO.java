@@ -31,6 +31,9 @@ public class ContestProblemVO implements Serializable {
     @ApiModelProperty(value = "题目id")
     private Long pid;
 
+    @ApiModelProperty(value = "题面id")
+    private Long peid;
+
     @ApiModelProperty(value = "该题目在比赛中的标题，默认为原名字")
     private String displayTitle;
 

@@ -98,8 +98,10 @@ public class ProblemController {
     @AnonApi
     public CommonResult<ProblemInfoVO> getProblemInfo(
             @RequestParam(value = "problemId", required = true) String problemId,
-            @RequestParam(value = "gid", required = false) Long gid) {
-        return problemService.getProblemInfo(problemId, gid);
+            @RequestParam(value = "gid", required = false) Long gid,
+            @RequestParam(value = "tid", required = false) Long tid,
+            @RequestParam(value = "peid", required = false) Long peid) {
+        return problemService.getProblemInfo(problemId, gid, tid, peid);
     }
 
     /**
@@ -110,8 +112,9 @@ public class ProblemController {
      */
     @RequestMapping(value = "/get-problem-pdf", method = RequestMethod.GET)
     @AnonApi
-    public CommonResult<String> getProblemPdf(@RequestParam(value = "pid") Long pid) {
-        return problemService.getProblemPdf(pid);
+    public CommonResult<String> getProblemPdf(@RequestParam(value = "pid") Long pid,
+            @RequestParam(value = "peid", required = false) Long peid) {
+        return problemService.getProblemPdf(pid, peid);
     }
 
     /**

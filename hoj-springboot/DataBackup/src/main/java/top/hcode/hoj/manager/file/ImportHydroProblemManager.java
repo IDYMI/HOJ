@@ -23,6 +23,7 @@ import top.hcode.hoj.pojo.dto.ProblemDTO;
 import top.hcode.hoj.pojo.entity.problem.Language;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.problem.ProblemCase;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.pojo.entity.problem.Tag;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
@@ -132,11 +133,11 @@ public class ImportHydroProblemManager {
                         failedCount++;
                     }
                 } catch (ProblemIDRepeatException e) {
-                    repeatProblemTitleSet.add(problemDto.getProblem().getTitle());
+                    repeatProblemTitleSet.add(problemEntityService.getDefaultProblemTitle(problemDto.getProblem()));
                     failedCount++;
                 } catch (Exception e) {
                     log.error("", e);
-                    failedProblemTitleSet.add(problemDto.getProblem().getTitle());
+                    failedProblemTitleSet.add(problemEntityService.getDefaultProblemTitle(problemDto.getProblem()));
                     failedCount++;
                 }
             }
@@ -160,6 +161,8 @@ public class ImportHydroProblemManager {
             List<Language> languageList) {
         ProblemDTO dto = new ProblemDTO();
         Problem problem = new Problem();
+        ProblemDescription problemDescription = new ProblemDescription().setPid(problem.getId());
+
         problem.setIsGroup(false)
                 .setAuth(1)
                 .setIsRemote(false)
@@ -174,7 +177,7 @@ public class ImportHydroProblemManager {
         String testDataDirPath = rootDirPath + File.separator + "testdata";
         String configYaml = FileUtil.readString(new File(testDataDirPath + File.separator + "config.yaml"),
                 StandardCharsets.UTF_8);
-        parseConfigYaml(configYaml, dto, problem, testDataDirPath, languageMap, languageList);
+        parseConfigYaml(configYaml, dto, problem, problemDescription, testDataDirPath, languageMap, languageList);
         // config配置文件没有配置cases，则去遍历testdata文件夹获取
         if (CollectionUtils.isEmpty(dto.getSamples())) {
             dto.setSamples(buildSamples(testDataDirPath));
@@ -194,7 +197,7 @@ public class ImportHydroProblemManager {
 
         String problemYaml = FileUtil.readString(new File(rootDirPath + File.separator + "problem.yaml"),
                 StandardCharsets.UTF_8);
-        parseProblemYaml(problemYaml, dto, problem, tagMap);
+        parseProblemYaml(problemYaml, dto, problem, problemDescription, tagMap);
 
         String problemMarkPath = rootDirPath + File.separator + "problem_zh.md";
         String problemMarkdown = "";
@@ -205,9 +208,12 @@ public class ImportHydroProblemManager {
                     StandardCharsets.UTF_8);
         }
 
-        parseMarkdown(problemMarkdown, problem, rootDirPath);
+        parseMarkdown(problemMarkdown, problem, problemDescription, rootDirPath);
+
+        List<ProblemDescription> problemDescriptionDtoList = Collections.singletonList(problemDescription);
 
         dto.setProblem(problem);
+        dto.setProblemDescriptionList(problemDescriptionDtoList);
         dto.setJudgeMode(problem.getJudgeMode());
         dto.setIsUploadTestCase(true);
         dto.setUploadTestcaseDir(testDataDirPath);
@@ -243,6 +249,7 @@ public class ImportHydroProblemManager {
     private void parseConfigYaml(String configYaml,
             ProblemDTO dto,
             Problem problem,
+            ProblemDescription problemDescription,
             String testDataDirPath,
             HashMap<String, Long> languageMap,
             List<Language> languageList) {
@@ -359,6 +366,7 @@ public class ImportHydroProblemManager {
     private void parseProblemYaml(String problemYaml,
             ProblemDTO dto,
             Problem problem,
+            ProblemDescription problemDescription,
             HashMap<String, Tag> tagMap) {
         Yaml yaml = new Yaml();
         Map<String, Object> map = yaml.load(problemYaml);
@@ -367,7 +375,7 @@ public class ImportHydroProblemManager {
         if (!"null".equals(pid)) {
             problem.setProblemId(pid);
         }
-        problem.setTitle((String) map.get("title"));
+        problemDescription.setTitle((String) map.get("title"));
         List<String> tags = (List<String>) map.get("tag");
         if (!CollectionUtils.isEmpty(tags)) {
             // 格式化标签
@@ -384,7 +392,7 @@ public class ImportHydroProblemManager {
         }
     }
 
-    private void parseMarkdown(String md, Problem problem, String rootDirPath) {
+    private void parseMarkdown(String md, Problem problem, ProblemDescription problemDescription, String rootDirPath) {
         List<String> inputExampleList = ReUtil.findAll("```input\\d+\n([\\s\\S]*?)\n```", md, 1);
         List<String> outputExampleList = ReUtil.findAll("```output\\d+\n([\\s\\S]*?)\n```", md, 1);
         if (!CollectionUtils.isEmpty(inputExampleList)) {
@@ -400,7 +408,7 @@ public class ImportHydroProblemManager {
                 }
                 sb.append("</output>");
             }
-            problem.setExamples(sb.toString());
+            problemDescription.setExamples(sb.toString());
         }
 
         // 处理题面中的图片等文件
@@ -431,7 +439,7 @@ public class ImportHydroProblemManager {
 
         String description = md.replaceAll("```input\\d+\n[\\s\\S]*?\n```", "")
                 .replaceAll("```output\\d+\n[\\s\\S]*?\n```", "");
-        problem.setDescription(description);
+        problemDescription.setDescription(description);
     }
 
     private List<Language> buildLanguageList(List<String> langList, HashMap<String, Long> languageMap) {

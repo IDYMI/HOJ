@@ -4,6 +4,7 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.http.HtmlUtil;
 import cn.hutool.http.HttpUtil;
 import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.pojo.entity.problem.Tag;
 import top.hcode.hoj.utils.Constants;
 
@@ -44,15 +45,18 @@ public class SPOJProblemStrategy extends ProblemStrategy {
     public RemoteProblemInfo getProblemInfo(String problemId, String author) throws Exception {
         problemId = problemId.toUpperCase();
         String body = HttpUtil.get(getProblemUrl(problemId));
-        String title = ReUtil.get("<h2 id=\"problem-name\" class=\"text-center\">[\\s\\S]*? - ([\\s\\S]*?)</h2>", body,
+        String title = ReUtil.get(
+                "<h2 id=\"problem-name\" class=\"text-center\">[\\s\\S]*? - ([\\s\\S]*?)</h2>", body,
                 1);
         String timeLimit = ReUtil.get("Time limit:</td><td>([\\s\\S]*?)s", body, 1);
         String memoryLimit = ReUtil.get("Memory limit:</td><td>([\\s\\S]*?)MB", body, 1);
-        String desc = ReUtil.get("<div id=\"problem-body\">([\\s\\S]*?)</div>[\\s]*?<div class=\"text-center\">", body,
+        String desc = ReUtil.get(
+                "<div id=\"problem-body\">([\\s\\S]*?)</div>[\\s]*?<div class=\"text-center\">", body,
                 1);
         desc = desc.replaceAll("src=\"/", "src=\"" + HOST + "/")
                 .replaceAll("<br>[\\s]*+", "<br>\n")
-                .replaceAll("<pre>", "<pre style=\"padding:9px!important;background-color: #f5f5f5!important\">");
+                .replaceAll("<pre>",
+                        "<pre style=\"padding:9px!important;background-color: #f5f5f5!important\">");
         desc = desc.replaceAll("<!-- here starts your code -->", "");
 
         Pattern tagPattern = Pattern.compile(
@@ -60,15 +64,20 @@ public class SPOJProblemStrategy extends ProblemStrategy {
         List<String> allTags = ReUtil.findAll(tagPattern, body, 1);
 
         Problem problem = new Problem();
+        ProblemDescription problemDescription = new ProblemDescription().setPid(problem.getId());
+
+        problemDescription
+                .setDescription("<pp>"
+                        + HtmlUtil.unescape(desc.trim().replaceAll("(?<=\\>)\\s+(?=\\<)", "")))
+                .setSource(getProblemSource(problemId))
+                .setTitle(title);
+
         problem.setProblemId(getJudgeName() + "-" + problemId)
                 .setAuthor(author)
-                .setTitle(title)
                 .setType(0)
                 .setTimeLimit((int) (Double.parseDouble(timeLimit) * 1000))
                 .setMemoryLimit(Integer.parseInt(memoryLimit))
-                .setDescription("<pp>" + HtmlUtil.unescape(desc.trim().replaceAll("(?<=\\>)\\s+(?=\\<)", "")))
                 .setIsRemote(true)
-                .setSource(getProblemSource(problemId))
                 .setAuth(1)
                 .setOpenCaseResult(false)
                 .setIsGroup(false)
@@ -86,6 +95,7 @@ public class SPOJProblemStrategy extends ProblemStrategy {
 
         return new RemoteProblemInfo()
                 .setProblem(problem)
+                .setProblemDescription(problemDescription)
                 .setTagList(tagList)
                 .setLangIdList(langIdList)
                 .setRemoteOJ(Constants.RemoteOJ.SPOJ);

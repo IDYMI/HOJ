@@ -26,9 +26,9 @@ import top.hcode.hoj.dao.contest.ContestEntityService;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.problem.ProblemEntityService;
 import top.hcode.hoj.dao.user.UserRecordEntityService;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.common.File;
 import top.hcode.hoj.pojo.entity.judge.Judge;
-import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.vo.*;
 import top.hcode.hoj.utils.Constants;
 import top.hcode.hoj.utils.RedisUtils;
@@ -200,30 +200,27 @@ public class HomeManager {
      * @MethodName getRecentUpdatedProblemList
      * @Params
      * @Description 获取最近前十更新的题目（不包括比赛题目、私有题目）
-     * @Return List<Problem>
      * @Since 2022/10/15
      */
     public List<RecentUpdatedProblemVO> getRecentUpdatedProblemList() {
-        QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
-        problemQueryWrapper.select("id", "problem_id", "title", "type", "gmt_modified", "gmt_create");
-        problemQueryWrapper.eq("auth", 1);
-        problemQueryWrapper.eq("is_group", false);
-        problemQueryWrapper.orderByDesc("gmt_create");
-        problemQueryWrapper.last("limit 10");
-        List<Problem> problemList = problemEntityService.list(problemQueryWrapper);
-        if (!CollectionUtils.isEmpty(problemList)) {
-            return problemList.stream()
+        List<ProblemResDTO> problemList = problemEntityService.getRecentUpdatedProblemList();
+
+        // 如果列表的大小大于10，就取前10个，否则取整个列表
+        List<ProblemResDTO> top10ProblemList = problemList.size() > 10 ? problemList.subList(0, 10) : problemList;
+
+        if (!CollectionUtils.isEmpty(top10ProblemList)) {
+            return top10ProblemList.stream()
                     .map(this::convertUpdatedProblemVO)
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();
     }
 
-    private RecentUpdatedProblemVO convertUpdatedProblemVO(Problem problem) {
+    private RecentUpdatedProblemVO convertUpdatedProblemVO(ProblemResDTO problem) {
         return RecentUpdatedProblemVO.builder()
                 .problemId(problem.getProblemId())
                 .id(problem.getId())
-                .title(problem.getTitle())
+                .title(problem.getProblemDescriptionList().get(0).getTitle())
                 .gmtCreate(problem.getGmtCreate())
                 .gmtModified(problem.getGmtModified())
                 .type(problem.getType())

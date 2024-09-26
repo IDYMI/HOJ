@@ -27,7 +27,7 @@
             <el-button
               icon="el-icon-plus"
               size="mini"
-              @click.native="handleAddProblem(row.id, row.problemId)"
+              @click.native="handleAddProblem(row.id, row.problemId, row.problemDescriptionList)"
               type="primary"
             ></el-button>
           </el-tooltip>
@@ -43,6 +43,33 @@
       :current-page.sync="page"
       :total="total"
     ></el-pagination>
+
+    <el-dialog append-to-body :visible.sync="handleVisible" z-index="9000">
+      <el-form>
+        <el-form-item
+          v-if="contestID"
+          :label="$t('m.Enter_The_Problem_Display_ID_in_the_Contest')"
+          required
+        >
+          <el-input v-model="displayId" size="small"></el-input>
+        </el-form-item>
+
+        <el-form-item :label="$t('m.Enter_The_Problem_Description_ID')" required>
+          <el-tag
+            v-for="problemDescription in problemDescriptionList"
+            size="medium"
+            class="filter-item"
+            :effect="peid == problemDescription.id ? 'dark' : 'plain'"
+            :key="problemDescription.id"
+            @click="filterByPeid(problemDescription.id)"
+          >{{ problemDescription.id + ": " + problemDescription.title }}</el-tag>
+        </el-form-item>
+
+        <el-form-item style="text-align: center">
+          <el-button type="primary" @click="addProblem" :loading="handleLoading">{{ $t("m.OK") }}</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -62,6 +89,13 @@ export default {
       problems: [],
       contest: {},
       keyword: "",
+      handleVisible: false,
+      handleLoading: false,
+      problemDescriptionList: [],
+      pid: null,
+      peid: null,
+      displayId: null,
+      problemId: null,
     };
   },
   mounted() {
@@ -106,47 +140,45 @@ export default {
           this.loading = false;
         });
     },
-    handleAddProblem(id, problemId) {
-      if (this.contestID) {
-        this.$prompt(
-          this.$i18n.t("m.Enter_The_Problem_Display_ID_in_the_Contest"),
-          "Tips"
-        ).then(
-          ({ value }) => {
-            if (utils.getValidateField(value, "Problem_Display_ID")) {
-              return;
-            }
-            let data = {
-              pid: id,
-              cid: this.contestID,
-              displayId: value,
-            };
-            api.admin_addContestProblemFromPublic(data).then(
-              (res) => {
-                this.$emit("on-change");
-                myMessage.success(this.$i18n.t("m.Add_Successfully"));
-                this.getPublicProblem(this.page);
-              },
-              () => {}
-            );
-          },
-          () => {}
-        );
-      } else {
-        let data = {
-          pid: id,
-          tid: this.trainingID,
-          displayId: problemId,
-        };
-        api.admin_addTrainingProblemFromPublic(data).then(
-          (res) => {
-            this.$emit("on-change");
-            myMessage.success(this.$i18n.t("m.Add_Successfully"));
-            this.getPublicProblem(this.page);
-          },
-          () => {}
-        );
-      }
+
+    handleAddProblem(id, problemId, problemDescriptionList) {
+      this.pid = id;
+      this.problemId = problemId;
+      this.problemDescriptionList = problemDescriptionList;
+      this.handleVisible = true;
+      this.peid = null;
+      this.displayId = null;
+    },
+
+    addProblem() {
+      let data = {
+        pid: this.pid,
+        peid: this.peid,
+        displayId: this.displayId || this.problemId,
+        cid: this.contestID,
+        tid: this.trainingID,
+      };
+
+      const func = this.contestID
+        ? "admin_addContestProblemFromPublic"
+        : "admin_addTrainingProblemFromPublic";
+
+      api[func](data).then(
+        (res) => {
+          myMessage.success(this.$i18n.t("m.Add_Successfully"));
+          this.getPublicProblem(this.page);
+          this.handleVisible = false;
+          this.handleLoading = false;
+          this.$emit("on-change");
+        },
+        () => {
+          this.handleVisible = false;
+          this.handleLoading = false;
+        }
+      );
+    },
+    filterByPeid(peid) {
+      this.peid = peid;
     },
     filterByKeyword() {
       this.page = 1;
@@ -164,5 +196,13 @@ export default {
   color: red;
   font-weight: bolder;
   font-size: 1rem;
+}
+.filter-item {
+  margin-right: 1em;
+  margin-top: 0.5em;
+  font-size: 13px;
+}
+.filter-item:hover {
+  cursor: pointer;
 }
 </style>

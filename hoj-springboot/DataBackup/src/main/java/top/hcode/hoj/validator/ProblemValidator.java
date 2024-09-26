@@ -4,7 +4,10 @@ import cn.hutool.core.util.StrUtil;
 import org.springframework.stereotype.Component;
 import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.utils.Constants;
+
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -120,11 +123,17 @@ public class ProblemValidator {
             throw new StatusFailException("题目的栈限制范围请合理填写！(1~1024mb)");
         }
 
-        commonValidator.validateContent(problem.getTitle(), "题目标题", 255);
-        commonValidator.validateContentLength(problem.getDescription(), "题目描述", 65535);
-        commonValidator.validateContentLength(problem.getInput(), "输入描述", 65535);
-        commonValidator.validateContentLength(problem.getOutput(), "输出描述", 65535);
-        commonValidator.validateContentLength(problem.getHint(), "题目提示", 65535);
+    }
+
+    public void validateGroupProblemDescription(List<ProblemDescription> problemDescriptionList)
+            throws StatusFailException {
+        for (ProblemDescription problemDescription : problemDescriptionList) {
+            commonValidator.validateContent(problemDescription.getTitle(), "题目标题", 255);
+            commonValidator.validateContentLength(problemDescription.getDescription(), "题目描述", 65535);
+            commonValidator.validateContentLength(problemDescription.getInput(), "输入描述", 65535);
+            commonValidator.validateContentLength(problemDescription.getOutput(), "输出描述", 65535);
+            commonValidator.validateContentLength(problemDescription.getHint(), "题目提示", 65535);
+        }
     }
 
     public void validateGroupProblemUpdate(Problem problem) throws StatusFailException {

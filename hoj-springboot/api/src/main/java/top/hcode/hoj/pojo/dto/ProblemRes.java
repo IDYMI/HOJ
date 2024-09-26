@@ -1,39 +1,51 @@
-package top.hcode.hoj.pojo.entity.problem;
+package top.hcode.hoj.pojo.dto;
 
 import com.baomidou.mybatisplus.annotation.*;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
 import java.util.Date;
 
-/**
- * <p>
- *
- * </p>
- *
- * @author Himit_ZH
- * @since 2020-10-23
- */
 @Data
-@EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@ApiModel(value = "Problem对象", description = "")
-public class Problem implements Serializable {
+public class ProblemRes {
 
-    private static final long serialVersionUID = 1L;
-
-    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     @ApiModelProperty(value = "题目的自定义ID 例如（HOJ-1000）")
     private String problemId;
 
-    @ApiModelProperty(value = "作者")
-    private String author;
+    @ApiModelProperty(value = "题目")
+    private String title;
+
+    @ApiModelProperty(value = "描述")
+    private String description;
+
+    @ApiModelProperty(value = "输入描述")
+    private String input;
+
+    @ApiModelProperty(value = "输出描述")
+    private String output;
+
+    @ApiModelProperty(value = "题面样例")
+    private String examples;
+
+    @ApiModelProperty(value = "题目来源（vj判题时例如HDU-1000的链接）")
+    private String source;
+
+    @ApiModelProperty(value = "备注,提醒")
+    private String hint;
+
+    @ApiModelProperty(value = "编号，升序")
+    @TableField("`rank`")
+    private Integer rank;
+
+    @ApiModelProperty(value = "PDF题面")
+    private String pdfDescription;
+
+    @ApiModelProperty(value = "题面")
+    private String html;
 
     @ApiModelProperty(value = "0为ACM,1为OI,2为选择,3为填空,4为判断")
     private Integer type;
@@ -96,9 +108,6 @@ public class Problem implements Serializable {
     @ApiModelProperty(value = "题目测试数据的版本号")
     private String caseVersion;
 
-    @ApiModelProperty(value = "修改题目的管理员用户名")
-    private String modifiedUser;
-
     @ApiModelProperty(value = "是否为团队内的题目")
     private Boolean isGroup;
 
@@ -120,10 +129,14 @@ public class Problem implements Serializable {
     @TableField(value = "io_write_file_name")
     private String ioWriteFileName;
 
-    @TableField(fill = FieldFill.INSERT)
+    @ApiModelProperty(value = "作者")
+    private String author;
+
+    @ApiModelProperty(value = "修改题目的管理员用户名")
+    private String modifiedUser;
+
     private Date gmtCreate;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
 
 }

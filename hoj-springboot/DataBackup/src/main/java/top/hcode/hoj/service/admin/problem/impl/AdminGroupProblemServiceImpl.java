@@ -7,7 +7,7 @@ import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.common.result.ResultStatus;
 import top.hcode.hoj.manager.admin.problem.AdminGroupProblemManager;
 import top.hcode.hoj.pojo.dto.ChangeGroupProblemProgressDTO;
-import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.service.admin.problem.AdminGroupProblemService;
 
 import javax.annotation.Resource;
@@ -23,7 +23,8 @@ public class AdminGroupProblemServiceImpl implements AdminGroupProblemService {
     private AdminGroupProblemManager adminGroupProblemManager;
 
     @Override
-    public CommonResult<IPage<Problem>> getProblemList(Integer currentPage, Integer limit, String keyword, Long gid) {
+    public CommonResult<IPage<ProblemResDTO>> getProblemList(Integer currentPage, Integer limit, String keyword,
+            Long gid) {
         return CommonResult.successResponse(adminGroupProblemManager.list(currentPage, limit, keyword, gid));
     }
 

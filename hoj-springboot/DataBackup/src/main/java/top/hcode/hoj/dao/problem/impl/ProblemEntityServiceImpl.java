@@ -12,6 +12,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,17 +26,25 @@ import org.springframework.util.StringUtils;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
 import top.hcode.hoj.dao.problem.*;
 import top.hcode.hoj.exception.ProblemIDRepeatException;
+import top.hcode.hoj.mapper.ProblemDescriptionMapper;
 import top.hcode.hoj.mapper.ProblemMapper;
 import top.hcode.hoj.pojo.bo.File_;
 import top.hcode.hoj.pojo.bo.Pair_;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
+import top.hcode.hoj.pojo.dto.ProblemRes;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.problem.*;
 import top.hcode.hoj.pojo.vo.ImportProblemVO;
 import top.hcode.hoj.pojo.vo.ProblemCountVO;
 import top.hcode.hoj.pojo.vo.ProblemVO;
 import top.hcode.hoj.utils.Constants;
+import top.hcode.hoj.utils.HtmlToPdfUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -76,6 +85,15 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     @Autowired
     private CodeTemplateEntityService codeTemplateEntityService;
 
+    @Autowired
+    private HtmlToPdfUtils htmlToPdfUtils;
+
+    @Autowired
+    private ProblemDescriptionMapper problemDescriptionMapper;
+
+    @Autowired
+    private ProblemDescriptionEntityService problemDescriptionEntityService;
+
     private final static Pattern EOL_PATTERN = Pattern.compile("[^\\S\\n]+(?=\\n)");
 
     @Override
@@ -114,6 +132,8 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     public boolean adminUpdateProblem(ProblemDTO problemDto) {
 
         Problem problem = problemDto.getProblem();
+        List<ProblemDescription> problemDescriptionList = problemDto.getProblemDescriptionList();
+
         if (Constants.JudgeMode.DEFAULT.getMode().equals(problemDto.getJudgeMode())) {
             problem.setSpjLanguage(null).setSpjCode(null);
         }
@@ -382,13 +402,15 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
                 }
             }
         }
-        // 将题面清空
-        problemDto.getProblem().setPdfDescription(null);
 
         // 更新problem表
         boolean problemUpdateResult = problemMapper.updateById(problem) == 1;
 
-        if (problemUpdateResult && checkProblemCase && deleteLanguagesFromProblemResult && deleteTagsFromProblemResult
+        // 更新对应的题面
+        boolean problemDescriptionResult = dealProblemDescriptionList(problemDescriptionList, pid);
+
+        if (problemUpdateResult && problemDescriptionResult && checkProblemCase && deleteLanguagesFromProblemResult
+                && deleteTagsFromProblemResult
                 && addLanguagesToProblemResult && addTagsToProblemResult && deleteTemplate
                 && saveOrUpdateCodeTemplate) {
             return true;
@@ -403,6 +425,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     public boolean adminAddProblem(ProblemDTO problemDto) {
 
         Problem problem = problemDto.getProblem();
+        List<ProblemDescription> problemDescriptionList = problemDto.getProblemDescriptionList();
 
         if (Constants.JudgeMode.DEFAULT.getMode().equals(problemDto.getJudgeMode())) {
             problem.setSpjLanguage(null)
@@ -445,6 +468,8 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             problemMapper.insert(problem);
         }
         Long pid = problem.getId();
+        dealProblemDescriptionList(problemDescriptionList, pid);
+
         if (pid == null) {
             throw new ProblemIDRepeatException(
                     "The problem with problem_id [" + problem.getProblemId() + "] insert failed!");
@@ -841,5 +866,270 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             }
         }
         return sumScore;
+    }
+
+    @Override
+    public ProblemResDTO getProblemResDTO(Long pid, Long peid, String problemId, Long gid) {
+        ProblemResDTO problemRes = new ProblemResDTO();
+
+        Problem problem = getProblem(pid, peid, problemId, gid);
+
+        if (problem != null) {
+            List<ProblemDescription> problemDescriptionList = getProblemDescription(problem.getId(), peid);
+            if (!CollectionUtils.isEmpty(problemDescriptionList)) {
+                problemRes.setProblemDescriptionList(problemDescriptionList);
+            }
+
+            BeanUtil.copyProperties(problem, problemRes);
+        }
+
+        return problemRes;
+    }
+
+    @Override
+    public ProblemRes getProblemRes(Long pid, Long peid, String problemId, Long gid) {
+        ProblemRes problemRes = new ProblemRes();
+
+        Problem problem = getProblem(pid, peid, problemId, gid);
+
+        if (problem != null) {
+            List<ProblemDescription> problemDescriptionList = getProblemDescription(problem.getId(),
+                    problem.getType() == 2 ? null : peid);
+
+            if (!CollectionUtils.isEmpty(problemDescriptionList)) {
+                ProblemDescription problemDescription = problemDescriptionList.get(0);
+                // 将题目信息合并
+                BeanUtil.copyProperties(problemDescription, problemRes, "id");
+            }
+            // 将题目信息合并
+            BeanUtil.copyProperties(problem, problemRes);
+            return problemRes;
+        }
+        return null;
+    }
+
+    @Override
+    public String getDefaultProblemTitle(Problem problem) {
+        return getProblemResDTO(problem.getId(), null, null, null).getProblemDescriptionList().get(0).getTitle();
+    }
+
+    @Override
+    public List<ProblemResDTO> getRecentUpdatedProblemList() {
+        return problemMapper.getRecentUpdatedProblemList();
+    }
+
+    @Override
+    public IPage<ProblemResDTO> getAdminProblemList(IPage<ProblemResDTO> iPage, String keyword, Integer auth, String oj,
+            Integer difficulty, Integer type, Boolean isRemote) {
+        return getProblemListPage(iPage,
+                problemMapper.getAdminProblemList(StrUtil.trimToNull(keyword), auth, oj, difficulty, type, isRemote));
+    }
+
+    @Override
+    public IPage<ProblemResDTO> getAdminGroupProblemList(IPage<ProblemResDTO> iPage, String keyword, Long gid) {
+        return getProblemListPage(iPage, problemMapper.getAdminGroupProblemList(keyword, gid));
+    }
+
+    @Override
+    public IPage<ProblemResDTO> getAdminContestProblemList(IPage<ProblemResDTO> iPage, String keyword, Long cid,
+            Integer problemType, String oj, Integer difficulty, Integer type, Long gid, Boolean isRemote,
+            Long contestGid, List<Long> pidList) {
+        return getProblemListPage(iPage,
+                problemMapper.getAdminContestProblemList(keyword, cid, problemType, oj, difficulty, type, gid, isRemote,
+                        contestGid, pidList));
+    }
+
+    @Override
+    public IPage<ProblemResDTO> getAdminTrainingProblemList(IPage<ProblemResDTO> iPage, String keyword,
+            Boolean queryExisted, Long tid, List<Long> pidList) {
+        return getProblemListPage(iPage,
+                problemMapper.getAdminTrainingProblemList(keyword, queryExisted, tid, pidList));
+    }
+
+    @Override
+    public List<ProblemDescription> getProblemDescriptionList(Long pid, Long peid, String problemId, Long gid) {
+        List<ProblemDescription> problemDescriptionList = new ArrayList<>();
+
+        Problem problem = getProblem(pid, peid, problemId, gid);
+
+        if (problem != null) {
+            problemDescriptionList = getProblemDescription(problem.getId(), peid);
+        }
+
+        return problemDescriptionList;
+    }
+
+    @Override
+    public Boolean updateProblemDescription(Long pid, Long peid, String pdfName) {
+        pdfName = htmlToPdfUtils.getProblemDescriptionName(pdfName);
+
+        // 更新对应数据库
+        UpdateWrapper<ProblemDescription> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("pid", pid).eq(peid != null, "id", peid);
+
+        if (StringUtils.isEmpty(pdfName)) {
+            return false;
+        }
+
+        updateWrapper.set("pdf_description", Constants.File.FILE_API.getPath() + pdfName + ".pdf");
+
+        String htmlPath = Constants.File.PROBLEM_FILE_FOLDER.getPath() + File.separator + pdfName + ".html";
+
+        StringBuilder htmlContent = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(new File(htmlPath)), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                htmlContent.append(line);
+                htmlContent.append(System.lineSeparator()); // 保持行分隔符
+            }
+        } catch (IOException e) {
+            e.printStackTrace(); // 处理异常
+        }
+        String html = htmlContent.toString(); // 现在包含了读取到的HTML文件内容
+
+        if (!StringUtils.isEmpty(html)) {
+            updateWrapper.set("html", html);
+        }
+
+        return problemDescriptionEntityService.update(updateWrapper);
+    }
+
+    public List<ProblemDescription> getProblemDescription(Long pid, Long peid) {
+        QueryWrapper<ProblemDescription> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("pid", pid)
+                .eq(peid != null, "id", peid)
+                .orderByAsc("`rank`"); // 按照rank从小到大排序
+        List<ProblemDescription> problemDescriptionList = problemDescriptionEntityService.list(queryWrapper);
+
+        return problemDescriptionList;
+    }
+
+    public Problem getProblem(Long pid, Long peid, String problemId, Long gid) {
+        QueryWrapper<Problem> wrapper = new QueryWrapper<>();
+        if (pid != null) {
+            wrapper.eq("id", pid).eq(problemId != null, "problem_id", problemId);
+        } else {
+            wrapper.eq(problemId != null, "problem_id", problemId).eq(pid != null, "id", pid)
+                    .eq(gid != null, "gid", gid).isNull(gid == null, "gid");
+        }
+        List<Problem> problemList = problemMapper.selectList(wrapper);
+
+        if (!CollectionUtils.isEmpty(problemList)) {
+            Problem problem = problemList.get(0);
+            return problem;
+        }
+        return null;
+    }
+
+    public IPage<ProblemResDTO> getProblemListPage(IPage<ProblemResDTO> iPage, List<ProblemResDTO> allProblems) {
+        // 获取分页信息
+        long pageSize = iPage.getSize();
+        long currentPage = iPage.getCurrent();
+        long fromIndex = (currentPage - 1) * pageSize;
+        long toIndex = Math.min(fromIndex + pageSize, allProblems.size());
+
+        // 创建分页结果
+        Page<ProblemResDTO> resultPage = new Page<>(currentPage, pageSize, allProblems.size());
+        resultPage.setRecords(allProblems.subList((int) fromIndex, (int) toIndex));
+
+        return resultPage;
+    }
+
+    // 更新对应的题面
+    public Boolean dealProblemDescriptionList(List<ProblemDescription> problemDescriptionList, Long pid) {
+
+        // 获取问题描述 ID 列表
+        List<Long> peidList = getProblemDescription(pid, null)
+                .stream()
+                .map(ProblemDescription::getId)
+                .collect(Collectors.toList());
+
+        // 并行处理问题描述列表
+        boolean problemDescriptionResult = true;
+        if (!CollectionUtils.isEmpty(problemDescriptionList)) {
+            problemDescriptionResult &= problemDescriptionList
+                    .parallelStream() // 使用 parallelStream 并行处理
+                    .map(problemDescription -> {
+                        problemDescription.setPid(pid);
+                        Long peid = problemDescription.getId();
+                        boolean result = true;
+
+                        if (peid == null) { // 添加
+                            result = problemDescriptionMapper.insert(problemDescription.setPid(pid)) == 1;
+                            addProblemPdf(problemDescription);
+                        } else if (peidList.remove(peid)) { // 更新
+
+                            UpdateWrapper<ProblemDescription> updateWrapper = new UpdateWrapper<>();
+                            updateWrapper.eq("pid", pid).eq(peid != null, "id", peid);
+                            updateWrapper.set("html", problemDescription.getHtml());
+                            problemDescriptionEntityService.update(updateWrapper);
+
+                            result = problemDescriptionMapper.updateById(problemDescription) == 1;
+
+                            addProblemPdf(problemDescription);
+                        }
+
+                        return result;
+                    })
+                    .reduce(true, (a, b) -> a && b); // 合并结果，确保所有操作都成功
+        }
+
+        // 并行删除
+        if (!CollectionUtils.isEmpty(peidList)) {
+            peidList.parallelStream().forEach(peid -> {
+                updateProblemPdf(problemDescriptionEntityService.getById(peid));
+                problemDescriptionEntityService.removeById(peid);
+            });
+        }
+
+        return problemDescriptionResult;
+    }
+
+    public Boolean updateProblemPdf(ProblemDescription problemDescription) {
+        boolean problemDescriptionResult = true;
+
+        if (problemDescription == null) {
+            return problemDescriptionResult;
+        }
+
+        String pdf_description = problemDescription.getPdfDescription();
+
+        if (!StringUtils.isEmpty(pdf_description)) {
+            String file_name = htmlToPdfUtils.getProblemDescriptionName(pdf_description);
+
+            // 删除对应的文件
+            String basePath = Constants.File.PROBLEM_FILE_FOLDER.getPath() + File.separator + file_name;
+            FileUtil.del(new File(basePath + ".pdf"));
+            FileUtil.del(new File(basePath + ".html"));
+            FileUtil.del(new File(basePath + ".tex"));
+
+            // 将题面清空
+            UpdateWrapper<ProblemDescription> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("id", problemDescription.getId()).set("pdf_description", null);
+            problemDescriptionResult &= problemDescriptionEntityService.update(updateWrapper);
+        }
+
+        // 更新题面
+        problemDescriptionResult &= problemDescriptionEntityService.updateById(problemDescription);
+
+        return problemDescriptionResult;
+    }
+
+    public void addProblemPdf(ProblemDescription problemDescription) {
+        Long pid = problemDescription.getPid();
+        Long peid = problemDescription.getId();
+
+        try {
+            // 查询题目详情并生成PDF
+            ProblemRes problem = getProblemRes(pid, peid, null, null);
+
+            String pdfName = htmlToPdfUtils.convertByHtml(problem);
+
+            // 更新题面对应的PDF信息
+            updateProblemDescription(pid, peid, pdfName);
+        } catch (Exception e) {
+            log.error("添加题目失败---------------->{}", e);
+        }
     }
 }

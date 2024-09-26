@@ -7,7 +7,7 @@ import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.web.bind.annotation.*;
 import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.pojo.dto.ChangeGroupProblemProgressDTO;
-import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.service.admin.problem.AdminGroupProblemService;
 
 import javax.annotation.Resource;
@@ -26,7 +26,7 @@ public class AdminGroupProblemController {
     private AdminGroupProblemService adminGroupProblemService;
 
     @GetMapping("/list")
-    public CommonResult<IPage<Problem>> getProblemList(
+    public CommonResult<IPage<ProblemResDTO>> getProblemList(
             @RequestParam(value = "currentPage", defaultValue = "1") Integer currentPage,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit,
             @RequestParam(value = "keyword", required = false) String keyword,

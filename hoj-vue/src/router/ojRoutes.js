@@ -79,7 +79,7 @@ const ojRoutes = [
     meta: { title: 'Announcements' },
   },
   {
-    path: '/problem/:problemID',
+    path: '/problem/:problemID/description/:descriptionID?',
     name: 'ProblemDetails',
     component: Problem,
     meta: { title: 'Problem Details' },
@@ -98,7 +98,7 @@ const ojRoutes = [
   },
   {
     name: 'GroupFullProblemDetails',
-    path: '/group/:groupID/problem/:problemID/full-screen',
+    path: '/group/:groupID/problem/:problemID/description/:descriptionID?/full-screen',
     component: Problem,
     meta: { title: 'Group Problem Details', fullScreenSource: 'group' },
   },
@@ -403,7 +403,7 @@ const ojRoutes = [
       },
       {
         name: 'GroupProblemDetails',
-        path: 'problem/:problemID/',
+        path: 'problem/:problemID/description/:descriptionID?',
         component: Problem,
         meta: { title: 'Group Problem Details' },
       },

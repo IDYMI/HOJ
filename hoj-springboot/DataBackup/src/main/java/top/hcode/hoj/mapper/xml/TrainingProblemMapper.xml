@@ -28,10 +28,10 @@
     <select id="getTrainingProblemList" resultMap="map_TrainingProblemList">
         SELECT p.id AS pid,
                p.problem_id,
-               p.title,
+               pd.title,
                p.difficulty,
-               p.type
-                ,
+               p.type ,
+               pd.id as peid,
                (SELECT COUNT(*)
                 FROM judge j
                 WHERE j.cid = 0
@@ -43,11 +43,12 @@
                 WHERE j.cid = 0
                   AND j.pid = p.id
                )    as total
-        FROM problem p,
-             training_problem tp
+        FROM training_problem tp, problem p
+        LEFT JOIN problem_description pd ON p.id = pd.pid
         where p.id = tp.pid
           and p.auth = 1
           and tp.tid = #{tid}
+          and (tp.peid IS NULL OR tp.peid = pd.id)
         order by tp.`rank` asc
     </select>
 
@@ -114,12 +115,14 @@
     <select id="getTrainingFullScreenProblemList" resultType="top.hcode.hoj.pojo.vo.ProblemFullScreenListVO">
         SELECT p.id AS pid,
                p.problem_id,
-               p.title
-        FROM problem p,
-             training_problem tp
+               pd.title,
+               pd.id as peid
+        FROM training_problem tp, problem p
+        LEFT JOIN problem_description pd ON p.id = pd.pid
         where p.id = tp.pid
           and p.auth = 1
           and tp.tid = #{tid}
+          and (tp.peid IS NULL OR tp.peid = pd.id)
         order by tp.`rank` asc
     </select>
 

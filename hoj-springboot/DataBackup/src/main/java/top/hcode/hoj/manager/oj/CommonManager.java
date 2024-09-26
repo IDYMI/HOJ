@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 
 import top.hcode.hoj.dao.problem.*;
 import top.hcode.hoj.dao.training.TrainingCategoryEntityService;
+import top.hcode.hoj.pojo.dto.ProblemRes;
 import top.hcode.hoj.pojo.entity.problem.*;
 import top.hcode.hoj.pojo.entity.training.TrainingCategory;
 import top.hcode.hoj.pojo.vo.CaptchaVO;
@@ -163,7 +164,7 @@ public class CommonManager {
 
         String oj = "ME";
         if (pid != null) {
-            Problem problem = problemEntityService.getById(pid);
+            ProblemRes problem = problemEntityService.getProblemRes(pid, null, null, null);
             if (problem.getIsRemote()) {
                 oj = problem.getProblemId().split("-")[0];
             }

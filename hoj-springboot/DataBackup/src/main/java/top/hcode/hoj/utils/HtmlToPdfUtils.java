@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import top.hcode.hoj.common.exception.StatusNotFoundException;
 import top.hcode.hoj.config.NacosSwitchConfig;
 import top.hcode.hoj.config.WebConfig;
-import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.dto.ProblemRes;
 
 @Component
 @RefreshScope
@@ -60,7 +60,7 @@ public class HtmlToPdfUtils {
      * @param problem 题目信息
      * @return 转换成功返回保存的文件名称
      */
-    public String convertByHtml(Problem problem) throws StatusNotFoundException, IOException {
+    public String convertByHtml(ProblemRes problem) throws StatusNotFoundException, IOException {
         WebConfig webConfig = nacosSwitchConfig.getWebConfig();
 
         String host = webConfig.getHtmltopdfHost();
@@ -70,6 +70,7 @@ public class HtmlToPdfUtils {
         this.EC = webConfig.getHtmltopdfEc();
 
         String fileName = getProblemDescriptionName(problem.getPdfDescription());
+        String html = problem.getHtml();
 
         if (StringUtils.isEmpty(webConfig.getHtmltopdfHost())) {
             throw new StatusNotFoundException("htmltopdf 服务未配置！");
@@ -81,8 +82,10 @@ public class HtmlToPdfUtils {
 
         problem.setPdfDescription(fileName);
 
-        // 生成保存 HTML 题面
-        saveHtmlDetails(problem);
+        if (html == null) {
+            // 生成保存 HTML 题面
+            saveHtmlDetails(problem);
+        }
 
         // 构建命令并执行
         HttpResponse response = savePdfDetails(problem);
@@ -104,7 +107,7 @@ public class HtmlToPdfUtils {
      *
      * @param problem 题目
      */
-    public void saveHtmlDetails(Problem problem) throws IOException {
+    public void saveHtmlDetails(ProblemRes problem) throws IOException {
         String fileName = getProblemDescriptionName(problem.getPdfDescription());
 
         // docker 对应的wkhtmltopdf默认目录
@@ -152,7 +155,7 @@ public class HtmlToPdfUtils {
      *
      * @param problem 题目
      */
-    public HttpResponse savePdfDetails(Problem problem) throws IOException {
+    public HttpResponse savePdfDetails(ProblemRes problem) throws IOException {
         String fileName = getProblemDescriptionName(problem.getPdfDescription());
 
         // docker 对应的wkhtmltopdf默认目录

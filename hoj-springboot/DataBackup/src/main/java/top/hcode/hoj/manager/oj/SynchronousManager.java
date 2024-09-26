@@ -16,13 +16,14 @@ import org.springframework.util.StringUtils;
 
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.entity.judge.JudgeCase;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.dao.contest.ContestEntityService;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.vo.ACMContestRankVO;
 import top.hcode.hoj.pojo.vo.ContestSynchronousConfigVO;
 import top.hcode.hoj.pojo.vo.JudgeVO;
 import top.hcode.hoj.pojo.vo.ContestProblemVO;
-import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.utils.Constants;
 import top.hcode.hoj.utils.JsoupUtils;
 
@@ -34,6 +35,7 @@ import java.net.HttpCookie;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * @param contest                     比赛的信息
@@ -434,8 +436,8 @@ public class SynchronousManager {
         return synchronousCaseResult;
     }
 
-    public Problem getSynchronousProblem(String displayId, Long cid) {
-        Problem problem = new Problem();
+    public ProblemResDTO getSynchronousProblem(String displayId, Long cid) {
+        ProblemResDTO problem = new ProblemResDTO();
 
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
@@ -608,26 +610,31 @@ public class SynchronousManager {
         return judgeCase;
     }
 
-    public static Problem parseSynchronousProblem(JSONObject record) {
-        Problem problem = new Problem();
+    public static ProblemResDTO parseSynchronousProblem(JSONObject record) {
+        ProblemResDTO problem = new ProblemResDTO();
+
+        List<ProblemDescription> problemDescriptionDtoList = Collections.singletonList(
+                new ProblemDescription()
+                        .setPid(problem.getId())
+                        .setTitle(record.getStr("title"))
+                        .setDescription(record.getStr("description"))
+                        .setInput(record.getStr("input"))
+                        .setOutput(record.getStr("output"))
+                        .setExamples(record.getStr("examples"))
+                        .setSource(record.getStr("source"))
+                        .setHint(record.getStr("hint")));
+
+        problem.setProblemDescriptionList(problemDescriptionDtoList);
         problem.setId(record.getLong("id"));
         problem.setProblemId(record.getStr("problemId"));
-        problem.setTitle(record.getStr("title"));
-        problem.setAuthor(record.getStr("author"));
         problem.setType(record.getInt("type"));
         problem.setJudgeMode(record.getStr("judgeMode"));
         problem.setJudgeCaseMode(record.getStr("judgeCaseMode"));
         problem.setTimeLimit(record.getInt("timeLimit"));
         problem.setMemoryLimit(record.getInt("memoryLimit"));
         problem.setStackLimit(record.getInt("stackLimit"));
-        problem.setDescription(record.getStr("description"));
-        problem.setInput(record.getStr("input"));
-        problem.setOutput(record.getStr("output"));
-        problem.setExamples(record.getStr("examples"));
         problem.setIsRemote(record.getBool("isRemote"));
-        problem.setSource(record.getStr("source"));
         problem.setDifficulty(record.getInt("difficulty"));
-        problem.setHint(record.getStr("hint"));
         problem.setAuth(record.getInt("auth"));
         problem.setIoScore(record.getInt("ioScore"));
         problem.setCodeShare(record.getBool("codeShare"));
@@ -639,7 +646,6 @@ public class SynchronousManager {
         problem.setOpenCaseResult(record.getBool("openCaseResult"));
         problem.setIsUploadCase(record.getBool("isUploadCase"));
         problem.setCaseVersion(record.getStr("caseVersion"));
-        problem.setModifiedUser(record.getStr("modifiedUser"));
         problem.setIsGroup(record.getBool("isGroup"));
         problem.setGid(record.getLong("gid", null));
         problem.setApplyPublicProgress(record.getInt("applyPublicProgress", null));

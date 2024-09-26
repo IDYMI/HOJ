@@ -27,6 +27,8 @@ import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.pojo.bo.Pair_;
 import top.hcode.hoj.pojo.dto.ContestPrintDTO;
 import top.hcode.hoj.pojo.dto.ContestRankDTO;
+import top.hcode.hoj.pojo.dto.ProblemRes;
+
 import top.hcode.hoj.pojo.dto.RegisterContestDTO;
 import top.hcode.hoj.pojo.dto.UserReadContestAnnouncementDTO;
 import top.hcode.hoj.pojo.entity.common.Announcement;
@@ -490,7 +492,15 @@ public class ContestManager {
         }
 
         // 查询题目详情，题目标签，题目语言，题目做题情况
-        Problem problem = problemEntityService.getById(contestProblem.getPid());
+        ProblemRes problem = problemEntityService.getProblemRes(contestProblem.getPid(), contestProblem.getPeid(), null,
+                contest.getGid());
+
+        List<ProblemDescription> problemDescriptionList = problemEntityService.getProblemDescriptionList(
+                contestProblem.getPid(), contestProblem.getPeid(), null, contest.getGid());
+
+        if (problem == null) {
+            throw new StatusNotFoundException("该题号对应的题目不存在");
+        }
 
         if (problem.getAuth() == 2) {
             throw new StatusForbiddenException("该比赛题目当前不可访问！");
@@ -568,7 +578,7 @@ public class ContestManager {
             }
         }
         // 将数据统一写入到一个Vo返回数据实体类中
-        return new ProblemInfoVO(problem, tags, languagesStr, problemCount, LangNameAndCode);
+        return new ProblemInfoVO(problem, problemDescriptionList, tags, languagesStr, problemCount, LangNameAndCode);
     }
 
     public IPage<JudgeVO> getContestSubmissionList(Integer limit,

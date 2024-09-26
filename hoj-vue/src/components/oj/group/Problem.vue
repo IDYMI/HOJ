@@ -36,39 +36,162 @@
               </el-form-item>
             </el-col>
           </el-row>
+          <el-tabs
+            type="card"
+            style="margin-top:1rem;"
+            v-model="activeTab"
+            @tab-click="handleTabClick"
+          >
+            <el-tab-pane
+              v-for="(description, index) in problemDescriptionList"
+              :key="index"
+              :name="index.toString()"
+            >
+              <template #label>
+                {{ description.title ? ' Title: ' + description.title : '' }}
+                Author: {{ description.author }}
+                <!-- 在标签的右边添加按钮 -->
+                <el-button
+                  v-if="problemDescriptionList.length > 1"
+                  type="text"
+                  size="mini"
+                  icon="el-icon-delete"
+                  @click.stop="removeDescription(index)"
+                  style="margin-left: 10px;"
+                />
+              </template>
 
-          <el-row :gutter="20">
-            <el-col :span="24">
-              <el-form-item prop="title" :label="$t('m.Title')" required>
-                <el-input :placeholder="$t('m.Title')" v-model="problem.title"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="24">
-              <el-form-item prop="description" :label="$t('m.Description')" required>
-                <Editor :value.sync="problem.description"></Editor>
-              </el-form-item>
-            </el-col>
-            <el-col :span="24">
-              <el-form-item prop="input_description" :label="$t('m.Input')" required>
-                <Editor :value.sync="problem.input"></Editor>
-              </el-form-item>
-            </el-col>
-            <el-col :span="24">
-              <el-form-item prop="output_description" :label="$t('m.Output')" required>
-                <Editor :value.sync="problem.output"></Editor>
-              </el-form-item>
-            </el-col>
-            <el-col :span="24">
-              <el-form-item prop="hint" :label="$t('m.Hint')">
-                <Editor :value.sync="problem.hint"></Editor>
-              </el-form-item>
-            </el-col>
-            <el-col :span="24">
-              <el-form-item prop="source" :label="$t('m.Source')">
-                <el-input :placeholder="$t('m.Source')" v-model="problem.source"></el-input>
-              </el-form-item>
-            </el-col>
-          </el-row>
+              <el-card>
+                <el-col :span="24">
+                  <el-form-item prop="title" :label="$t('m.Title')" required>
+                    <el-input :placeholder="$t('m.Title')" v-model="description.title"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="24">
+                  <el-form-item prop="description" :label="$t('m.Description')" required>
+                    <Editor :value.sync="description.description"></Editor>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="24">
+                  <el-form-item prop="input" :label="$t('m.Input')" required>
+                    <Editor :value.sync="description.input"></Editor>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="24">
+                  <el-form-item prop="output" :label="$t('m.Output')" required>
+                    <Editor :value.sync="description.output"></Editor>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="24">
+                  <el-form-item prop="hint" :label="$t('m.Hint')">
+                    <Editor :value.sync="description.hint"></Editor>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="24">
+                  <el-form-item prop="source" :label="$t('m.Source')">
+                    <el-input :placeholder="$t('m.Source')" v-model="description.source"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="24">
+                  <!-- 表单项 -->
+                  <el-form-item v-if="description.html" prop="html">
+                    <template #label>
+                      <!-- 标题 -->
+                      <span style="font-size: 14px;">{{ $t('m.PDF_Description_View') }}</span>
+
+                      <!-- 折叠按钮 -->
+                      <el-button
+                        type="text"
+                        style="margin-left: 15px;"
+                        @click="toggleEditor"
+                      >{{ isCollapsed ? $t('m.Unfold') : $t('m.Fold') }}</el-button>
+                      <!-- 刷新按钮 -->
+                      <el-button
+                        v-show="!isCollapsed"
+                        type="text"
+                        icon="el-icon-refresh"
+                        style="margin-left: 15px;"
+                        size="small"
+                        @click="refreshDescription(description)"
+                      >{{ $t('m.Refresh_PDF_Description') }}</el-button>
+                    </template>
+
+                    <!-- 编辑器，使用 v-show 控制可见性 -->
+                    <Editor v-show="!isCollapsed" :value.sync="description.html"></Editor>
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="24" v-if="isAcmOi">
+                  <el-form-item>
+                    <template #label>
+                      {{ $t('m.Problem_Examples') }}
+                      <el-popover placement="right" trigger="hover">
+                        <p>{{ $t('m.Problem_Examples_Desc') }}</p>
+                        <i slot="reference" class="el-icon-question"></i>
+                      </el-popover>
+                    </template>
+
+                    <el-form-item
+                      v-model="description.examples"
+                      v-for="(example, index) in description.examples"
+                      :key="'example' + index"
+                    >
+                      <Accordion
+                        :title="$t('m.Problem_Example') + (index + 1)"
+                        :isOpen="example.isOpen ? true : false"
+                        :index="index"
+                        @changeVisible="changeExampleVisible(description.examples, index, $event)"
+                      >
+                        <el-button
+                          type="danger"
+                          size="small"
+                          icon="el-icon-delete"
+                          slot="header"
+                          @click="deleteExample(description.examples, index)"
+                        >{{ $t('m.Delete') }}</el-button>
+                        <el-row :gutter="20">
+                          <el-col :xs="24" :md="12">
+                            <el-form-item :label="$t('m.Example_Input')" required>
+                              <el-input
+                                :rows="5"
+                                type="textarea"
+                                :placeholder="$t('m.Example_Input')"
+                                v-model="example.input"
+                                style="white-space: pre-line"
+                              ></el-input>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :xs="24" :md="12">
+                            <el-form-item :label="$t('m.Example_Output')" required>
+                              <el-input
+                                :rows="5"
+                                type="textarea"
+                                :placeholder="$t('m.Example_Output')"
+                                v-model="example.output"
+                              ></el-input>
+                            </el-form-item>
+                          </el-col>
+                        </el-row>
+                      </Accordion>
+                    </el-form-item>
+                    <div class="add-example-btn">
+                      <el-button
+                        class="add-examples"
+                        @click="addExample(description.examples)"
+                        icon="el-icon-plus"
+                        type="small"
+                      >{{ $t('m.Add_Example') }}</el-button>
+                    </div>
+                  </el-form-item>
+                </el-col>
+              </el-card>
+            </el-tab-pane>
+            <el-tab-pane name="addTab">
+              <template #label>
+                <i class="el-icon-plus" style="color:#2d8cf0"></i>
+              </template>
+            </el-tab-pane>
+          </el-tabs>
 
           <el-row :gutter="20">
             <el-col :md="6" :xs="24">
@@ -229,84 +352,56 @@
             </el-col>
           </el-row>
 
-          <div v-if="isAcmOi || isSelection">
-            <div class="panel-title home-title">
-              {{ isAcmOi ? $t('m.Problem_Examples'): $t('m.Selection_Options') }}
-              <el-popover v-if="isAcmOi" placement="right" trigger="hover">
-                <p>{{ $t('m.Problem_Examples_Desc') }}</p>
-                <i slot="reference" class="el-icon-question"></i>
-              </el-popover>
-            </div>
-            <el-form-item v-for="(example, index) in problem.examples" :key="'example' + index">
-              <Accordion
-                :title="(isAcmOi ? ($t('m.Problem_Example')) + (index + 1) : String.fromCharCode(65 + index))"
-                :isOpen="example.isOpen ? true : false"
-                :index="index"
-                @changeVisible="changeExampleVisible"
+          <div v-if="isSelection || isFilling">
+            <div
+              class="panel-title home-title"
+            >{{ isSelection ? $t('m.Selection_Options') : $t('m.Filling_Count') }}</div>
+            <div v-if="isSelection">
+              <el-form-item
+                v-for="(example, index) in problemDescriptionList[0].examples"
+                :key="'example' + index"
               >
-                <el-button
-                  type="danger"
-                  size="small"
-                  icon="el-icon-delete"
-                  slot="header"
-                  @click="deleteExample(index)"
-                >{{ $t('m.Delete') }}</el-button>
-                <el-row :gutter="20" v-if="isAcmOi">
-                  <el-col :xs="24" :md="12">
-                    <el-form-item :label="$t('m.Example_Input')" required>
-                      <el-input
-                        :rows="5"
-                        type="textarea"
-                        :placeholder="$t('m.Example_Input')"
-                        v-model="example.input"
-                        style="white-space: pre-line"
-                      ></el-input>
-                    </el-form-item>
-                  </el-col>
-                  <el-col :xs="24" :md="12">
-                    <el-form-item :label="$t('m.Example_Output')" required>
-                      <el-input
-                        :rows="5"
-                        type="textarea"
-                        :placeholder="$t('m.Example_Output')"
-                        v-model="example.output"
-                      ></el-input>
-                    </el-form-item>
-                  </el-col>
-                </el-row>
-                <el-row :gutter="20" v-else>
-                  <el-col :xs="24" :md="24">
-                    <el-form-item :label="$t('m.Selection_View')" required>
-                      <el-input
-                        :rows="5"
-                        type="textarea"
-                        :placeholder="$t('m.Selection_View')"
-                        v-model="example.output"
-                        style="white-space: pre-line"
-                      ></el-input>
-                    </el-form-item>
-                  </el-col>
-                </el-row>
-              </Accordion>
-            </el-form-item>
+                <Accordion
+                  :title="(String.fromCharCode(65 + index))"
+                  :isOpen="example.isOpen ? true : false"
+                  :index="index"
+                  @changeVisible="changeExampleVisible(problemDescriptionList[0].examples, index, $event)"
+                >
+                  <el-button
+                    type="danger"
+                    size="small"
+                    icon="el-icon-delete"
+                    slot="header"
+                    @click="deleteExample(problemDescriptionList[0].examples, index)"
+                  >{{ $t('m.Delete') }}</el-button>
+                  <el-row :gutter="20">
+                    <el-col :xs="24" :md="24">
+                      <el-form-item :label="$t('m.Selection_View')" required>
+                        <el-input
+                          :rows="5"
+                          type="textarea"
+                          :placeholder="$t('m.Selection_View')"
+                          v-model="example.output"
+                          style="white-space: pre-line"
+                        ></el-input>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </Accordion>
+              </el-form-item>
+            </div>
           </div>
 
-          <div class="add-example-btn" v-if="isAcmOi || isSelection">
+          <div class="add-example-btn" v-if="isSelection">
             <el-button
               class="add-examples"
-              @click="addExample()"
+              @click="addExample(problemDescriptionList[0].examples)"
               icon="el-icon-plus"
               type="small"
-            >{{ isAcmOi ? $t('m.Add_Example'): $t('m.Add_Selection') }}</el-button>
+            >{{ $t('m.Add_Selection') }}</el-button>
           </div>
           <div v-else-if="isFilling">
-            <div class="panel-title home-title">{{ $t('m.Filling_Count') }}</div>
-            <el-input
-              type="Number"
-              :placeholder="$t('m.Filling_Count')"
-              v-model="fillingCount"
-              @change="checkFillingCount"
-            ></el-input>
+            <el-input type="Number" :placeholder="$t('m.Filling_Count')" v-model="fillingCount"></el-input>
           </div>
 
           <template v-if="isAcmOi && !problem.isRemote">
@@ -837,16 +932,12 @@ export default {
         id: null,
         title: "",
         problemId: "",
-        description: "",
-        input: "",
-        output: "",
         timeLimit: 1000,
         memoryLimit: 256,
         stackLimit: 128,
         difficulty: 0,
         auth: 1,
         codeShare: true,
-        examples: [],
         spjLanguage: "",
         spjCode: "",
         spjCompileOk: false,
@@ -855,8 +946,6 @@ export default {
         isRemote: false,
         isUploadCase: false,
         type: 0,
-        hint: "",
-        source: "",
         cid: null,
         isRemoveEndBlank: false,
         openCaseResult: true,
@@ -868,7 +957,22 @@ export default {
         isFileIO: false,
         ioReadFileName: null,
         ioWriteFileName: null,
+        author: null,
       },
+      problemDescriptionList: [
+        {
+          id: null,
+          title: "",
+          description: "",
+          input: "",
+          output: "",
+          hint: "",
+          source: "NYOJ",
+          rank: 0,
+          examples: [], // 题面上的样例输入输出
+          html: null,
+        },
+      ],
       problemTags: [],
       problemLanguages: [],
       problemSamples: [],
@@ -912,8 +1016,9 @@ export default {
       isSelection: false,
       isFilling: false,
       isDecide: false,
-      fillingCount: 0,
       type: 0,
+      isCollapsed: true, // 控制折叠状态
+      activeTab: "0", // 默认激活第一个标签
     };
   },
   mounted() {
@@ -942,16 +1047,12 @@ export default {
         id: null,
         problemId: "",
         title: "",
-        description: "",
-        input: "",
-        output: "",
         timeLimit: 1000,
         memoryLimit: 256,
         stackLimit: 128,
         difficulty: 0,
         auth: 1,
         codeShare: true,
-        examples: [],
         spjLanguage: "",
         spjCode: "",
         spjCompileOk: false,
@@ -959,9 +1060,8 @@ export default {
         uploadTestcaseDir: "",
         testCaseScore: [],
         contestProblem: {},
+        isRemote: false,
         type: 0,
-        hint: "",
-        source: "",
         cid: null,
         isRemoveEndBlank: false,
         openCaseResult: true,
@@ -972,6 +1072,7 @@ export default {
         isFileIO: false,
         ioReadFileName: null,
         ioWriteFileName: null,
+        author: null,
       };
       if (this.contestId) {
         this.problem.cid = this.reProblem.cid = this.contestId;
@@ -995,6 +1096,19 @@ export default {
       this.problemSamples = [];
       this.problemCodeTemplate = [];
       this.codeTemplate = [];
+      this.problemDescriptionList = [
+        {
+          id: null,
+          title: null,
+          description: null,
+          input: null,
+          output: null,
+          hint: null,
+          source: "NYOJ",
+          html: null,
+          examples: [],
+        },
+      ]; //指定问题的题面列表
       this.init();
     },
     problemLanguages(newVal) {
@@ -1060,11 +1174,11 @@ export default {
           this.spjRecord.spjCode = data.spjCode;
           this.judgeCaseModeRecord = data.judgeCaseModeRecord;
           this.problem = data;
-          this.problem["examples"] = utils.stringToExamples(data.examples);
-          if (this.problem["examples"].length > 0) {
-            this.problem["examples"][0]["isOpen"] = true;
-          }
-          this.fillingCount = this.problem["examples"].length;
+          this.problemDescriptionList = data["problemDescriptionList"];
+          this.problemDescriptionList.forEach((description) => {
+            description.examples = utils.stringToExamples(description.examples);
+            description.examples.isOpen = true;
+          });
           this.testCaseUploaded = true;
           if (this.problem.userExtraFile) {
             this.addUserExtraFile = true;
@@ -1074,7 +1188,6 @@ export default {
             this.addJudgeExtraFile = true;
             this.judgeExtraFile = JSON.parse(this.problem.judgeExtraFile);
           }
-          this.fillingCount = this.problem["examples"].length;
           this.changeType();
           utils.readTestCase(this.pid).then((result) => {
             this.caseContentDir = result;
@@ -1091,6 +1204,7 @@ export default {
           this.problemTags = res.data.data;
         });
       } else {
+        this.problemDescriptionList[0].author = this.userInfo.username;
         this.addSample();
         this.testCaseUploaded = false;
         for (let item of this.allLanguage) {
@@ -1343,11 +1457,11 @@ export default {
         }
       }
     },
-    addExample() {
-      this.problem.examples.push({ input: "", output: "", isOpen: true });
+    addExample(examples) {
+      examples.push({ input: "", output: "", isOpen: true });
     },
-    changeExampleVisible(index, isOpen) {
-      this.problem.examples[index]["isOpen"] = isOpen;
+    changeExampleVisible(examples, index, isOpen) {
+      examples[index]["isOpen"] = isOpen;
     },
     addSample() {
       let len = this.sampleIndex;
@@ -1376,8 +1490,8 @@ export default {
       this.sortManualProblemSampleList();
     },
 
-    deleteExample(index) {
-      this.problem.examples.splice(index, 1);
+    deleteExample(examples, index) {
+      examples.splice(index, 1);
     },
     deleteSample(index) {
       this.problemSamples.splice(index, 1);
@@ -1774,9 +1888,16 @@ export default {
         this.problem.judgeExtraFile = null;
       }
       problemDto["problem"] = Object.assign({}, this.problem); // 深克隆
-      problemDto.problem.examples = utils.examplesToString(
-        this.problem.examples
+      let problemDescriptionList = this.problemDescriptionList.map(
+        (description, index) => {
+          return {
+            ...description, // 创建一个新的对象，保留原有的属性
+            rank: index, // 添加 rank 属性
+            examples: utils.examplesToString(description.examples), // 修改 examples 属性
+          };
+        }
       );
+      problemDto["problemDescriptionList"] = problemDescriptionList;
       problemDto["codeTemplates"] = this.problemCodeTemplate;
       problemDto["tags"] = problemTagList;
       problemDto["languages"] = problemLanguageList;
@@ -1835,14 +1956,63 @@ export default {
       this.isFilling = type === 3;
       this.isDecide = type > 3;
     },
-    checkFillingCount() {
-      this.problem.examples = [];
-      for (let i = 0; i < this.fillingCount; i++)
-        this.problem.examples.push({ input: i, output: "", isOpen: true });
+    handleTabClick(tab) {
+      if (tab.name === "addTab") {
+        this.addDescription();
+      } else {
+        // 获取当前标签对应的索引
+        const index = Number(tab.name);
+
+        // 根据索引找到对应的 description
+        const description = this.problemDescriptionList[index];
+
+        // 调用 updateDescription 方法并携带 description
+        this.description = description;
+      }
+    },
+    addDescription() {
+      this.problemDescriptionList.push({
+        id: null,
+        title: null,
+        description: null,
+        input: null,
+        output: null,
+        hint: null,
+        source: "NYOJ",
+        examples: [],
+        author: this.userInfo.username,
+      });
+      this.activeTab = (this.problemDescriptionList.length - 1).toString();
+    },
+    removeDescription(index) {
+      this.problemDescriptionList.splice(index, 1);
+      this.activeTab = (this.problemDescriptionList.length - 1).toString();
+    },
+    toggleEditor() {
+      this.isCollapsed = !this.isCollapsed;
+    },
+    refreshDescription(description) {
+      description.html = null;
     },
   },
   computed: {
     ...mapGetters(["userInfo", "group"]),
+    fillingCount: {
+      get() {
+        if (this.isFilling) {
+          return this.problemDescriptionList[0].examples.length;
+        }
+        return 0;
+      },
+      set(newCount) {
+        if (this.isFilling) {
+          this.problemDescriptionList[0].examples = Array.from(
+            { length: newCount },
+            () => ""
+          );
+        }
+      },
+    },
   },
 };
 </script>
@@ -1922,5 +2092,8 @@ export default {
 }
 .copy {
   padding-left: 8px;
+}
+.el-collapse {
+  margin-bottom: 10px !important;
 }
 </style>

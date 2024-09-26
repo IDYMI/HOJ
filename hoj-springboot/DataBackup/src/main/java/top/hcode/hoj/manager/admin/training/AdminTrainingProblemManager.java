@@ -19,8 +19,10 @@ import top.hcode.hoj.dao.training.TrainingEntityService;
 import top.hcode.hoj.dao.training.TrainingProblemEntityService;
 import top.hcode.hoj.manager.admin.problem.RemoteProblemManager;
 import top.hcode.hoj.manager.group.GroupManager;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.dto.TrainingProblemDTO;
 import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.pojo.entity.training.Training;
 import top.hcode.hoj.pojo.entity.training.TrainingProblem;
 import top.hcode.hoj.shiro.AccountProfile;
@@ -84,7 +86,7 @@ public class AdminTrainingProblemManager {
         if (limit == null || limit < 1)
             limit = 10;
 
-        IPage<Problem> iPage = new Page<>(currentPage, limit);
+        IPage<ProblemResDTO> iPage = new Page<>(currentPage, limit);
         // 根据tid在TrainingProblem表中查询到对应pid集合
         QueryWrapper<TrainingProblem> trainingProblemQueryWrapper = new QueryWrapper<>();
         trainingProblemQueryWrapper.eq("tid", tid).orderByAsc("display_id");
@@ -98,45 +100,39 @@ public class AdminTrainingProblemManager {
             pidList.add(trainingProblem.getPid());
         });
 
-        HashMap<String, Object> trainingProblem = new HashMap<>();
+        HashMap<String, Object> trainingProblemHashMap = new HashMap<>();
 
-        QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
-
-        // 逻辑判断，如果是查询已有的就应该是in，如果是查询不要重复的，使用not in
-        if (queryExisted) {
-            problemQueryWrapper.in(pidList.size() > 0, "id", pidList);
-        } else {
-            // 权限需要是公开的（隐藏的，比赛中不可加入！）
-            problemQueryWrapper.eq("auth", 1).eq("is_group", false);
-            problemQueryWrapper.notIn(pidList.size() > 0, "id", pidList);
-        }
-
-        if (!StringUtils.isEmpty(keyword)) {
-            problemQueryWrapper.and(wrapper -> wrapper.like("title", keyword).or()
-                    .like("problem_id", keyword).or()
-                    .like("author", keyword));
-        }
-
-        if (pidList.size() == 0 && queryExisted) {
-            problemQueryWrapper = new QueryWrapper<>();
-            problemQueryWrapper.eq("id", null);
-        }
-
-        IPage<Problem> problemListPage = problemEntityService.page(iPage, problemQueryWrapper);
+        IPage<ProblemResDTO> problemListPage = problemEntityService.getAdminTrainingProblemList(iPage, keyword,
+                queryExisted, tid, pidList);
 
         if (queryExisted && pidList.size() > 0) {
-            List<Problem> problemListPageRecords = problemListPage.getRecords();
-            List<Problem> sortProblemList = problemListPageRecords
+            List<ProblemResDTO> problemListPageRecords = problemListPage.getRecords();
+
+            problemListPageRecords.forEach(problemResDto -> {
+                TrainingProblem trainingProblem = trainingProblemMap.get(problemResDto.getId());
+                List<ProblemDescription> problemDescriptionList = problemResDto.getProblemDescriptionList();
+
+                // 获取对应的 peid 或第一个 problemDescription 的 title 和 id
+                problemDescriptionList.stream()
+                        .filter(pd -> trainingProblem.getPeid() == null || pd.getId().equals(trainingProblem.getPeid()))
+                        .findFirst()
+                        .ifPresent(problemDescription -> {
+                            problemResDto.setTitle(problemDescription.getTitle())
+                                    .setPeid(problemDescription.getId());
+                        });
+            });
+
+            List<ProblemResDTO> sortProblemList = problemListPageRecords
                     .stream()
                     .sorted(Comparator.comparingInt(problem -> trainingProblemMap.get(problem.getId()).getRank()))
                     .collect(Collectors.toList());
             problemListPage.setRecords(sortProblemList);
         }
 
-        trainingProblem.put("problemList", problemListPage);
-        trainingProblem.put("trainingProblemMap", trainingProblemMap);
+        trainingProblemHashMap.put("problemList", problemListPage);
+        trainingProblemHashMap.put("trainingProblemMap", trainingProblemMap);
 
-        return trainingProblem;
+        return trainingProblemHashMap;
     }
 
     public void updateProblem(TrainingProblem trainingProblem) throws StatusFailException, StatusForbiddenException {
@@ -227,6 +223,7 @@ public class AdminTrainingProblemManager {
             throws StatusFailException, StatusForbiddenException {
 
         Long pid = trainingProblemDto.getPid();
+        Long peid = trainingProblemDto.getPeid();
         Long tid = trainingProblemDto.getTid();
         String displayId = trainingProblemDto.getDisplayId();
 
@@ -258,7 +255,7 @@ public class AdminTrainingProblemManager {
 
         TrainingProblem newTProblem = new TrainingProblem();
         boolean isOk = trainingProblemEntityService.saveOrUpdate(newTProblem
-                .setTid(tid).setPid(pid).setDisplayId(displayId));
+                .setTid(tid).setPid(pid).setPeid(peid).setDisplayId(displayId));
         if (isOk) { // 添加成功
 
             // 更新训练最近更新时间
@@ -274,6 +271,31 @@ public class AdminTrainingProblemManager {
             adminTrainingRecordManager.syncAlreadyRegisterUserRecord(tid, pid, newTProblem.getId());
         } else {
             throw new StatusFailException("添加失败！");
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void changeProblemDescription(TrainingProblemDTO trainingProblemDTO) throws StatusFailException {
+        Long pid = trainingProblemDTO.getPid();
+        Long peid = trainingProblemDTO.getPeid();
+        Long tid = trainingProblemDTO.getTid();
+
+        // 比赛中题目显示默认为原标题
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, null, null, null);
+        List<ProblemDescription> problemDescriptionList = problem.getProblemDescriptionList();
+
+        boolean isOk = problemDescriptionList.stream()
+                .anyMatch(desc -> {
+                    if (peid.equals(desc.getId())) {
+                        UpdateWrapper<TrainingProblem> trainingProblemUpdateWrapper = new UpdateWrapper<>();
+                        trainingProblemUpdateWrapper.eq("tid", tid).eq("pid", pid).set("peid", peid);
+                        return trainingProblemEntityService.update(trainingProblemUpdateWrapper);
+                    }
+                    return false;
+                });
+
+        if (!isOk) {
+            throw new StatusFailException("更新失败");
         }
     }
 

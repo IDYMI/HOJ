@@ -106,6 +106,12 @@ public class AdminTrainingController {
         return adminTrainingProblemService.addProblemFromPublic(trainingProblemDto);
     }
 
+    @PostMapping("/change-problem-description")
+    @RequiresAuthentication
+    public CommonResult<Void> changeProblemDescription(@RequestBody TrainingProblemDTO trainingProblemDto) {
+        return adminTrainingProblemService.changeProblemDescription(trainingProblemDto);
+    }
+
     @GetMapping("/import-remote-oj-problem")
     @RequiresAuthentication
     @Transactional(rollbackFor = Exception.class)

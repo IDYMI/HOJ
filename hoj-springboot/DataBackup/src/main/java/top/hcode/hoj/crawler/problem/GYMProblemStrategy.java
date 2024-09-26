@@ -10,6 +10,7 @@ import cn.hutool.http.Method;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.utils.CodeForcesUtils;
 import top.hcode.hoj.utils.Constants;
 
@@ -79,6 +80,7 @@ public class GYMProblemStrategy extends CFProblemStrategy {
     private RemoteProblemInfo getPDFHtml(String problemId, String contestNum, String problemNum, String author) {
 
         Problem problem = new Problem();
+        ProblemDescription problemDescription = new ProblemDescription().setPid(problem.getId());
 
         String url = HOST + "/gym/" + contestNum;
         HttpRequest request = HttpRequest.get(url)
@@ -107,11 +109,11 @@ public class GYMProblemStrategy extends CFProblemStrategy {
         matcher.find();
 
         problem.setProblemId(getJudgeName() + "-" + problemId);
-        problem.setTitle(matcher.group(1));
+        problemDescription.setTitle(matcher.group(1));
         problem.setTimeLimit((int) (Double.parseDouble(matcher.group(3)) * 1000));
         problem.setMemoryLimit(Integer.parseInt(matcher.group(4)));
 
-        problem.setSource(String.format(
+        problemDescription.setSource(String.format(
                 "<p>Problem：<a style='color:#1A5CC8' href='https://codeforces.com/gym/%s/attachments'>%s</a></p><p>" +
                         "Contest：" + ReUtil.get("(<a[^<>]+/gym/\\d+\">.+?</a>)", html, 1)
                                 .replace("/gym", HOST + "/gym")
@@ -154,7 +156,7 @@ public class GYMProblemStrategy extends CFProblemStrategy {
                         .append(pdfURI).append("\">").append(problemId).append("</a></p>");
             }
         }
-        problem.setDescription(
+        problemDescription.setDescription(
                 "<pp>" + HtmlUtil.unescape(description.toString().replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
         problem.setType(0)
                 .setIsRemote(true)
@@ -166,6 +168,7 @@ public class GYMProblemStrategy extends CFProblemStrategy {
                 .setDifficulty(1); // 默认为中等
         return new RemoteProblemInfo()
                 .setProblem(problem)
+                .setProblemDescription(problemDescription)
                 .setTagList(null)
                 .setRemoteOJ(Constants.RemoteOJ.GYM);
     }

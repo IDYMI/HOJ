@@ -16,6 +16,7 @@ import top.hcode.hoj.dao.training.TrainingProblemEntityService;
 import top.hcode.hoj.manager.admin.training.AdminTrainingProblemManager;
 import top.hcode.hoj.manager.admin.training.AdminTrainingRecordManager;
 import top.hcode.hoj.manager.group.GroupManager;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.dto.TrainingProblemDTO;
 import top.hcode.hoj.pojo.entity.group.Group;
 import top.hcode.hoj.pojo.entity.problem.Problem;
@@ -168,8 +169,9 @@ public class GroupTrainingProblemManager {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
         Long pid = trainingProblemDto.getPid();
+        Long peid = trainingProblemDto.getPeid();
 
-        Problem problem = problemEntityService.getById(pid);
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, peid, null, null);
 
         if (problem == null
                 || problem.getAuth().intValue() != Constants.ProblemAuth.PUBLIC.getAuth()
@@ -219,7 +221,7 @@ public class GroupTrainingProblemManager {
         TrainingProblem newTProblem = new TrainingProblem();
 
         boolean isOk = trainingProblemEntityService.saveOrUpdate(newTProblem
-                .setTid(tid).setPid(pid).setDisplayId(displayId));
+                .setTid(tid).setPid(pid).setPeid(peid).setDisplayId(displayId));
         if (isOk) { // 添加成功
 
             // 更新训练最近更新时间

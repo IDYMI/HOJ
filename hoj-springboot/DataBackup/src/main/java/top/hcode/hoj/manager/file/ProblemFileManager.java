@@ -192,6 +192,7 @@ public class ProblemFileManager {
             }
 
             Problem problem = BeanUtil.mapToBean(importProblemVo.getProblem(), Problem.class, true);
+            ProblemDescription problemDescription = new ProblemDescription().setPid(problem.getId());
             if (problem.getAuthor() == null) {
                 problem.setAuthor(userRolesVo.getUsername());
             }
@@ -211,8 +212,11 @@ public class ProblemFileManager {
                 problem.setJudgeExtraFile(judgeExtraFileJson.toString());
             }
 
+            List<ProblemDescription> problemDescriptionDtoList = Collections.singletonList(problemDescription);
+
             ProblemDTO problemDto = new ProblemDTO();
             problemDto.setProblem(problem)
+                    .setProblemDescriptionList(problemDescriptionDtoList)
                     .setCodeTemplates(codeTemplates)
                     .setTags(tags)
                     .setLanguages(languages)

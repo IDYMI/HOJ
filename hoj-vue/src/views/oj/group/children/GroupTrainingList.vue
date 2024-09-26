@@ -195,6 +195,7 @@
       width="90%"
       :visible.sync="publicPage"
       :close-on-click-modal="false"
+      z-index="3000"
     >
       <AddPublicProblem
         v-if="publicPage"
@@ -209,6 +210,7 @@
       width="350px"
       :visible.sync="groupPage"
       :close-on-click-modal="false"
+      z-index="3000"
     >
       <AddGroupProblem
         :trainingId="trainingId"

@@ -332,6 +332,7 @@ export const m = {
   Copied_failed: 'Copied failed',
   View_as_PDF: 'View PDF',
   Get_PDF_Failed: 'Get PDF Failed',
+  Problem_Descriptions: 'Problem Descriptions',
 
   // /views/oj/status/SubmissionList.vue
   Mine: 'Mine',

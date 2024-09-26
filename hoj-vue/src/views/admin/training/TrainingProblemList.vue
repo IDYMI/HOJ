@@ -48,6 +48,23 @@
         <vxe-table-column min-width="100" field="problemId" :title="$t('m.Display_ID')"></vxe-table-column>
         <vxe-table-column field="title" min-width="150" :title="$t('m.Title')" show-overflow></vxe-table-column>
 
+        <vxe-table-column min-width="150" :title="$t('m.Selected_Description')">
+          <template v-slot="{ row }">
+            <el-select
+              v-model="row.peid"
+              @change="changeProblemDescription(row.id,row.peid)"
+              size="small"
+            >
+              <el-option
+                v-for="item in row.problemDescriptionList"
+                :key="item.id"
+                :label="item.title"
+                :value="item.id"
+              >{{ item.title }}</el-option>
+            </el-select>
+          </template>
+        </vxe-table-column>
+
         <vxe-table-column field="author" min-width="100" :title="$t('m.Author')" show-overflow></vxe-table-column>
         <vxe-table-column min-width="200" :title="$t('m.Training_Problem_Rank')">
           <template v-slot="{ row }">
@@ -133,6 +150,7 @@
       width="90%"
       :visible.sync="addProblemDialogVisible"
       :close-on-click-modal="false"
+      z-index="3000"
     >
       <AddPublicProblem :trainingID="trainingId" @on-change="getProblemList"></AddPublicProblem>
     </el-dialog>
@@ -142,6 +160,7 @@
       width="350px"
       :visible.sync="AddRemoteOJProblemDialogVisible"
       :close-on-click-modal="false"
+      z-index="3000"
     >
       <el-form>
         <el-form-item :label="$t('m.Remote_OJ')">
@@ -338,6 +357,17 @@ export default {
             this.addRemoteOJproblemLoading = false;
           }
         );
+    },
+    changeProblemDescription(pid, peid) {
+      let data = {
+        pid: pid,
+        peid: peid,
+        tid: this.trainingId,
+      };
+      api.admin_changeTrainingProblemDescription(data).then((res) => {
+        myMessage.success(this.$i18n.t("m.Update_Successfully"));
+        this.currentChange(1);
+      });
     },
   },
   watch: {

@@ -6,6 +6,7 @@ import cn.hutool.http.HtmlUtil;
 import cn.hutool.http.HttpRequest;
 import org.springframework.util.StringUtils;
 import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.pojo.entity.problem.Tag;
 import top.hcode.hoj.utils.CodeForcesUtils;
 import top.hcode.hoj.utils.Constants;
@@ -84,13 +85,18 @@ public class CFProblemStrategy extends ProblemStrategy {
         }
 
         Problem info = new Problem();
+        ProblemDescription problemDescription = new ProblemDescription().setPid(info.getId());
+
         info.setProblemId(getJudgeName() + "-" + problemId);
 
-        info.setTitle(ReUtil.get("<div class=\"title\">\\s*" + problemNum + "\\. ([\\s\\S]*?)</div>", html, 1).trim());
+        problemDescription.setTitle(
+                ReUtil.get("<div class=\"title\">\\s*" + problemNum + "\\. ([\\s\\S]*?)</div>", html, 1)
+                        .trim());
 
         String timeLimitStr = ReUtil.get("</div>\\s*([\\d\\.]+) (seconds?|s)\\s*</div>", html, 1);
         if (StringUtils.isEmpty(timeLimitStr)) {
-            timeLimitStr = ReUtil.get("</div>\\s*<span .*?>(\\d+) (seconds?|s)\\s*</span>\\s*</div>", html, 1);
+            timeLimitStr = ReUtil.get("</div>\\s*<span .*?>(\\d+) (seconds?|s)\\s*</span>\\s*</div>", html,
+                    1);
         }
 
         double timeLimit = 1000 * Double.parseDouble(timeLimitStr);
@@ -98,7 +104,8 @@ public class CFProblemStrategy extends ProblemStrategy {
 
         String memoryLimitStr = ReUtil.get("</div>\\s*(\\d+) (megabytes|MB)\\s*</div>", html, 1);
         if (StringUtils.isEmpty(memoryLimitStr)) {
-            memoryLimitStr = ReUtil.get("</div>\\s*<span .*?>(\\d+) (megabytes|MB)\\s*</span>\\s*</div>", html, 1);
+            memoryLimitStr = ReUtil.get("</div>\\s*<span .*?>(\\d+) (megabytes|MB)\\s*</span>\\s*</div>",
+                    html, 1);
         }
 
         info.setMemoryLimit(Integer.parseInt(memoryLimitStr));
@@ -107,7 +114,9 @@ public class CFProblemStrategy extends ProblemStrategy {
                 "standard output\\s*</div>\\s*</div>\\s*<div>([\\s\\S]*?)</div>\\s*<div class=\"input-specification",
                 html, 1);
         if (StringUtils.isEmpty(tmpDesc)) {
-            tmpDesc = ReUtil.get("<div class=\"input-file\">([\\s\\S]*?)</div><div class=\"input-specification", html,
+            tmpDesc = ReUtil.get(
+                    "<div class=\"input-file\">([\\s\\S]*?)</div><div class=\"input-specification",
+                    html,
                     1);
         }
 
@@ -130,7 +139,8 @@ public class CFProblemStrategy extends ProblemStrategy {
                     .trim();
         }
 
-        info.setDescription("<pp>" + HtmlUtil.unescape(tmpDesc.replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
+        problemDescription.setDescription(
+                "<pp>" + HtmlUtil.unescape(tmpDesc.replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
 
         String inputDesc = ReUtil.get(
                 "<div class=\"section-title\">\\s*Input\\s*</div>([\\s\\S]*?)</div>\\s*<div class=\"output-specification\">",
@@ -150,7 +160,8 @@ public class CFProblemStrategy extends ProblemStrategy {
             inputDesc = inputDesc.replaceAll("\\$\\$\\$", "\\$").trim();
         }
 
-        info.setInput("<pp>" + HtmlUtil.unescape(inputDesc.replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
+        problemDescription
+                .setInput("<pp>" + HtmlUtil.unescape(inputDesc.replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
 
         String outputDesc = ReUtil.get(
                 "<div class=\"section-title\">\\s*Output\\s*</div>([\\s\\S]*?)</div>\\s*<div class=\"sample-tests\">",
@@ -158,7 +169,8 @@ public class CFProblemStrategy extends ProblemStrategy {
         if (!StringUtils.isEmpty(outputDesc)) {
             outputDesc = outputDesc.replaceAll("\\$\\$\\$", "\\$").trim();
         }
-        info.setOutput("<pp>" + HtmlUtil.unescape(outputDesc.replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
+        problemDescription.setOutput(
+                "<pp>" + HtmlUtil.unescape(outputDesc.replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
 
         List<String> inputExampleList = ReUtil.findAll(Pattern.compile(
                 "<div class=\"input\">\\s*<div class=\"title\">\\s*Input\\s*</div>\\s*<pre>([\\s\\S]*?)</pre>\\s*</div>"),
@@ -187,20 +199,21 @@ public class CFProblemStrategy extends ProblemStrategy {
             sb.append(HtmlUtil.unescape(output)).append("</output>");
         }
 
-        info.setExamples(sb.toString());
+        problemDescription.setExamples(sb.toString());
 
-        String tmpHint = ReUtil.get("<div class=\"section-title\">\\s*Note\\s*</div>([\\s\\S]*?)</div>\\s*</div>", html,
+        String tmpHint = ReUtil.get(
+                "<div class=\"section-title\">\\s*Note\\s*</div>([\\s\\S]*?)</div>\\s*</div>", html,
                 1);
         if (tmpHint != null) {
-            info.setHint("<pp>" + HtmlUtil
-                    .unescape(tmpHint.replaceAll("\\$\\$\\$", "\\$").trim().replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
+            problemDescription.setHint("<pp>" + HtmlUtil
+                    .unescape(tmpHint.replaceAll("\\$\\$\\$", "\\$").trim()
+                            .replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
         }
 
-        info.setIsRemote(true);
-
-        info.setSource(getProblemSource(html, problemId, contestId, problemNum));
+        problemDescription.setSource(getProblemSource(html, problemId, contestId, problemNum));
 
         info.setType(0)
+                .setIsRemote(true)
                 .setAuth(1)
                 .setAuthor(author)
                 .setOpenCaseResult(true)
@@ -209,7 +222,8 @@ public class CFProblemStrategy extends ProblemStrategy {
                 .setDifficulty(1); // 默认为中等
 
         List<String> allTags = ReUtil.findAll(Pattern.compile(
-                "<span class=\"tag-box\" style=\"font-size:1\\.2rem;\" title=\"[\\s\\S]*?\">([\\s\\S]*?)</span>"), html,
+                "<span class=\"tag-box\" style=\"font-size:1\\.2rem;\" title=\"[\\s\\S]*?\">([\\s\\S]*?)</span>"),
+                html,
                 1);
         List<Tag> tagList = new LinkedList<>();
         for (String tmp : allTags) {
@@ -217,6 +231,7 @@ public class CFProblemStrategy extends ProblemStrategy {
         }
         return new RemoteProblemInfo()
                 .setProblem(info)
+                .setProblemDescription(problemDescription)
                 .setTagList(tagList)
                 .setRemoteOJ(Constants.RemoteOJ.CODEFORCES);
     }

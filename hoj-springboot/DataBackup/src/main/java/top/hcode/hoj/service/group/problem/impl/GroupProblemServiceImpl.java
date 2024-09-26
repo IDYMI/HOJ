@@ -11,7 +11,7 @@ import top.hcode.hoj.common.result.ResultStatus;
 import top.hcode.hoj.manager.group.problem.GroupProblemManager;
 import top.hcode.hoj.pojo.dto.CompileDTO;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
-import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.problem.ProblemCase;
 import top.hcode.hoj.pojo.entity.problem.Tag;
 import top.hcode.hoj.pojo.vo.ProblemVO;
@@ -42,7 +42,7 @@ public class GroupProblemServiceImpl implements GroupProblemService {
     }
 
     @Override
-    public CommonResult<IPage<Problem>> getAdminProblemList(Integer limit, Integer currentPage, Long gid) {
+    public CommonResult<IPage<ProblemResDTO>> getAdminProblemList(Integer limit, Integer currentPage, Long gid) {
         try {
             return CommonResult.successResponse(groupProblemManager.getAdminProblemList(limit, currentPage, gid));
         } catch (StatusForbiddenException e) {
@@ -53,9 +53,9 @@ public class GroupProblemServiceImpl implements GroupProblemService {
     }
 
     @Override
-    public CommonResult<Problem> getProblem(Long pid) {
+    public CommonResult<ProblemResDTO> getProblem(Long pid, Long peid) {
         try {
-            return CommonResult.successResponse(groupProblemManager.getProblem(pid));
+            return CommonResult.successResponse(groupProblemManager.getProblem(pid, peid));
         } catch (StatusForbiddenException e) {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
         } catch (StatusNotFoundException e) {

@@ -365,7 +365,7 @@ public class JudgeManager {
 
         Boolean isSynchronous = false;
         Judge judge = judgeEntityService.getById(submitId);
-        Problem problem = new Problem();
+        ProblemResDTO problem = new ProblemResDTO();
 
         if (judge == null && cid != null) {
             // 获取同步赛对应的 judge 记录
@@ -376,7 +376,7 @@ public class JudgeManager {
         }
 
         problem = isSynchronous ? synchronousManager.getSynchronousProblem(judge.getDisplayPid(), cid)
-                : problemEntityService.getById(judge.getPid());
+                : problemEntityService.getProblemResDTO(judge.getPid(), null, null, null);
 
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
@@ -641,7 +641,7 @@ public class JudgeManager {
 
         Boolean isSynchronous = false;
         Judge judge = judgeEntityService.getById(submitId);
-        Problem problem = new Problem();
+        ProblemResDTO problem = new ProblemResDTO();
 
         if (judge == null && cid != null) {
             // 获取同步赛对应的 judge 记录
@@ -652,7 +652,7 @@ public class JudgeManager {
         }
 
         problem = isSynchronous ? synchronousManager.getSynchronousProblem(judge.getDisplayPid(), cid)
-                : problemEntityService.getById(judge.getPid());
+                : problemEntityService.getProblemResDTO(judge.getPid(), null, null, null);
 
         if (problem.getOpenCaseResult() != null && !problem.getOpenCaseResult()) {
             // 如果该题不支持开放测试点结果查看

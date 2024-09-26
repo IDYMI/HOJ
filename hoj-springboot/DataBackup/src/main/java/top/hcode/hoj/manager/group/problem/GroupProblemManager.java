@@ -23,6 +23,7 @@ import top.hcode.hoj.judge.Dispatcher;
 import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.pojo.dto.CompileDTO;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.group.Group;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.entity.problem.Problem;
@@ -104,7 +105,7 @@ public class GroupProblemManager {
         return groupProblemEntityService.getProblemList(limit, currentPage, gid);
     }
 
-    public IPage<Problem> getAdminProblemList(Integer limit, Integer currentPage, Long gid)
+    public IPage<ProblemResDTO> getAdminProblemList(Integer limit, Integer currentPage, Long gid)
             throws StatusNotFoundException, StatusForbiddenException {
 
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
@@ -129,10 +130,11 @@ public class GroupProblemManager {
         return groupProblemEntityService.getAdminProblemList(limit, currentPage, gid);
     }
 
-    public Problem getProblem(Long pid) throws StatusForbiddenException, StatusNotFoundException, StatusFailException {
+    public ProblemResDTO getProblem(Long pid, Long peid)
+            throws StatusForbiddenException, StatusNotFoundException, StatusFailException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        Problem problem = problemEntityService.getById(pid);
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, peid, null, null);
 
         if (problem == null) {
             throw new StatusNotFoundException("该题目不存在！");
@@ -164,6 +166,7 @@ public class GroupProblemManager {
             throws StatusForbiddenException, StatusNotFoundException, StatusFailException {
 
         problemValidator.validateGroupProblem(problemDto.getProblem());
+        problemValidator.validateGroupProblemDescription(problemDto.getProblemDescriptionList());
 
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
@@ -226,7 +229,8 @@ public class GroupProblemManager {
 
         Long pid = problemDto.getProblem().getId();
 
-        Problem problem = problemEntityService.getById(pid);
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, null, null,
+                problemDto.getProblem().getGid());
 
         if (problem == null) {
             throw new StatusNotFoundException("该题目不存在！");
@@ -298,7 +302,7 @@ public class GroupProblemManager {
     public void deleteProblem(Long pid) throws StatusForbiddenException, StatusNotFoundException, StatusFailException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        Problem problem = problemEntityService.getById(pid);
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, null, null, null);
 
         if (problem == null) {
             throw new StatusNotFoundException("该题目不存在！");
@@ -336,7 +340,7 @@ public class GroupProblemManager {
             throws StatusForbiddenException, StatusNotFoundException, StatusFailException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        Problem problem = problemEntityService.getById(pid);
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, null, null, null);
 
         if (problem == null) {
             throw new StatusNotFoundException("该题目不存在！");
@@ -446,7 +450,7 @@ public class GroupProblemManager {
             throws StatusForbiddenException, StatusNotFoundException, StatusFailException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        Problem problem = problemEntityService.getById(pid);
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, null, null, null);
 
         if (problem == null) {
             throw new StatusNotFoundException("该题目不存在！");
@@ -486,7 +490,7 @@ public class GroupProblemManager {
             throws StatusNotFoundException, StatusForbiddenException, StatusFailException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        Problem problem = problemEntityService.getById(pid);
+        ProblemResDTO problem = problemEntityService.getProblemResDTO(pid, null, null, null);
 
         if (problem == null) {
             throw new StatusNotFoundException("该题目不存在！");

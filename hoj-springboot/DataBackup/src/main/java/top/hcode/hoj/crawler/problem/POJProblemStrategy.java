@@ -7,6 +7,7 @@ import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.springframework.util.Assert;
 import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.utils.Constants;
 import top.hcode.hoj.utils.JsoupUtils;
 
@@ -27,25 +28,26 @@ public class POJProblemStrategy extends ProblemStrategy {
                 // 验证题号是否符合规范
                 Assert.isTrue(problemId.matches("[1-9]\\d*"), "POJ题号格式错误！");
                 Problem info = new Problem();
+                ProblemDescription problemDescription = new ProblemDescription().setPid(info.getId());
                 String url = HOST + String.format(PROBLEM_URL, problemId);
                 Connection connection = JsoupUtils.getConnectionFromUrl(url, null, null, false);
                 Document document = JsoupUtils.getDocument(connection, null);
                 String html = document.html();
                 html = html.replaceAll("<br>", "\n");
                 info.setProblemId(JUDGE_NAME + "-" + problemId);
-                info.setTitle(ReUtil.get("<title>\\d{3,} -- ([\\s\\S]*?)</title>", html, 1).trim());
+                problemDescription.setTitle(ReUtil.get("<title>\\d{3,} -- ([\\s\\S]*?)</title>", html, 1).trim());
                 info.setTimeLimit(Integer.parseInt(ReUtil.get("<b>Time Limit:</b> (\\d{3,})MS</td>", html, 1)));
                 info.setMemoryLimit(
                                 Integer.parseInt(ReUtil.get("<b>Memory Limit:</b> (\\d{2,})K</td>", html, 1)) / 1024);
-                info.setDescription("<pp>" + HtmlUtil.unescape(ReUtil.get(
+                problemDescription.setDescription("<pp>" + HtmlUtil.unescape(ReUtil.get(
                                 "<p class=\"pst\">Description</p><div class=.*?>([\\s\\S]*?)</div><p class=\"pst\">",
                                 html, 1)
                                 .replaceAll("src=\"[../]*", "src=\"" + HOST + "/")));
 
-                info.setInput("<pp>" + HtmlUtil.unescape(ReUtil.get(
+                problemDescription.setInput("<pp>" + HtmlUtil.unescape(ReUtil.get(
                                 "<p class=\"pst\">Input</p><div class=.*?>([\\s\\S]*?)</div><p class=\"pst\">",
                                 html, 1).replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
-                info.setOutput("<pp>" + HtmlUtil.unescape(ReUtil.get(
+                problemDescription.setOutput("<pp>" + HtmlUtil.unescape(ReUtil.get(
                                 "<p class=\"pst\">Output</p><div class=.*?>([\\s\\S]*?)</div><p class=\"pst\">", html,
                                 1).replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
                 StringBuilder sb = new StringBuilder("<input>");
@@ -57,13 +59,14 @@ public class POJProblemStrategy extends ProblemStrategy {
                                 "<p class=\"pst\">Sample Output</p><pre class=.*?>([\\s\\S]*?)</pre><p class=\"pst\">",
                                 html, 1))
                                 .append("</output>");
-                info.setExamples(sb.toString());
-                info.setHint("<pp>" + HtmlUtil.unescape(ReUtil.get(
+                problemDescription.setExamples(sb.toString());
+                problemDescription.setHint("<pp>" + HtmlUtil.unescape(ReUtil.get(
                                 "<p class=.*?>Hint</p><div class=.*?>([\\s\\S]*?)</div><p class=\"pst\">", html,
                                 1).replaceAll("(?<=\\>)\\s+(?=\\<)", "").replaceAll("(?<=\\>)\\s+(?=\\<)", "")));
                 info.setIsRemote(true);
-                info.setSource(String.format("<a style='color:#1A5CC8' href='http://poj.org/problem?id=%s'>%s</a>",
-                                problemId, JUDGE_NAME + "-" + problemId));
+                problemDescription.setSource(
+                                String.format("<a style='color:#1A5CC8' href='http://poj.org/problem?id=%s'>%s</a>",
+                                                problemId, JUDGE_NAME + "-" + problemId));
                 info.setType(0)
                                 .setAuth(1)
                                 .setAuthor(author)
@@ -73,6 +76,7 @@ public class POJProblemStrategy extends ProblemStrategy {
                                 .setDifficulty(1); // 默认为简单
                 return new RemoteProblemInfo()
                                 .setProblem(info)
+                                .setProblemDescription(problemDescription)
                                 .setTagList(null)
                                 .setRemoteOJ(Constants.RemoteOJ.POJ);
         }

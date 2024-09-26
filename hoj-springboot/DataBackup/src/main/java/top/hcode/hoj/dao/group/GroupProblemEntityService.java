@@ -1,5 +1,6 @@
 package top.hcode.hoj.dao.group;
 
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.vo.ProblemVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -14,6 +15,6 @@ public interface GroupProblemEntityService extends IService<Problem> {
 
     IPage<ProblemVO> getProblemList(int limit, int currentPage, Long gid);
 
-    IPage<Problem> getAdminProblemList(int limit, int currentPage, Long gid);
+    IPage<ProblemResDTO> getAdminProblemList(int limit, int currentPage, Long gid);
 
 }

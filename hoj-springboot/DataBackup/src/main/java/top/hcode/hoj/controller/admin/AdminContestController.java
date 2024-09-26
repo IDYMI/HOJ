@@ -12,10 +12,10 @@ import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.pojo.dto.AnnouncementDTO;
 import top.hcode.hoj.pojo.dto.ContestProblemDTO;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.contest.ContestProblem;
 
-import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.vo.AdminContestVO;
 import top.hcode.hoj.pojo.vo.AnnouncementVO;
 
@@ -124,8 +124,9 @@ public class AdminContestController {
 
     @GetMapping("/problem")
     @RequiresAuthentication
-    public CommonResult<Problem> getProblem(@RequestParam("pid") Long pid, HttpServletRequest request) {
-        return adminContestProblemService.getProblem(pid);
+    public CommonResult<ProblemResDTO> getProblem(@RequestParam("pid") Long pid,
+            @RequestParam(value = "peid", required = false) Long peid, HttpServletRequest request) {
+        return adminContestProblemService.getProblem(pid, peid);
     }
 
     @DeleteMapping("/problem")
@@ -172,6 +173,12 @@ public class AdminContestController {
     public CommonResult<Void> addProblemFromPublic(@RequestBody ContestProblemDTO contestProblemDto) {
 
         return adminContestProblemService.addProblemFromPublic(contestProblemDto);
+    }
+
+    @PostMapping("/change-problem-description")
+    @RequiresAuthentication
+    public CommonResult<Void> changeProblemDescription(@RequestBody ContestProblemDTO contestProblemDto) {
+        return adminContestProblemService.changeProblemDescription(contestProblemDto);
     }
 
     @GetMapping("/import-remote-oj-problem")

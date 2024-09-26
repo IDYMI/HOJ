@@ -17,6 +17,8 @@ public class ProblemDTO {
 
     private Problem problem;
 
+    private List<ProblemDescription> problemDescriptionList;
+
     private List<ProblemCase> samples;
 
     private Boolean isUploadTestCase;

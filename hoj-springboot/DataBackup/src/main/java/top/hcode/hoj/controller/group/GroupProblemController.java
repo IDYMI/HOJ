@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.pojo.dto.ProblemDTO;
+import top.hcode.hoj.pojo.dto.ProblemResDTO;
 import top.hcode.hoj.pojo.dto.CompileDTO;
-import top.hcode.hoj.pojo.entity.problem.Problem;
 import top.hcode.hoj.pojo.entity.problem.ProblemCase;
 import top.hcode.hoj.pojo.entity.problem.Tag;
 import top.hcode.hoj.pojo.vo.ProblemVO;
@@ -36,7 +36,7 @@ public class GroupProblemController {
     }
 
     @GetMapping("/get-admin-problem-list")
-    public CommonResult<IPage<Problem>> getAdminProblemList(
+    public CommonResult<IPage<ProblemResDTO>> getAdminProblemList(
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage,
             @RequestParam(value = "gid", required = true) Long gid) {
@@ -44,8 +44,9 @@ public class GroupProblemController {
     }
 
     @GetMapping("/problem")
-    public CommonResult<Problem> getProblem(@RequestParam("pid") Long pid) {
-        return groupProblemService.getProblem(pid);
+    public CommonResult<ProblemResDTO> getProblem(@RequestParam("pid") Long pid,
+            @RequestParam(value = "peid", required = false) Long peid) {
+        return groupProblemService.getProblem(pid, peid);
     }
 
     @PostMapping("/problem")

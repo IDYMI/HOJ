@@ -7,6 +7,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.entity.problem.ProblemDescription;
 import top.hcode.hoj.pojo.entity.problem.Tag;
 import top.hcode.hoj.utils.Constants;
 
@@ -86,26 +87,28 @@ public class LibreProblemStrategy extends ProblemStrategy {
             examples.append("<output>").append(tempObj.getStr("outputData")).append("</output>");
         });
         Problem problem = new Problem();
+        ProblemDescription problemDescription = new ProblemDescription().setPid(problem.getId());
         String finalProblemId = null;
         if (Objects.equals(problemId, id)) {
             finalProblemId = NAME + "-" + problemId;
         } else {
             finalProblemId = NAME + "-" + problemId + "(" + id + ")";
         }
-        problem.setProblemId(finalProblemId)
-                .setTitle(localizedContentsOfLocale.getStr("title"))
-                .setTimeLimit(Integer.parseInt(judgeInfo.getStr("timeLimit")))
-                .setMemoryLimit(Integer.parseInt(judgeInfo.getStr("memoryLimit")))
+        problemDescription.setTitle(localizedContentsOfLocale.getStr("title"))
                 .setDescription("<pp>" + HtmlUtil.unescape(desctiption.replaceAll("(?<=\\>)\\s+(?=\\<)", "")))
                 .setInput("<pp>" + HtmlUtil.unescape(JSONUtil.parseObj(problemDetailArray.get(1)).getStr("text")
                         .replaceAll("(?<=\\>)\\s+(?=\\<)", "")))
                 .setOutput("<pp>" + HtmlUtil.unescape(JSONUtil.parseObj(problemDetailArray.get(2)).getStr("text")
                         .replaceAll("(?<=\\>)\\s+(?=\\<)", "")))
                 .setExamples(examples.toString())
-                .setAuthor(author)
-                .setIsRemote(true)
                 .setSource("<a style='color:#1A5CC8' href='" + HOST + "/p/" + problemId + "'>" + NAME + "-" + problemId
-                        + "</a>")
+                        + "</a>");
+
+        problem.setProblemId(finalProblemId)
+                .setTimeLimit(Integer.parseInt(judgeInfo.getStr("timeLimit")))
+                .setMemoryLimit(Integer.parseInt(judgeInfo.getStr("memoryLimit")))
+                .setIsRemote(true)
+                .setAuthor(author)
                 .setAuth(1)
                 .setOpenCaseResult(false)
                 .setIsGroup(false)
@@ -119,6 +122,7 @@ public class LibreProblemStrategy extends ProblemStrategy {
         }
         return new RemoteProblemInfo()
                 .setProblem(problem)
+                .setProblemDescription(problemDescription)
                 .setTagList(tagList)
                 .setRemoteOJ(Constants.RemoteOJ.LIBRE);
     }

@@ -15,6 +15,8 @@ public class TrainingProblemDTO {
     @NotBlank(message = "题目id不能为空")
     private Long pid;
 
+    private Long peid;
+
     @NotBlank(message = "训练id不能为空")
     private Long tid;
 

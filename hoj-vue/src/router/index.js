@@ -16,9 +16,18 @@ Vue.use(VueRouter);
 
 //获取原型对象上的push函数
 const originalPush = VueRouter.prototype.push;
-//修改原型对象中的push方法
-VueRouter.prototype.push = function push(location) {
-  return originalPush.call(this, location).catch((err) => err);
+// 修改原型对象中的 push 方法
+VueRouter.prototype.push = function push(location, onComplete, onAbort) {
+  // 检测 Ctrl 键是否被按下
+  if (window.event && window.event.ctrlKey) {
+    // 在新标签页中打开链接
+    window.open(this.resolve(location).href, '_blank');
+    // 阻止默认的 push 行为
+    return Promise.resolve();
+  } else {
+    // 调用原始的 push 方法
+    return originalPush.call(this, location, onComplete, onAbort).catch((err) => err);
+  }
 };
 
 let routes = new Set([...ojRoutes, ...adminRoutes]);

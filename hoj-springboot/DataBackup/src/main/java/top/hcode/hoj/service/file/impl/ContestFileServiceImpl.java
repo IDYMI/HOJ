@@ -29,9 +29,9 @@ public class ContestFileServiceImpl implements ContestFileService {
     }
 
     @Override
-    public void downloadStatisticRank(String cids, HttpServletResponse response)
-            throws StatusFailException, IOException, StatusForbiddenException {
-        contestFileManager.downloadStatisticRank(cids, response);
+    public void downloadStatisticRank(String cids, String keyword, HttpServletResponse response)
+            throws StatusFailException, IOException, StatusForbiddenException, Exception {
+        contestFileManager.downloadStatisticRank(cids, keyword, response);
     }
 
     @Override

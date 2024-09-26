@@ -105,6 +105,15 @@
             OJ="MOSS"
           ></RemoteJudgeAccount>
         </el-col>
+        <el-col :xs="24" :md="12" style="margin-top: 15px;">
+          <RemoteJudgeAccount
+            :usernameList.sync="switchConfig.vjUsernameList"
+            :passwordList.sync="switchConfig.vjPasswordList"
+            :loading.sync="loading"
+            @saveSwitchConfig="saveSwitchConfig"
+            OJ="VJ"
+          ></RemoteJudgeAccount>
+        </el-col>
       </el-row>
     </el-card>
   </div>

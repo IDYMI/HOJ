@@ -7,18 +7,23 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import org.apache.shiro.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.common.exception.StatusForbiddenException;
+import top.hcode.hoj.pojo.bo.Pair_;
+import top.hcode.hoj.pojo.dto.StatisticDTO;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.vo.ACMContestRankVO;
-import top.hcode.hoj.pojo.vo.ACMStatisticContestVO;
+import top.hcode.hoj.pojo.vo.StatisticVO;
 import top.hcode.hoj.pojo.vo.OIContestRankVO;
 import top.hcode.hoj.pojo.vo.UserContestsRankingVO;
 import top.hcode.hoj.shiro.AccountProfile;
+import top.hcode.hoj.utils.RedisUtils;
+import top.hcode.hoj.validator.ContestValidator;
 
 import javax.annotation.Resource;
 import java.util.stream.Collectors;
@@ -34,6 +39,12 @@ public class ContestRankManager {
 
     @Resource
     private ContestCalculateRankManager contestCalculateRankManager;
+
+    @Autowired
+    private ContestValidator contestValidator;
+
+    @Autowired
+    private RedisUtils redisUtils;
 
     /**
      * @param isOpenSealRank              是否封榜
@@ -208,22 +219,6 @@ public class ContestRankManager {
     }
 
     /**
-     * @param cids        查询比赛的cid列表
-     * @param currentPage 当前页面
-     * @param limit       分页大小
-     * @param keyword     搜索关键词：匹配学校或榜单显示名称
-     * @desc 获取ACM比赛排行榜
-     */
-    public IPage<ACMStatisticContestVO> getStatisticRankPage(List<Contest> contestList, int currentPage, int limit,
-            String keyword)
-            throws StatusFailException, StatusForbiddenException {
-
-        List<ACMStatisticContestVO> result = getStatisticRankList(contestList, keyword);
-        // 计算好排行榜，然后进行分页
-        return getPagingRankList(result, currentPage, limit);
-    }
-
-    /**
      * 获取ACM比赛排行榜外榜
      *
      * @param isOpenSealRank              是否开启封榜
@@ -280,36 +275,91 @@ public class ContestRankManager {
         return getPagingRankList(acmContestRankVOS, currentPage, limit);
     }
 
-    /**
-     * @param cids       是否封榜
-     * @param keyword    搜索关键词：匹配学校或榜单显示名称
-     * @param isDownload 是否为下载请求
-     * @desc 获取ACM系列比赛排行榜
-     */
-    public List<ACMStatisticContestVO> getStatisticRankList(List<Contest> contestList, String keyword)
-            throws StatusFailException, StatusForbiddenException {
+    public List<ACMContestRankVO> getStatisticRankList(StatisticVO statisticVo)
+            throws StatusFailException, StatusForbiddenException, Exception {
 
-        List<ACMStatisticContestVO> result = contestCalculateRankManager.calcStatisticRank(contestList);
+        StatisticDTO statisticDto = statisticVo.getStatisticDTO();
+        String keyword = statisticDto.getKeyword();
+        String cids = statisticDto.getCids();
 
-        for (int i = 0; i < contestList.size(); i++) {
-            Contest contest = contestList.get(i);
+        List<ACMContestRankVO> result = contestCalculateRankManager.calcStatisticRank(statisticVo);
 
-            // keyword 查询
-            if (StrUtil.isNotBlank(keyword)) {
-                String finalKeyword = keyword.trim().toLowerCase();
-                result = result.stream()
-                        .filter(rankVo -> {
-                            boolean shouldFilter = filterBySchoolORRankShowName(finalKeyword,
-                                    rankVo.getSchool(),
-                                    getUserRankShowName(contest.getRankShowName(),
-                                            rankVo.getUsername(),
-                                            rankVo.getRealname(),
-                                            rankVo.getNickname()));
-                            return shouldFilter; // 返回 true 则筛选，返回 false 则不筛选
-                        })
-                        .collect(Collectors.toList());
+        return getStatisticRankListByKeywordAndPercents(result, cids, null, keyword);
+    }
+
+    public List<ACMContestRankVO> getSortedACMContestRankVoList(List<ACMContestRankVO> resultList) {
+        return contestCalculateRankManager.getSortedACMContestRankVoList(resultList);
+    }
+
+    public List<ACMContestRankVO> getStatisticRankListByKeywordAndPercents(List<ACMContestRankVO> result,
+            String cids, String percents, String keyword)
+            throws StatusFailException, StatusForbiddenException, Exception {
+        List<Contest> contestList = contestValidator.validateContestList(cids);
+
+        if (percents != null) {
+            List<Integer> percentList = contestValidator.validatePercentList(percents);
+
+            for (ACMContestRankVO acmContestRankVO : result) {
+                double totalAc = 0.0;
+                double totalTime = 0.0;
+
+                HashMap<String, HashMap<String, Object>> submissionInfo = acmContestRankVO.getSubmissionInfo();
+
+                for (int j = 0; j < contestList.size(); j++) {
+                    Contest contest = contestList.get(j); // 提取 contestList.get(j) 为局部变量
+                    String key = contest.getOj().equals("default")
+                            ? contest.getId().toString()
+                            : contest.getOj() + contest.getTitle(); // 简化 key 生成
+
+                    HashMap<String, Object> contestInfo = submissionInfo.get(key);
+
+                    if (contestInfo == null) {
+                        continue;
+                    }
+
+                    int percentValue = percentList.get(j);
+                    double percent = percentValue / 100.0;
+
+                    if (percentValue != 100) {
+                        String suffix = " * " + percentValue + "%";
+                        contestInfo.put("ac", String.valueOf(contestInfo.get("ac")) + suffix);
+                        contestInfo.put("totalTime", String.valueOf(contestInfo.get("totalTime")) + suffix);
+                    }
+
+                    // 先将字符串转换为数字，确保是可以转换的
+                    double acValue = Double.parseDouble(contestInfo.get("ac").toString().replaceAll("[^0-9.]", ""));
+                    double totalTimeValue = Double
+                            .parseDouble(contestInfo.get("totalTime").toString().replaceAll("[^0-9.]", ""));
+
+                    // 进行累加
+                    totalAc += acValue * percent;
+                    totalTime += totalTimeValue * percent;
+                }
+
+                // 保留三位小数
+                acmContestRankVO.setAc(Double.parseDouble(String.format("%.3f", totalAc)));
+                acmContestRankVO.setTotalTime(Double.parseDouble(String.format("%.3f", totalTime)));
             }
+
+            // 重新排序
+            result = contestCalculateRankManager.getSortedACMContestRankVoList(result);
         }
+
+        // 筛选关键词
+        if (StrUtil.isNotBlank(keyword)) {
+            String finalKeyword = keyword.trim().toLowerCase();
+            return result.stream()
+                    .filter(rankVo -> contestList.stream()
+                            .anyMatch(contest -> filterBySchoolORRankShowName(
+                                    finalKeyword,
+                                    rankVo.getSchool(),
+                                    "default".equals(contest.getOj())
+                                            ? getUserRankShowName(contest.getRankShowName(), rankVo.getUsername(),
+                                                    rankVo.getRealname(), rankVo.getNickname())
+                                            : rankVo.getRealname())))
+                    .collect(Collectors.toList());
+        }
+
         return result;
     }
 
@@ -456,7 +506,7 @@ public class ContestRankManager {
         return userContestsRankingVO;
     }
 
-    private <T> Page<T> getPagingRankList(List<T> rankList, int currentPage, int limit) {
+    public <T> Page<T> getPagingRankList(List<T> rankList, int currentPage, int limit) {
         Page<T> page = new Page<>(currentPage, limit);
         int count = rankList.size();
         List<T> pageList = new ArrayList<>();

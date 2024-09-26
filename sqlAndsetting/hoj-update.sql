@@ -2183,3 +2183,117 @@ CALL add_honor ;
 
 DROP PROCEDURE add_honor;
 
+/*
+* contest 添加 oj
+*/
+DROP PROCEDURE
+IF EXISTS add_Contest_oj;
+DELIMITER $$
+
+CREATE PROCEDURE add_Contest_oj ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'contest'
+	AND column_name = 'oj'
+) THEN
+	ALTER TABLE contest ADD COLUMN `oj` varchar(50) DEFAULT NULL COMMENT '其他平台oj';
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_Contest_oj ;
+
+DROP PROCEDURE add_Contest_oj;
+
+/*
+* 添加 statistic 记录系列比赛对应 cids
+
+*/
+DROP PROCEDURE
+IF EXISTS add_StatisticContest;
+DELIMITER $$
+
+CREATE PROCEDURE add_StatisticContest ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'statistic_contest'
+) THEN
+	CREATE TABLE `statistic_contest` (
+	  `scid` varchar(255) NOT NULL COMMENT '系列比赛id',
+	  `title` varchar(255) DEFAULT NULL COMMENT '系列比赛名称',
+      `cids` longtext NOT NULL COMMENT '包含比赛的cids',
+      `percents` longtext DEFAULT NULL COMMENT '包含比赛的比例',
+	  `visible` tinyint(1) DEFAULT '1' COMMENT '是否可见',
+	  `author` varchar(255) NOT NULL COMMENT '作者',
+	  `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	  `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	  PRIMARY KEY (`scid`)
+	) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_StatisticContest ;
+
+DROP PROCEDURE add_StatisticContest;
+
+
+/*
+* 添加 statistic_rank 系列比赛对应榜单信息
+
+*/
+DROP PROCEDURE
+IF EXISTS add_StatisticRank;
+DELIMITER $$
+
+CREATE PROCEDURE add_StatisticRank ()
+BEGIN
+
+IF NOT EXISTS (
+	SELECT
+		1
+	FROM
+		information_schema.`COLUMNS`
+	WHERE
+		table_name = 'statistic_rank'
+) THEN
+	CREATE TABLE `statistic_rank` (
+	  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+	  `scid` varchar(255) NOT NULL COMMENT '系列比赛id',
+	  `uid` varchar(255) NOT NULL,
+	  `username` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+	  `realname` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '真实姓名',
+	  `school` varchar(100) DEFAULT NULL COMMENT '学校',
+	  `ac` double DEFAULT NULL COMMENT 'ac题目数',
+	  `total` int DEFAULT NULL COMMENT '总提交数',
+	  `total_time` double DEFAULT NULL COMMENT '总用时',
+      `rank` int DEFAULT NULL COMMENT '总排名',
+	  `synchronous` tinyint(1) DEFAULT '1' COMMENT '是否为外网站数据',
+      `json` longtext DEFAULT NULL COMMENT '比赛对应的提交信息',
+	  `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	  `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	  PRIMARY KEY (`id`),
+	  KEY `scid` (`scid`),
+	  CONSTRAINT `statistic_rank_ibfk_1` FOREIGN KEY (`scid`) REFERENCES `statistic_contest` (`scid`) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+END
+IF ; END$$
+
+DELIMITER ;
+CALL add_StatisticRank ;
+
+DROP PROCEDURE add_StatisticRank;
+
+

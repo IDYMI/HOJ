@@ -143,4 +143,8 @@ public class SwitchConfigDTO {
     private List<String> newojPasswordList;
 
     private List<String> mossUsernameList;
+
+    private List<String> vjUsernameList;
+
+    private List<String> vjPasswordList;
 }

@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -55,17 +56,32 @@ public class ACMContestRankVO {
     private String avatar;
 
     @ApiModelProperty(value = "提交总罚时")
-    private Long totalTime;
+    private Double totalTime;
 
     @ApiModelProperty(value = "总提交数")
     private Integer total;
 
     @ApiModelProperty(value = "ac题目数")
-    private Integer ac;
+    private Double ac;
 
     @ApiModelProperty(value = "有提交的题的提交详情")
     private HashMap<String, HashMap<String, Object>> submissionInfo;
 
-    @ApiModelProperty(value = "是否为同步赛数据")
+    @ApiModelProperty(value = "比赛名称")
+    private String title;
+
+    @ApiModelProperty(value = "cid")
+    private String cid;
+
+    @ApiModelProperty(value = "开始时间")
+    private Date startTime;
+
+    @ApiModelProperty(value = "排行网址")
+    private String link;
+
+    @ApiModelProperty(value = "是否为外网站数据")
     private Boolean synchronous;
+
+    @ApiModelProperty(value = "包含比赛的比例")
+    private String percents;
 }

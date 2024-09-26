@@ -24,16 +24,6 @@
             $t("m.System_Config")
             }}
           </el-menu-item>
-          <el-menu-item index="/admin/switch">
-            {{
-            $t("m.System_Switch")
-            }}
-          </el-menu-item>
-          <el-menu-item index="/admin/account">
-            {{
-            $t("m.Account_Config")
-            }}
-          </el-menu-item>
           <el-menu-item index="/admin/user">
             {{
             $t("m.User_Admin")
@@ -45,6 +35,16 @@
             <i class="el-icon-menu"></i>
             {{ $t("m.General") }}
           </template>
+          <el-menu-item index="/admin/switch">
+            {{
+            $t("m.System_Switch")
+            }}
+          </el-menu-item>
+          <el-menu-item index="/admin/account">
+            {{
+            $t("m.Account_Config")
+            }}
+          </el-menu-item>
           <el-menu-item index="/admin/notice">
             {{
             $t("m.SysNotice")
@@ -177,6 +177,17 @@
             }}
           </el-menu-item>
         </el-submenu>
+        <el-submenu index="tools" v-if="isMainAdminRole">
+          <template slot="title">
+            <i class="el-icon-s-cooperation" aria-hidden="true" style="font-size: 20px"></i>
+            {{ $t("m.Tools_Admin") }}
+          </template>
+          <el-menu-item index="/admin/tools/ranks-list">
+            {{
+            $t("m.Ranks_Admin")
+            }}
+          </el-menu-item>
+        </el-submenu>
       </el-menu>
       <div id="header">
         <el-row>
@@ -304,6 +315,33 @@
               button
               :ripple="false"
               slot="nested"
+              to="/admin/user"
+              @click="opendrawer = !opendrawer"
+              active-class="mobile-menu-active"
+            >
+              <mu-list-item-title>{{ $t("m.User_Admin") }}</mu-list-item-title>
+            </mu-list-item>
+          </mu-list-item>
+
+          <mu-list-item
+            v-if="isMainAdminRole"
+            button
+            :ripple="false"
+            nested
+            :open="openSideMenu === 'general'"
+            @toggle-nested="openSideMenu = arguments[0] ? 'general' : ''"
+          >
+            <mu-list-item-action>
+              <mu-icon value=":el-icon-menu" size="24"></mu-icon>
+            </mu-list-item-action>
+            <mu-list-item-title>{{ $t("m.General") }}</mu-list-item-title>
+            <mu-list-item-action>
+              <mu-icon class="toggle-icon" size="24" value=":el-icon-arrow-down"></mu-icon>
+            </mu-list-item-action>
+            <mu-list-item
+              button
+              :ripple="false"
+              slot="nested"
               to="/admin/switch"
               @click="opendrawer = !opendrawer"
               active-class="mobile-menu-active"
@@ -328,33 +366,6 @@
                 }}
               </mu-list-item-title>
             </mu-list-item>
-            <mu-list-item
-              button
-              :ripple="false"
-              slot="nested"
-              to="/admin/user"
-              @click="opendrawer = !opendrawer"
-              active-class="mobile-menu-active"
-            >
-              <mu-list-item-title>{{ $t("m.User_Admin") }}</mu-list-item-title>
-            </mu-list-item>
-          </mu-list-item>
-
-          <mu-list-item
-            v-if="isMainAdminRole"
-            button
-            :ripple="false"
-            nested
-            :open="openSideMenu === 'general'"
-            @toggle-nested="openSideMenu = arguments[0] ? 'general' : ''"
-          >
-            <mu-list-item-action>
-              <mu-icon value=":el-icon-menu" size="24"></mu-icon>
-            </mu-list-item-action>
-            <mu-list-item-title>{{ $t("m.General") }}</mu-list-item-title>
-            <mu-list-item-action>
-              <mu-icon class="toggle-icon" size="24" value=":el-icon-arrow-down"></mu-icon>
-            </mu-list-item-action>
             <mu-list-item
               button
               :ripple="false"
@@ -741,6 +752,41 @@
               <mu-list-item-title>
                 {{
                 $t("m.Create_Honor")
+                }}
+              </mu-list-item-title>
+            </mu-list-item>
+          </mu-list-item>
+
+          <mu-list-item
+            v-if="isMainAdminRole"
+            button
+            :ripple="false"
+            nested
+            :open="openSideMenu === 'tools'"
+            @toggle-nested="openSideMenu = arguments[0] ? 'tools' : ''"
+          >
+            <mu-list-item-action>
+              <mu-icon value=":el-icon-s-cooperation fa-size" size="24"></mu-icon>
+            </mu-list-item-action>
+            <mu-list-item-title>
+              {{
+              $t("m.Tools_Admin")
+              }}
+            </mu-list-item-title>
+            <mu-list-item-action>
+              <mu-icon class="toggle-icon" size="24" value=":el-icon-arrow-down"></mu-icon>
+            </mu-list-item-action>
+            <mu-list-item
+              button
+              :ripple="false"
+              slot="nested"
+              to="/admin/tools/ranks-list"
+              @click="opendrawer = !opendrawer"
+              active-class="mobile-menu-active"
+            >
+              <mu-list-item-title>
+                {{
+                $t("m.Ranks_Admin")
                 }}
               </mu-list-item-title>
             </mu-list-item>

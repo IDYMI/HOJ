@@ -22,14 +22,14 @@ public class SwitchController {
     @Resource
     private ConfigService configService;
 
-    @RequiresPermissions("system_info_admin")
+    @RequiresPermissions("switch_info_admin")
     @RequestMapping("/info")
     public CommonResult<SwitchConfigDTO> getSwitchConfig() {
 
         return configService.getSwitchConfig();
     }
 
-    @RequiresPermissions("system_info_admin")
+    @RequiresPermissions("switch_info_admin")
     @PutMapping("/update")
     public CommonResult<Void> setSwitchConfig(@RequestBody SwitchConfigDTO config) {
         return configService.setSwitchConfig(config);

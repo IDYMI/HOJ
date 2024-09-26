@@ -1,16 +1,154 @@
 <template>
-  <el-row type="flex" justify="space-around">
-    <el-col :span="24">
-      <el-card shadow :padding="10">
-        <div slot="header">
+  <div class="view">
+    <el-card shadow :padding="10">
+      <div slot="header">
+        <template v-if="isAdmin">
+          <span class="panel-title home-title">{{ $t("m.ACM_StatisticRank") }}</span>
+        </template>
+        <template v-else>
           <ul class="nav-list">
             <li>
-              <span class="panel-title-acm">{{ $t("m.ACM_StatisticRank") }}</span>
+              <span
+                class="panel-title-acm"
+              >{{ title ? $t("m.ACM_StatisticRank") + " - " + title : $t("m.ACM_StatisticRank") }}</span>
             </li>
           </ul>
-        </div>
-        <el-row>
-          <el-col :xs="24" :md="8">
+        </template>
+      </div>
+      <el-form label-position="top" @submit.native.prevent>
+        <el-row :gutter="20">
+          <template v-if="isAdmin">
+            <el-col>
+              <!-- 选择的cids -->
+              <el-form-item :label="$t('m.Generate_Title')" required>
+                <el-input style="width:50%;" v-model="title" :placeholder="$t('m.Generate_Title')"></el-input>
+              </el-form-item>
+              <el-form-item required>
+                <template #label>
+                  {{ $t('m.The_Selected_Cids') }}
+                  <el-popover placement="right" trigger="hover">
+                    <p>{{ $t('m.The_Selected_Cids_Tips') }}</p>
+                    <i slot="reference" class="el-icon-question"></i>
+                  </el-popover>
+                </template>
+                <!-- 快速输入框 -->
+                <el-input
+                  :placeholder="$t('m.The_Input_Cids')"
+                  size="medium"
+                  class="input-new-cids"
+                  v-model="cids"
+                  :trigger-on-focus="true"
+                  clearable
+                  @keyup.enter.native="getStatisticRankCids"
+                  @blur="getStatisticRankCids"
+                ></el-input>
+                <el-tag
+                  v-for="(cid, index) in contestCids"
+                  closable
+                  :close-transition="false"
+                  :key="cid"
+                  type="warning"
+                  size="medium"
+                  @close="removeCid(index, cid)"
+                  style="margin-right: 7px; margin-top: 4px"
+                >{{ cid }}</el-tag>
+                <el-input
+                  v-if="inputVisible"
+                  size="medium"
+                  class="input-new-cid"
+                  v-model="cid"
+                  :trigger-on-focus="true"
+                  @keyup.enter.native="addCid"
+                  @blur="addCid"
+                ></el-input>
+                <el-tooltip effect="dark" :content="$t('m.Add')" placement="top" v-else>
+                  <el-button
+                    class="button-new-tag"
+                    size="small"
+                    @click="inputVisible = true"
+                    icon="el-icon-plus"
+                  ></el-button>
+                </el-tooltip>
+                <!-- 快速删除 -->
+                <el-tooltip
+                  style="margin-left: 7px;"
+                  effect="dark"
+                  :content="$t('m.Delete_All')"
+                  placement="top"
+                >
+                  <el-button size="small" @click="clearAllCid()" icon="el-icon-delete"></el-button>
+                </el-tooltip>
+              </el-form-item>
+            </el-col>
+
+            <el-col v-if="cfVisible || vjVisible || hduVisible">
+              <el-form-item>
+                <template #label>
+                  {{ $t('m.Ranks_Account') }}
+                  <el-popover placement="right" trigger="hover">
+                    <p>{{ $t('m.Ranks_Account_Tips') }}</p>
+                    <i slot="reference" class="el-icon-question"></i>
+                  </el-popover>
+                </template>
+
+                <div
+                  v-for="(visible, platform) in { cf: cfVisible, vj: vjVisible, hdu: hduVisible }"
+                  :key="platform"
+                >
+                  <el-col v-if="visible" :xs="8" :md="8">
+                    <div style="display: flex; align-items: center;">
+                      <span>{{ platform.toUpperCase() }}</span>
+                      <el-select
+                        style="margin-left: 15px;"
+                        size="small"
+                        class="difficulty-select"
+                        placeholder="Enter the username"
+                        v-model="account[platform]"
+                      >
+                        <el-option
+                          :label="value"
+                          :value="value"
+                          v-for="(value, index) in switchConfig[`${platform}UsernameList`]"
+                          :key="index"
+                        ></el-option>
+                      </el-select>
+                    </div>
+                  </el-col>
+                </div>
+              </el-form-item>
+            </el-col>
+
+            <el-col>
+              <el-card>
+                <p>1. {{ $t('m.Import_User_Tips1') }}</p>
+                <p>2. {{ $t('m.Import_User_Tips9') }}</p>
+                <p>3. {{ $t('m.Import_User_Tips10') }}</p>
+                <p>4. {{ $t('m.Import_User_Tips5') }}</p>
+                <el-upload
+                  action
+                  :show-file-list="false"
+                  accept=".csv"
+                  :before-upload="handleUsersCSV"
+                >
+                  <el-button
+                    size="small"
+                    icon="el-icon-folder-opened"
+                    type="primary"
+                  >{{ $t('m.Choose_File') }}</el-button>
+                </el-upload>
+              </el-card>
+            </el-col>
+          </template>
+          <el-col :md="8" :xs="24" v-if="isAdmin">
+            <div class="contest-rank-search contest-rank-filter">
+              <el-input
+                :placeholder="$t('m.Enter_Contest_Percents')"
+                v-model="percents"
+                @keyup.enter.native="getStatisticRankData(page)"
+              ></el-input>
+            </div>
+          </el-col>
+          <el-col :md="8" :xs="24">
             <div class="contest-rank-search contest-rank-filter">
               <el-input
                 :placeholder="$t('m.Contest_Rank_Search_Placeholder')"
@@ -26,8 +164,8 @@
               </el-input>
             </div>
           </el-col>
-          <el-col :xs="24" :md="16">
-            <div class="contest-rank-config" v-if="isMainAdminRole">
+          <el-col :md="8" :xs="24" v-if="!isAdmin">
+            <div class="contest-rank-config">
               <el-popover trigger="hover" placement="left-start">
                 <el-button round size="small" slot="reference">{{ $t("m.Contest_Rank_Setting") }}</el-button>
                 <div id="switches">
@@ -45,9 +183,8 @@
             </div>
           </el-col>
         </el-row>
-
         <div>
-          <vxe-table
+          <vxe-grid
             round
             border
             auto-resize
@@ -129,7 +266,7 @@
                     ></avatar>
                   </span>
                   <span class="contest-rank-user-info">
-                    <a @click=" getUserHomeByUsername(row.uid, row.username, row.synchronous) ">
+                    <a @click="getUserHomeByUsername(row.uid, row.username, row.synchronous)">
                       <span class="contest-username" :title="row.rankShowName">
                         <span class="contest-rank-flag" v-if="row.uid == userInfo.uid">Own</span>
                         <span class="contest-rank-flag" v-if="row.rank == -1">Star</span>
@@ -146,12 +283,7 @@
                 </div>
               </template>
             </vxe-table-column>
-            <vxe-table-column
-              field="realname"
-              width="150"
-              fixed="left"
-              :title="$t('m.RealName')"
-            >
+            <vxe-table-column field="realname" width="150" fixed="left" :title="$t('m.RealName')">
               <template v-slot="{ row }">
                 <span>{{ row.realname }}</span>
               </template>
@@ -177,44 +309,83 @@
             >
               <template v-slot:header>
                 <span>
-                  <el-tooltip effect="dark" placement="top">
-                    <div slot="content">{{getContestTitle(cid)}}</div>
+                  <el-tooltip v-if="getContestTitle(cid)" effect="dark" placement="top">
+                    <div slot="content">{{ getContestTitle(cid) }}</div>
                     <span
                       class="emphasis"
                       :style="{ color: '#495060', cursor: 'pointer' }"
                       @click="getContestDetailsById(cid)"
                     >{{ cid }}</span>
                   </el-tooltip>
+                  <span
+                    v-else
+                    class="emphasis"
+                    :style="{ color: '#495060', cursor: 'pointer' }"
+                    @click="getContestDetailsById(cid)"
+                  >{{ cid }}</span>
                 </span>
               </template>
               <template v-slot="{ row }">
-                <span v-if="row.contestInfo[cid]" class="submission-hover">
-                  <span
-                    v-if="row.contestInfo[cid].AC"
-                    class="submission-time"
-                    @click="getUserACSubmit(row.username,cid)"
-                    style="color: rgb(87, 163, 243); font-weight: 600; font-size: 14px;"
-                  >
-                    {{row.contestInfo[cid].AC}}
-                    <br />
+                <span v-if="row.submissionInfo[cid]">
+                  <span v-if="row.submissionInfo[cid].link">
+                    <span
+                      v-if="row.submissionInfo[cid].ac"
+                      class="submission-time"
+                      style="font-weight: 600; font-size: 14px;"
+                    >
+                      {{ row.submissionInfo[cid].ac }}
+                      <br />
+                    </span>
+                  </span>
+                  <span v-else @click="getUserACSubmit(row.username, cid)" class="submission-hover">
+                    <span
+                      v-if="row.submissionInfo[cid].ac"
+                      class="submission-time"
+                      style="color: rgb(87, 163, 243); font-weight: 600; font-size: 14px;"
+                    >
+                      {{ row.submissionInfo[cid].ac }}
+                      <br />
+                    </span>
                   </span>
                 </span>
               </template>
             </vxe-table-column>
-          </vxe-table>
+          </vxe-grid>
         </div>
-        <Pagination
-          :total="total"
-          :page-size.sync="limit"
-          :page-sizes="[10, 30, 50, 100, 300, 500]"
-          :current.sync="page"
-          @on-change="getStatisticRankData"
-          @on-page-size-change="getStatisticRankData(1)"
-          :layout="'prev, pager, next, sizes'"
-        ></Pagination>
-      </el-card>
-    </el-col>
-  </el-row>
+        <div style="display: flex; justify-content: flex-end;">
+          <Pagination
+            :total="total"
+            :page-size.sync="limit"
+            :page-sizes="[10, 30, 50, 100, 300, 500]"
+            :current.sync="page"
+            @on-change="getStatisticRankData"
+            @on-page-size-change="getStatisticRankData(1)"
+            :layout="'prev, pager, next, sizes'"
+          ></Pagination>
+        </div>
+        <div v-if="isAdmin">
+          <div v-if="captcha_img">
+            <div style="margin-bottom: 10px;">
+              <el-image :src="captcha_img" fit="cover" style="width: 200px;"></el-image>
+            </div>
+            <el-form-item :label="$t('m.Enter_Captcha')" required>
+              <el-input
+                size="medium"
+                class="input-new-cid"
+                v-model="captcha"
+                placeholder="Enter captcha"
+              ></el-input>
+            </el-form-item>
+          </div>
+          <el-button
+            type="primary"
+            size="small"
+            @click="getStatisticRankData(page, true)"
+          >{{ $t("m.Generate") }}</el-button>
+        </div>
+      </el-form>
+    </el-card>
+  </div>
 </template>
 
 <script>
@@ -225,6 +396,8 @@ const RankBox = () => import("@/components/oj/common/RankBox");
 import time from "@/common/time";
 import utils from "@/common/utils";
 import api from "@/common/api";
+import myMessage from "@/common/message";
+import papa from "papaparse"; // csv插件
 
 export default {
   name: "ACMContestStatic",
@@ -238,33 +411,188 @@ export default {
       total: 0,
       page: 1,
       limit: 30,
-      cids: this.$route.params.cids,
       dataRank: [],
       keyword: null,
       contestCids: [],
+      contestPercents: [],
+      cid: "",
+      cids: "",
+      percents: "",
+      title: null,
+      inputVisible: false,
+      cfVisible: false,
+      vjVisible: false,
+      hduVisible: false,
+      switchConfig: {
+        cfUsernameList: [],
+        vjUsernameList: [],
+        hduUsernameList: [],
+      },
+      account: {
+        cf: null,
+        vj: null,
+        hdu: null,
+      },
+      captcha_img: null,
+      captcha: null,
+      username_dir: {},
+      isAdmin: false,
+      uid: null,
     };
   },
   mounted() {
-    this.getStatisticRankData(1);
-    this.getContestCids();
+    this.routeName = this.$route.name;
+    if (this.routeName === "ACM Static Rank") {
+      this.cids = this.$route.params.cids;
+      this.isAdmin = false;
+      this.getStatisticRankCids(true);
+    } else {
+      this.isAdmin = true;
+      this.getAdminSwitchConfig();
+    }
   },
   methods: {
-    ...mapActions(["isMainAdminRole", "isContestAdmin", "userInfo"]),
-
-    getContestCids() {
-      this.contestCids = this.$route.params.cids.split("+");
-    },
-    getStatisticRankData(page = 1) {
-      let data = {
-        currentPage: page,
-        limit: this.limit,
-        cids: this.cids,
-        keyword: this.keyword == null ? null : this.keyword.trim(),
-      };
-      api.getStatisticRank(data).then((res) => {
-        this.total = res.data.data.total;
-        this.applyToTable(res.data.data.records);
+    ...mapActions(["userInfo"]),
+    getAdminSwitchConfig() {
+      api.admin_getSwitchConfig().then((res) => {
+        let profile = res.data.data;
+        Object.keys(this.switchConfig).forEach((element) => {
+          if (profile[element] !== undefined) {
+            this.switchConfig[element] = profile[element];
+          }
+        });
       });
+    },
+    removeCid(index, cid) {
+      this.contestCids.splice(
+        this.contestCids.map((item) => item).indexOf(cid),
+        1
+      );
+      this.contestPercents.splice(index, 1);
+      this.percents = this.contestPercents.join("-");
+
+      if (cid.startsWith("cf") || cid.startsWith("gym")) {
+        this.cfVisible = false;
+      } else if (cid.startsWith("vj")) {
+        this.vjVisible = false;
+      } else if (cid.startsWith("hdu")) {
+        this.hduVisible = false;
+      }
+    },
+    addCid(out_error = true) {
+      this.cid = this.cid.replace(/(^\s*)|(\s*$)/g, "");
+
+      const validCidPattern =
+        /^(?:\d+|(?:cf|gym|vj|hdu|nowcoder|pta)\d+|xcpc.+)$/;
+
+      if (this.cid) {
+        if (validCidPattern.test(this.cid)) {
+          for (var i = 0; i < this.contestCids.length; i++) {
+            if (this.contestCids[i] == this.cid) {
+              myMessage.warning(this.$i18n.t("m.Add_Cid_Error"));
+              this.cid = "";
+              return;
+            }
+          }
+          if (this.cid.startsWith("cf") || this.cid.startsWith("gym")) {
+            this.cfVisible = true;
+          } else if (this.cid.startsWith("vj")) {
+            this.vjVisible = true;
+          } else if (this.cid.startsWith("hdu")) {
+            this.hduVisible = true;
+          }
+
+          this.contestCids.push(this.cid);
+          this.contestPercents.push("100%");
+        } else {
+          if (!out_error) {
+            myMessage.warning(this.$i18n.t("m.Invalid_Cid_Error"));
+          }
+        }
+        this.cid = "";
+        this.inputVisible = false;
+      }
+    },
+    clearAllCid() {
+      this.contestCids = [];
+      this.contestPercents = [];
+    },
+    getStatisticRankData(page = 1, isSave = false) {
+      let cids = this.contestCids.join("+") + "+";
+
+      // 提前处理 keyword 和 captcha
+      const trimmedKeyword = this.keyword ? this.keyword.trim() : null;
+      const trimmedCaptcha = this.captcha ? this.captcha.trim() : null;
+
+      if (this.isAdmin) {
+        if (this.captcha_img && !trimmedCaptcha) {
+          myMessage.warning(this.$i18n.t("m.Enter_Captcha"));
+          return;
+        }
+
+        const data = {
+          currentPage: page,
+          limit: this.limit,
+          cids: cids,
+          percents: this.percents,
+          statisticAccountDto: this.account,
+          keyword: trimmedKeyword,
+          captcha: trimmedCaptcha,
+          data: this.username_dir,
+          title: this.title,
+          isSave: isSave,
+        };
+
+        api
+          .admin_addStatisticRank(data)
+          .then((response) => {
+            this.handleResponse(response);
+            if (isSave) {
+              this.$router.push({ name: "admin-ranks-list" });
+            }
+          })
+          .catch(this.handleCaptchaError); // 捕获并处理错误
+      } else {
+        api
+          .getStatisticRank(page, this.limit, this.cids, trimmedKeyword)
+          .then(this.handleResponse, this.clearCaptcha);
+      }
+    },
+    handleResponse(res) {
+      this.total = res.data.data.total;
+      this.applyToTable(res.data.data.records);
+      this.clearCaptcha();
+    },
+    handleCaptchaError(error) {
+      const msg = error.data.msg;
+      if (msg.startsWith("[VJ] Your Captcha :")) {
+        this.captcha_img = msg.split(":")[1].trim();
+        this.captcha = null;
+      } else {
+        this.clearCaptcha();
+      }
+    },
+    clearCaptcha() {
+      this.captcha_img = null;
+      this.captcha = null;
+    },
+
+    getStatisticRankCids(out_error = false) {
+      api.getStatisticRankCids(this.cids).then(
+        (res) => {
+          let cids = res.data.msg || this.cids;
+
+          cids.split("+").forEach((cid) => {
+            if (cid) {
+              this.cid = cid;
+              this.addCid(out_error);
+            }
+          });
+          this.percents = this.contestPercents.join("-");
+          if (!this.isAdmin) this.getStatisticRankData(1);
+        },
+        (_) => {}
+      );
     },
     getRankShowName(rankShowName, username) {
       let finalShowName = rankShowName;
@@ -283,7 +611,7 @@ export default {
         query: { username: username, status: 0 },
       });
     },
-    getUserHomeByUsername(uid, username, synchronous) {
+    getUserHomeByUsername(uid, username, synchronous = false) {
       if (!synchronous) {
         this.$router.push({
           name: "UserHome",
@@ -291,13 +619,30 @@ export default {
         });
       }
     },
-    getContestDetailsById(contestID) {
-      this.$router.push({
-        name: "ContestDetails",
-        params: {
-          contestID: contestID,
-        },
+    getContestDetailsById(cid) {
+      let foundLink = null;
+      this.dataRank.forEach((rank, i) => {
+        let info = rank.submissionInfo;
+        Object.keys(info).forEach((contestID) => {
+          if (contestID.toString() == cid.toString()) {
+            foundLink = info[contestID].link;
+            return;
+          }
+        });
+        if (foundLink) {
+          return;
+        }
       });
+      if (foundLink) {
+        window.open(foundLink, "_blank");
+      } else {
+        this.$router.push({
+          name: "ContestDetails",
+          params: {
+            contestID: cid,
+          },
+        });
+      }
     },
     cellClassName({ row, rowIndex, column, columnIndex }) {
       if (row.username == this.userInfo.username) {
@@ -319,7 +664,7 @@ export default {
     getContestTitle(cid) {
       let foundTitle = null;
       this.dataRank.forEach((rank, i) => {
-        let info = rank.contestInfo;
+        let info = rank.submissionInfo;
         Object.keys(info).forEach((contestID) => {
           if (contestID.toString() == cid.toString()) {
             foundTitle = info[contestID].title;
@@ -334,7 +679,11 @@ export default {
     },
     applyToTable(dataRank) {
       dataRank.forEach((rank, i) => {
-        let info = rank.contestInfo;
+        if (!this.isAdmin) {
+          if (rank.title) this.title = rank.title;
+          if (rank.percents) this.percents = rank.percents;
+        }
+        let info = rank.submissionInfo;
         let cellClass = {};
         Object.keys(info).forEach((contestID) => {
           rank[contestID] = info[contestID];
@@ -351,8 +700,43 @@ export default {
       return time.secondFormat(totalTime);
     },
     downloadRankCSV() {
-      const cids = this.$route.params.cids.replace(/\+/g, "%2B");
-      utils.downloadFile(`/api/file/download-statistic-rank?cids=${cids}`);
+      let cids = "";
+      cids = this.cids.replace(/\+/g, "%2B");
+
+      let url = `/api/file/download-statistic-rank?cids=${cids}`;
+
+      if (this.keyword) url += `&keyword=${keyword}`;
+
+      utils.downloadFile(url);
+    },
+    handleUsersCSV(file) {
+      papa.parse(file, {
+        complete: (results) => {
+          let data = results.data.filter((user) => {
+            return user[0] && user[1];
+          });
+          let delta = results.data.length - data.length;
+          if (delta > 0) {
+            myMessage.warning(
+              delta + this.$i18n.t("m.Generate_Skipped_Reason2")
+            );
+          }
+          let transformedData = data.reduce((acc, item) => {
+            let key = item[0];
+            let value = item[1];
+            if (!acc[key]) {
+              acc[key] = value;
+            }
+            return acc;
+          }, {});
+
+          // 直接将转换后的数据赋值给 username_dir
+          this.username_dir = transformedData;
+        },
+        error: (error) => {
+          myMessage.error(error);
+        },
+      });
     },
   },
   computed: {
@@ -469,5 +853,12 @@ a.emphasis:hover {
 }
 .submission-error {
   font-weight: 400;
+}
+.input-new-cid {
+  width: 200px;
+}
+.input-new-cids {
+  width: 400px;
+  margin-right: 10px;
 }
 </style>

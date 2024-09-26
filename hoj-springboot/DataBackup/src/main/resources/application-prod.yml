@@ -68,6 +68,8 @@ nswoj-password-list: ${NSWOJ_ACCOUNT_PASSWORD_LIST:}
 newoj-username-list: ${NEWOJ_ACCOUNT_USERNAME_LIST:}
 newoj-password-list: ${NEWOJ_ACCOUNT_PASSWORD_LIST:}
 moss-username-list: ${MOSS_ACCOUNT_USERNAME_LIST:}
+vj-username-list: ${VJ_ACCOUNT_USERNAME_LIST:}
+vj-password-list: ${VJ_ACCOUNT_PASSWORD_LIST:}
 # 是否强制用配置更新覆盖remote judge的账号
 forced-update-remote-judge-account: ${FORCED_UPDATE_REMOTE_JUDGE_ACCOUNT:false}
 

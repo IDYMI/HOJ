@@ -28,6 +28,8 @@ const ExaminationList = () => import('@/views/admin/examination/ExaminationList'
 const Cloc = () => import('@/views/admin/cloc/Cloc');
 const HonorList = () => import('@/views/admin/honor/HonorList');
 const Honor = () => import('@/views/admin/honor/Honor');
+const ACMStaticRank = () => import('@/views/oj/rank/ACMContestStatistic');
+const ACMStaticRankList = () => import('@/views/oj/rank/ACMContestStatisticList');
 
 const adminRoutes = [
   {
@@ -81,13 +83,13 @@ const adminRoutes = [
         path: 'switch',
         name: 'admin-switch',
         component: SysSwitch,
-        meta: { requireSuperAdmin: true, title: 'System Switch' },
+        meta: { requireMainRoleAdmin: true, title: 'System Switch' },
       },
       {
         path: 'account',
         name: 'admin-account',
         component: AccountConfig,
-        meta: { requireSuperAdmin: true, title: 'Account Config' },
+        meta: { requireMainRoleAdmin: true, title: 'Account Config' },
       },
       {
         path: 'file',
@@ -262,6 +264,18 @@ const adminRoutes = [
         name: 'admin-edit-honor',
         component: Honor,
         meta: { requireMainRoleAdmin: true, title: 'Edit Honor' },
+      },
+      {
+        path: 'tools/ranks',
+        name: 'admin-ranks',
+        component: ACMStaticRank,
+        meta: { requireMainRoleAdmin: true, title: 'Ranks Admin', keepAlive: true },
+      },
+      {
+        path: 'tools/ranks-list',
+        name: 'admin-ranks-list',
+        component: ACMStaticRankList,
+        meta: { requireMainRoleAdmin: true, title: 'Ranks Admin' },
       },
     ],
   },

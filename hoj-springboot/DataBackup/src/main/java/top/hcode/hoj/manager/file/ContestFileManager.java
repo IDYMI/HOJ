@@ -1,5 +1,6 @@
 package top.hcode.hoj.manager.file;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
@@ -8,6 +9,9 @@ import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,24 +24,30 @@ import top.hcode.hoj.dao.contest.ContestEntityService;
 import top.hcode.hoj.dao.contest.ContestPrintEntityService;
 import top.hcode.hoj.dao.contest.ContestProblemEntityService;
 import top.hcode.hoj.dao.judge.JudgeEntityService;
+import top.hcode.hoj.dao.tools.StatisticContestEntityService;
+import top.hcode.hoj.dao.tools.StatisticRankEntityService;
 import top.hcode.hoj.dao.user.UserInfoEntityService;
 import top.hcode.hoj.manager.group.GroupManager;
 import top.hcode.hoj.manager.oj.ContestCalculateRankManager;
 import top.hcode.hoj.pojo.bo.File_;
+import top.hcode.hoj.pojo.dto.StatisticDTO;
 import top.hcode.hoj.manager.oj.ContestManager;
 import top.hcode.hoj.manager.oj.ContestRankManager;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.contest.ContestPrint;
 import top.hcode.hoj.pojo.entity.contest.ContestProblem;
+import top.hcode.hoj.pojo.entity.contest.StatisticContest;
+import top.hcode.hoj.pojo.entity.contest.StatisticRank;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.vo.ACMContestRankVO;
-import top.hcode.hoj.pojo.vo.ACMStatisticContestVO;
 import top.hcode.hoj.pojo.vo.OIContestRankVO;
+import top.hcode.hoj.pojo.vo.StatisticVO;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
 import top.hcode.hoj.validator.ContestValidator;
 import top.hcode.hoj.validator.GroupValidator;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
@@ -92,6 +102,12 @@ public class ContestFileManager {
 
     @Autowired
     private GroupManager groupManager;
+
+    @Resource
+    private StatisticRankEntityService statisticRankEntityService;
+
+    @Resource
+    private StatisticContestEntityService statisticContestEntityService;
 
     public void downloadContestRank(Long cid, Boolean forceRefresh, Boolean removeStar,
             Boolean isContainsAfterContestJudge,
@@ -165,51 +181,50 @@ public class ContestFileManager {
         }
     }
 
-    public void downloadStatisticRank(String cids, HttpServletResponse response)
-            throws IOException, StatusFailException, StatusForbiddenException {
+    public void downloadStatisticRank(String cids, String keyword, HttpServletResponse response)
+            throws IOException, StatusFailException, StatusForbiddenException, Exception {
+        List<ACMContestRankVO> result = new ArrayList<>();
 
-        // 获取当前登录的用户
-        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+        // 如果传入的是scid
+        StatisticContest statisticContest = statisticContestEntityService.getOne(
+                new QueryWrapper<StatisticContest>().eq("scid", cids), false);
 
-        List<Contest> contestList = new ArrayList<>();
+        if (statisticContest != null) {
+            List<StatisticRank> statisticRankList = statisticRankEntityService.list(
+                    new QueryWrapper<StatisticRank>().in("scid", statisticContest.getScid()));
 
-        List<Long> contest_cids = contestManager.getSplitedCid(cids);
+            // 转换 StatisticRank 为 ACMContestRankVO
+            result = (List<ACMContestRankVO>) statisticRankList.stream()
+                    .map(statisticRank -> {
+                        ACMContestRankVO acmContestRankVo = new ACMContestRankVO();
+                        BeanUtil.copyProperties(statisticContest, acmContestRankVo);
+                        BeanUtil.copyProperties(statisticRank, acmContestRankVo);
+                        try {
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            acmContestRankVo
+                                    .setSubmissionInfo(objectMapper.readValue(statisticRank.getJson(), HashMap.class));
+                        } catch (JsonProcessingException e) {
+                        }
+                        return acmContestRankVo;
+                    })
+                    .collect(Collectors.toList());
+        } else {
+            List<Contest> contestList = contestValidator.validateContestList(cids);
 
-        for (int i = 0; i < contest_cids.size(); i++) {
-            String input_cid = cids.split("\\+")[i];
-            Long cid = contest_cids.get(i);
-            if (cid == -1L) {
-                throw new StatusFailException("错误，请输入正确的 cid, 对应错误 cid: " + input_cid + "无效");
-            }
+            StatisticDTO statisticDto = new StatisticDTO()
+                    .setCids(cids);
 
-            Contest contest = contestEntityService.getById(cid);
-            if (contest == null) { // 查询不存在
-                throw new StatusFailException("错误：cid对应比赛不存在, 对应错误 cid: " + input_cid + "无效");
-            }
+            StatisticVO statisticVo = new StatisticVO()
+                    .setStatisticDTO(statisticDto)
+                    .setContestList(contestList);
 
-            Boolean isACM = (contest.getType().intValue() == Constants.Contest.TYPE_ACM.getCode());
-
-            if (!isACM) {
-                throw new StatusFailException("错误：cid对应比赛不为ACM类型, 对应错误 cid: " + input_cid + "无效");
-            }
-
-            boolean isRoot = groupManager.getGroupAuthAdmin(contest.getGid());
-
-            // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
-            contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
-
-            if (contest.getStatus().intValue() != Constants.Contest.STATUS_ENDED.getCode()) {
-                throw new StatusFailException("错误：cid对应比赛还未结束, 对应错误 cid: " + input_cid + "无效");
-            }
-
-            if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
-                throw new StatusForbiddenException("错误：您并非该比赛的管理员，对用cid：" + input_cid + "，无权下载榜单！");
-            }
-            contestList.add(contest);
+            result = contestRankManager.getStatisticRankList(statisticVo);
         }
 
-        List<ACMStatisticContestVO> acmStatisticContestRankVOList = contestRankManager.getStatisticRankList(contestList,
-                null);
+        cids = contestValidator.getStatisticRankCids(cids);
+        result = contestRankManager.getStatisticRankListByKeywordAndPercents(result, cids, null, keyword);
+
+        List<String> contest_cids = contestValidator.getSplitedCid(cids);
 
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");
@@ -220,11 +235,14 @@ public class ContestFileManager {
         response.setHeader("Content-disposition", "attachment;filename=" + fileName + ".xlsx");
         response.setHeader("Content-Type", "application/xlsx");
 
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("admin");
+
         EasyExcel.write(response.getOutputStream())
-                .head(fileEntityService.getStatisticRankExcelHead(contest_cids))
+                .head(fileEntityService.getStatisticRankExcelHead(contest_cids, isRoot))
                 .sheet("rank")
-                .doWrite(fileEntityService.changeStatisticContestRankToExcelRowList(acmStatisticContestRankVOList,
-                        contest_cids));
+                .doWrite(fileEntityService.changeStatisticContestRankToExcelRowList(result,
+                        contest_cids, isRoot));
     }
 
     private String encodeFileName(String fileName) throws UnsupportedEncodingException {

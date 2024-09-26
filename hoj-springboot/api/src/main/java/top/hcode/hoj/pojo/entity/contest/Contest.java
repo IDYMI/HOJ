@@ -42,6 +42,9 @@ public class Contest implements Serializable {
     @ApiModelProperty(value = "比赛标题")
     private String title;
 
+    @ApiModelProperty(value = "其他平台oj")
+    private String oj;
+
     @ApiModelProperty(value = "0为acm赛制，1为比分赛制")
     private Integer type;
 

@@ -57,6 +57,10 @@ public class SwitchConfig {
 
     private List<String> mossUsernameList = new ArrayList<>();
 
+    private List<String> vjUsernameList = new ArrayList<>();
+
+    private List<String> vjPasswordList = new ArrayList<>();
+
     /**
      * SCPC 超管账号
      */
@@ -159,6 +163,8 @@ public class SwitchConfig {
         this.setNewojUsernameList(format2Unicode(this.newojUsernameList));
         this.setNewojPasswordList(format2Unicode(this.newojPasswordList));
         this.setMossUsernameList(format2Unicode(this.mossUsernameList));
+        this.setVjUsernameList(format2Unicode(this.vjUsernameList));
+        this.setVjPasswordList(format2Unicode(this.vjPasswordList));
     }
 
     public void convertUnicodeRemoteAccount2Str() {
@@ -183,6 +189,8 @@ public class SwitchConfig {
         this.setNewojUsernameList(convertUnicode2Str(this.newojUsernameList));
         this.setNewojPasswordList(convertUnicode2Str(this.newojPasswordList));
         this.setMossUsernameList(convertUnicode2Str(this.mossUsernameList));
+        this.setVjUsernameList(convertUnicode2Str(this.vjUsernameList));
+        this.setVjPasswordList(convertUnicode2Str(this.vjPasswordList));
     }
 
     private List<String> format2Unicode(List<String> strList) {

@@ -14,12 +14,14 @@ import org.springframework.util.StringUtils;
 import top.hcode.hoj.dao.contest.ContestRecordEntityService;
 import top.hcode.hoj.dao.group.GroupMemberEntityService;
 import top.hcode.hoj.dao.user.UserInfoEntityService;
+import top.hcode.hoj.pojo.bo.Pair_;
+import top.hcode.hoj.pojo.dto.StatisticDTO;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.group.GroupMember;
 import top.hcode.hoj.pojo.vo.ACMContestRankVO;
-import top.hcode.hoj.pojo.vo.ACMStatisticContestVO;
 import top.hcode.hoj.pojo.vo.ContestAwardConfigVO;
 import top.hcode.hoj.pojo.vo.ContestRecordVO;
+import top.hcode.hoj.pojo.vo.StatisticVO;
 import top.hcode.hoj.pojo.vo.OIContestRankVO;
 import top.hcode.hoj.shiro.AccountProfile;
 import top.hcode.hoj.utils.Constants;
@@ -29,6 +31,7 @@ import javax.annotation.Resource;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -50,6 +53,9 @@ public class ContestCalculateRankManager {
 
     @Resource
     private SynchronousManager synchronousManager;
+
+    @Resource
+    private ScraperManager scraperManager;
 
     @Autowired
     private GroupMemberEntityService groupMemberEntityService;
@@ -428,115 +434,152 @@ public class ContestCalculateRankManager {
                 needAddConcernedUser);
     }
 
-    public List<ACMStatisticContestVO> calcStatisticRank(List<Contest> contestList) {
+    public List<ACMContestRankVO> calcStatisticRank(StatisticVO statisticVo) throws Exception {
+        List<Contest> contestList = statisticVo.getContestList();
+        List<Pair_<String, String>> accountList = statisticVo.getAccountList();
 
-        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+        StatisticDTO statisticDto = statisticVo.getStatisticDTO();
+        Map<String, String> data = statisticDto.getData();
+        String keyword = statisticDto.getKeyword();
+        String captcha = statisticDto.getCaptcha();
 
         HashMap<String, Integer> uidMapIndex = new HashMap<>();
+        HashMap<String, Boolean> uidOjMapIndex = new HashMap<>();
 
-        List<ACMStatisticContestVO> resultList = new ArrayList<>();
+        List<ACMContestRankVO> resultList = new ArrayList<>();
 
-        int index = 0;
+        AtomicInteger index = new AtomicInteger(0);
 
-        for (int i = 0; i < contestList.size(); i++) {
-            Contest contest = contestList.get(i);
+        Map<String, String> usernameToUidMap = new HashMap<>();
 
-            // 进行排序计算得到用户的排名
-            List<ACMContestRankVO> orderResultList = calcACMRank(
-                    false,
-                    true,
-                    contest,
-                    userRolesVo.getUid(),
-                    null,
-                    null,
-                    false,
-                    null);
+        try {
+            contestList.parallelStream().forEach(contest -> {
+                List<ACMContestRankVO> orderResultList = new ArrayList<>();
 
-            // 将ACMContestRankVO 转化为 ACMStatisticContestVO
-            if (orderResultList.size() > 0) {
+                if (!contest.getOj().equals("default")) {
+                    Pair_<String, String> account = accountList.get(contestList.indexOf(contest));
 
-                for (int j = 0; j < orderResultList.size(); j++) {
-                    ACMStatisticContestVO ACMStatisticContestVo;
+                    try {
+                        orderResultList = scraperManager.getScraperInfo(contest.getTitle(), keyword, contest.getOj(),
+                                account.getKey(), account.getValue(), captcha, usernameToUidMap);
 
-                    if (!uidMapIndex.containsKey(orderResultList.get(j).getUid())) { // 如果该用户信息没还记录
-                        // 初始化参数
-                        ACMStatisticContestVo = new ACMStatisticContestVO();
-                        ACMStatisticContestVo.setRealname(orderResultList.get(j).getRealname())
-                                .setAvatar(orderResultList.get(j).getAvatar())
-                                .setSchool(orderResultList.get(j).getSchool())
-                                .setGender(orderResultList.get(j).getGender())
-                                .setUid(orderResultList.get(j).getUid())
-                                .setUsername(orderResultList.get(j).getUsername())
-                                .setNickname(orderResultList.get(j).getNickname())
-                                .setAc(0)
-                                .setTotalTime(0L)
-                                .setTotal(0);
-
-                        HashMap<String, HashMap<String, Object>> contestInfo = new HashMap<>();
-
-                        ACMStatisticContestVo.setContestInfo(contestInfo);
-
-                        resultList.add(ACMStatisticContestVo);
-                        uidMapIndex.put(orderResultList.get(j).getUid(), index);
-                        index++;
-                    } else {
-                        ACMStatisticContestVo = resultList.get(uidMapIndex.get(orderResultList.get(j).getUid())); // 根据记录的index进行获取
+                    } catch (Exception e) {
+                        // 将异常封装为 RuntimeException 以便抛出
+                        throw new RuntimeException(e);
                     }
-
-                    // 将该场比赛的总AC计入
-                    ACMStatisticContestVo.setAc(ACMStatisticContestVo.getAc() + orderResultList.get(j).getAc());
-                    // 将该场比赛的总罚时计入
-                    ACMStatisticContestVo
-                            .setTotalTime(ACMStatisticContestVo.getTotalTime() + orderResultList.get(j).getTotalTime());
-                    // 将该场比赛的总提交数计入
-                    ACMStatisticContestVo
-                            .setTotal(ACMStatisticContestVo.getTotal() + orderResultList.get(j).getTotal());
-
-                    HashMap<String, Object> contestInfo = ACMStatisticContestVo.getContestInfo()
-                            .get(contest.getId().toString());
-
-                    if (contestInfo == null) {
-                        contestInfo = new HashMap<>();
-                        contestInfo.put("title", contest.getTitle());
-                        contestInfo.put("AC", orderResultList.get(j).getAc());
-                        contestInfo.put("TotalTime", orderResultList.get(j).getTotalTime());
-                    }
-
-                    // 计入比赛信息
-                    ACMStatisticContestVo.getContestInfo().put(contest.getId().toString(), contestInfo);
-                }
-            }
-        }
-
-        // 重新排序
-        List<ACMStatisticContestVO> result = resultList.stream()
-                .sorted(Comparator.comparing(ACMStatisticContestVO::getAc, Comparator.reverseOrder()) // 先以总ac数降序
-                        .thenComparing(ACMStatisticContestVO::getTotalTime) // 再以总耗时升序
-                ).collect(Collectors.toList());
-
-        int rankNum = 1;
-        int len = result.size();
-        ACMStatisticContestVO lastACMRankVo = null;
-
-        // 设置每个人的排名
-        for (int i = 0; i < len; i++) {
-            ACMStatisticContestVO ACMStatisticContestVo = result.get(i);
-
-            if (rankNum == 1) {
-                ACMStatisticContestVo.setRank(rankNum);
-            } else {
-                // 当前用户的总罚时和AC数跟前一个用户一样的话，同时前一个不应该为打星，排名则一样
-                if (Objects.equals(lastACMRankVo.getAc(), ACMStatisticContestVo.getAc())
-                        && lastACMRankVo.getTotalTime().equals(ACMStatisticContestVo.getTotalTime())) {
-                    ACMStatisticContestVo.setRank(lastACMRankVo.getRank());
                 } else {
-                    ACMStatisticContestVo.setRank(rankNum);
+                    // 进行排序计算得到用户的排名
+                    orderResultList = calcACMRank(
+                            false,
+                            true,
+                            contest,
+                            null,
+                            null,
+                            null,
+                            false,
+                            null);
                 }
+
+                if (orderResultList.size() > 0) {
+                    orderResultList.forEach(orderResult -> {
+                        ACMContestRankVO ACMContestRankVO;
+
+                        synchronized (uidMapIndex) {
+                            String username = orderResult.getUsername();
+                            String realname = getValueForKey(data, username, orderResult.getRealname());
+                            orderResult.setRealname(realname);
+
+                            String key = StringUtils.isEmpty(realname) ? orderResult.getUid()
+                                    : orderResult.getRealname();
+
+                            if (!uidMapIndex.containsKey(key)) { // 如果用户信息还没有记录，初始化参数
+                                ACMContestRankVO = new ACMContestRankVO()
+                                        .setRealname(orderResult.getRealname())
+                                        .setAvatar(orderResult.getAvatar())
+                                        .setSchool(orderResult.getSchool())
+                                        .setGender(orderResult.getGender())
+                                        .setUid(orderResult.getUid())
+                                        .setUsername("")
+                                        .setNickname(orderResult.getNickname())
+                                        .setAc(0.0)
+                                        .setTotalTime(0.0)
+                                        .setTotal(0)
+                                        .setCid(orderResult.getCid())
+                                        .setTitle(orderResult.getTitle())
+                                        .setStartTime(orderResult.getStartTime())
+                                        .setLink(orderResult.getLink())
+                                        .setSynchronous(
+                                                orderResult.getSynchronous() != null ? orderResult.getSynchronous()
+                                                        : false)
+                                        .setSubmissionInfo(new HashMap<>());
+
+                                synchronized (resultList) {
+                                    resultList.add(ACMContestRankVO);
+                                }
+
+                                uidMapIndex.put(key, index.getAndIncrement());
+                            } else {
+                                ACMContestRankVO = resultList.get(uidMapIndex.get(key));
+                            }
+
+                            String cid_username = contest.getOj().equals("default") ? orderResult.getUsername()
+                                    : (contest.getOj() + ": " + orderResult.getUsername()) + " \n";
+
+                            if (!uidOjMapIndex.containsKey(cid_username)) {
+                                ACMContestRankVO.setUsername(ACMContestRankVO.getUsername() + cid_username);
+                                uidOjMapIndex.put(cid_username, true);
+                            }
+                        }
+
+                        synchronized (ACMContestRankVO) {
+                            // 将该场比赛的总AC计入
+                            ACMContestRankVO.setAc(ACMContestRankVO.getAc() + orderResult.getAc());
+                            // 将该场比赛的总罚时计入
+                            ACMContestRankVO.setTotalTime(ACMContestRankVO.getTotalTime() + orderResult.getTotalTime());
+
+                            if (orderResult.getTotal() != null) {
+                                // 将该场比赛的总提交数计入
+                                ACMContestRankVO.setTotal(ACMContestRankVO.getTotal() + orderResult.getTotal());
+                            }
+
+                            String contestKey = (!"default".equals(contest.getOj()) ? contest.getOj() : "")
+                                    + contest.getTitle().toString();
+
+                            HashMap<String, Object> submissionInfo = ACMContestRankVO.getSubmissionInfo()
+                                    .get(contestKey);
+
+                            if (submissionInfo == null) {
+                                submissionInfo = new HashMap<>();
+                                submissionInfo.put("title", contest.getTitle());
+                                submissionInfo.put("ac", orderResult.getAc());
+                                submissionInfo.put("totalTime", orderResult.getTotalTime());
+                                submissionInfo.put("link", orderResult.getLink());
+                                submissionInfo.put("startTime", orderResult.getStartTime());
+                                submissionInfo.put("title", orderResult.getTitle());
+                                submissionInfo.put("synchronous", orderResult.getSynchronous());
+                            }
+
+                            // 根据条件选择 key 并计入比赛信息
+                            ACMContestRankVO.getSubmissionInfo().put(
+                                    ("default".equals(contest.getOj()) ? contest.getId().toString()
+                                            : contest.getOj() + contest.getTitle().toString()),
+                                    submissionInfo);
+                        }
+                    });
+                }
+            });
+
+        } catch (RuntimeException e) {
+            // 如果并行流中抛出 RuntimeException，将其解包并重新抛出原始异常
+            Throwable cause = e.getCause();
+            if (cause instanceof Exception) {
+                throw (Exception) cause;
+            } else {
+                throw e; // 不应该到达这里
             }
-            lastACMRankVo = ACMStatisticContestVo;
-            rankNum++;
         }
-        return result;
+
+        return getSortedACMContestRankVoList(resultList);
     }
 
     private List<ACMContestRankVO> getACMOrderRank(Contest contest,
@@ -602,8 +645,8 @@ public class ContestCalculateRankManager {
                         .setUid(contestRecord.getUid())
                         .setUsername(contestRecord.getUsername())
                         .setNickname(contestRecord.getNickname())
-                        .setAc(0)
-                        .setTotalTime(0L)
+                        .setAc(0.0)
+                        .setTotalTime(0.0)
                         .setTotal(0);
 
                 HashMap<String, HashMap<String, Object>> submissionInfo = new HashMap<>();
@@ -1026,6 +1069,39 @@ public class ContestCalculateRankManager {
         return superAdminUidList;
     }
 
+    public List<ACMContestRankVO> getSortedACMContestRankVoList(List<ACMContestRankVO> resultList) {
+        // 重新排序
+        List<ACMContestRankVO> result = resultList.stream()
+                .sorted(Comparator.comparing(ACMContestRankVO::getAc, Comparator.reverseOrder()) // 先以总ac数降序
+                        .thenComparing(ACMContestRankVO::getTotalTime) // 再以总耗时升序
+                ).collect(Collectors.toList());
+
+        int rankNum = 1;
+        int len = result.size();
+        ACMContestRankVO lastACMRankVo = null;
+
+        // 设置每个人的排名
+        for (int i = 0; i < len; i++) {
+            ACMContestRankVO ACMContestRankVO = result.get(i);
+
+            if (rankNum == 1) {
+                ACMContestRankVO.setRank(rankNum);
+            } else {
+                // 当前用户的总罚时和AC数跟前一个用户一样的话，同时前一个不应该为打星，排名则一样
+                if (Objects.equals(lastACMRankVo.getAc(), ACMContestRankVO.getAc())
+                        && lastACMRankVo.getTotalTime().equals(ACMContestRankVO.getTotalTime())) {
+                    ACMContestRankVO.setRank(lastACMRankVo.getRank());
+                } else {
+                    ACMContestRankVO.setRank(rankNum);
+                }
+            }
+            lastACMRankVo = ACMContestRankVO;
+            rankNum++;
+        }
+
+        return result;
+    }
+
     private boolean isInSealTimeSubmission(Long minSealRankTime, Long maxSealRankTime, Long time) {
         return time >= minSealRankTime && time < maxSealRankTime;
     }
@@ -1101,7 +1177,7 @@ public class ContestCalculateRankManager {
         int rankNum = 1;
 
         int schoolRankNum = 1;
-        HashMap<String, Long> firstSchoolTotalMap = new HashMap<>();
+        HashMap<String, Double> firstSchoolTotalMap = new HashMap<>();
         HashMap<String, Integer> firstSchoolRankMap = new HashMap<>();
 
         int len = result.size();
@@ -1118,7 +1194,7 @@ public class ContestCalculateRankManager {
                     currentACMRankVo.setRank(rankNum);
                     // 判断是不是学校的first AC
                     if (!StringUtils.isEmpty(currentACMRankVo.getSchool())) {
-                        firstSchoolTotalMap.put(currentACMRankVo.getSchool(), currentACMRankVo.getTotalTime());
+                        firstSchoolTotalMap.put(currentACMRankVo.getSchool(), (double) currentACMRankVo.getTotalTime());
                         firstSchoolRankMap.put(currentACMRankVo.getSchool(), schoolRankNum);
                         currentACMRankVo.setSchoolRank(schoolRankNum);
                         schoolRankNum++;
@@ -1133,7 +1209,7 @@ public class ContestCalculateRankManager {
                         if (!StringUtils.isEmpty(lastACMRankVo.getSchool())
                                 && firstSchoolRankMap.getOrDefault(currentACMRankVo.getSchool(), null) == null) {
                             Integer rank = firstSchoolRankMap.getOrDefault(lastACMRankVo.getSchool(), null);
-                            Long schoolTime = firstSchoolTotalMap.getOrDefault(lastACMRankVo.getSchool(), null);
+                            Double schoolTime = firstSchoolTotalMap.getOrDefault(lastACMRankVo.getSchool(), null);
                             firstSchoolTotalMap.put(currentACMRankVo.getSchool(), schoolTime);
                             firstSchoolRankMap.put(currentACMRankVo.getSchool(), rank);
                             currentACMRankVo.setSchoolRank(rank);
@@ -1142,7 +1218,7 @@ public class ContestCalculateRankManager {
                         currentACMRankVo.setRank(rankNum);
                         // 判断是不是学校的first AC
                         if (!StringUtils.isEmpty(currentACMRankVo.getSchool())) {
-                            Long schoolTime = firstSchoolTotalMap.getOrDefault(currentACMRankVo.getSchool(), null);
+                            Double schoolTime = firstSchoolTotalMap.getOrDefault(currentACMRankVo.getSchool(), null);
                             if (schoolTime == null) {
                                 firstSchoolTotalMap.put(currentACMRankVo.getSchool(), currentACMRankVo.getTotalTime());
                                 firstSchoolRankMap.put(currentACMRankVo.getSchool(), schoolRankNum);
@@ -1250,4 +1326,20 @@ public class ContestCalculateRankManager {
             return 0L;
         }
     }
+
+    public String getValueForKey(Map<String, String> data, String username, String realname) {
+        if (CollectionUtils.isEmpty(data)) {
+            return realname;
+        }
+
+        // 遍历 data 的 entrySet
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            String mapKey = entry.getKey().trim();
+            if (mapKey.equals(username)) {
+                return entry.getValue();
+            }
+        }
+        return realname; // 如果找不到对应的 key
+    }
+
 }

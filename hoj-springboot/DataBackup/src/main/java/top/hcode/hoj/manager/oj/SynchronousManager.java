@@ -521,9 +521,9 @@ public class SynchronousManager {
                 .setSchool(record.getStr("school"))
                 .setGender(record.getStr("gender"))
                 .setAvatar(record.getStr("avatar"))
-                .setTotalTime(record.getLong("totalTime"))
+                .setTotalTime((double) record.getLong("totalTime"))
                 .setTotal(record.getInt("total"))
-                .setAc(record.getInt("ac"));
+                .setAc((double) record.getInt("ac"));
         JSONObject submissionInfo = record.getJSONObject("submissionInfo");
         HashMap<String, HashMap<String, Object>> submissionInfoMap = new HashMap<>();
         for (String key : submissionInfo.keySet()) {

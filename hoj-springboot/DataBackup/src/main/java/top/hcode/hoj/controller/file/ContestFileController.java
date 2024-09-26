@@ -6,6 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import top.hcode.hoj.annotation.AnonApi;
 import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.common.exception.StatusForbiddenException;
 import top.hcode.hoj.service.file.ContestFileService;
@@ -36,10 +38,12 @@ public class ContestFileController {
     }
 
     @GetMapping("/download-statistic-rank")
-    @RequiresAuthentication
-    public void downloadStatisticRank(@RequestParam("cids") String cids, HttpServletResponse response)
-            throws StatusFailException, IOException, StatusForbiddenException {
-        contestFileService.downloadStatisticRank(cids, response);
+    @AnonApi
+    public void downloadStatisticRank(
+            @RequestParam(value = "cids", required = true) String cids,
+            @RequestParam(value = "keyword", required = false) String keyword, HttpServletResponse response)
+            throws StatusFailException, IOException, StatusForbiddenException, Exception {
+        contestFileService.downloadStatisticRank(cids, keyword, response);
     }
 
     @GetMapping("/download-contest-ac-submission")

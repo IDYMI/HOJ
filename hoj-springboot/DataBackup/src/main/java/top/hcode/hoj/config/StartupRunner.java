@@ -206,6 +206,12 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${moss-username-list}")
     private List<String> mossUsernameList;
 
+    @Value("${vj-username-list}")
+    private List<String> vjUsernameList;
+
+    @Value("${vj-password-list}")
+    private List<String> vjPasswordList;
+
     @Value("${forced-update-remote-judge-account}")
     private Boolean forcedUpdateRemoteJudgeAccount;
 
@@ -463,6 +469,20 @@ public class StartupRunner implements CommandLineRunner {
             isChanged = true;
         }
 
+        if ((CollectionUtils.isEmpty(switchConfig.getVjUsernameList())
+                && !CollectionUtils.isEmpty(vjUsernameList))
+                || forcedUpdateRemoteJudgeAccount) {
+            switchConfig.setSpojUsernameList(vjUsernameList);
+            isChanged = true;
+        }
+
+        if ((CollectionUtils.isEmpty(switchConfig.getVjPasswordList())
+                && !CollectionUtils.isEmpty(vjPasswordList))
+                || forcedUpdateRemoteJudgeAccount) {
+            switchConfig.setSpojPasswordList(vjPasswordList);
+            isChanged = true;
+        }
+
         if (isChanged) {
             nacosSwitchConfig.publishWebConfig();
         }
@@ -503,6 +523,9 @@ public class StartupRunner implements CommandLineRunner {
             addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.MOSS.getName(),
                     switchConfig.getMossUsernameList(),
                     null);
+            addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.VJ.getName(),
+                    switchConfig.getVjUsernameList(),
+                    switchConfig.getVjPasswordList());
             checkRemoteOJLanguage(Constants.RemoteOJ.SPOJ, Constants.RemoteOJ.ATCODER);
         }
     }

@@ -13,6 +13,7 @@ import OIRank from '@/views/oj/rank/OIRank.vue';
 import OJRank from '@/views/oj/rank/OJRank.vue';
 import CODERank from '@/views/oj/rank/CODERank.vue';
 import ACMStaticRank from '@/views/oj/rank/ACMContestStatistic.vue';
+import ACMContestStatisticList from '@/views/oj/rank/ACMContestStatisticList.vue';
 import ContestDetails from '@/views/oj/contest/ContestDetails.vue';
 import ACMScoreBoard from '@/views/oj/contest/outside/ACMScoreBoard.vue';
 import OIScoreBoard from '@/views/oj/contest/outside/OIScoreBoard.vue';
@@ -317,6 +318,14 @@ const ojRoutes = [
     name: 'CODE Rank',
     component: CODERank,
     meta: { title: 'CODE Rank' },
+  },
+  {
+    path: '/acm-rank-static',
+    name: 'ACM Static Rank List',
+    component: ACMContestStatisticList,
+    meta: {
+      title: 'ACM Static Rank List',
+    },
   },
   {
     path: '/acm-rank-static/:cids',

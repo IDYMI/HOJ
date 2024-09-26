@@ -513,6 +513,7 @@ export const m = {
   Unfollow: '取消关注',
   Top_And_Follow: '置顶关注',
   Contest_Rank_Search_Placeholder: '请输入用户名称 / 学校名称',
+  Enter_Contest_Percents: '输入比赛之间的比例',
   Contest_Rank_Setting: '榜单设置',
   Contest_Setting: '比赛设置',
   Contains_After_Contest: '包含赛后',

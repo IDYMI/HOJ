@@ -93,7 +93,8 @@ public class Constants {
         QOJ("QOJ"),
         NSWOJ("NSWOJ"),
         NEWOJ("NEWOJ"),
-        MOSS("MOSS");
+        MOSS("MOSS"),
+        VJ("VJ");
 
         private final String name;
 
@@ -244,6 +245,9 @@ public class Constants {
         OJ_RANK_CACHE("oj_rank_cache"),
         NEW_OJ_RANK_CACHE("new_oj_rank_cache"),
 
+        STATISTIC_RANK_DIR("statistic_rank_dir"),
+        STATISTIC_RANK_TITLE("statistic_rank_title"),
+        STATISTIC_RANK_CACHE("statistic_rank_cache"),
         CODE_RANK_CACHE("code_rank_cache"),
 
         GROUP_RANK_CACHE("group_rank_cache"),
@@ -258,6 +262,10 @@ public class Constants {
         CONTEST_ADD_PRINT_LOCK("contest_add_print_lock:"),
         CONTEST_INVENT_LOCK("contest_invent_lock:"),
         CONTEST_SIGN_LOCK("contest_sign_lock:"),
+
+        VJ_LOGIN_COOKIES("vj-login-cookies:"),
+        VJ_LOGIN_TIME("vj-login-time:"),
+        VJ_CAPTCHA_UID("vj-captcha-uid:"),
 
         REMOTE_JUDGE_CF_ACCOUNT_NUM("remote_judge_cf_account:");
 
@@ -310,6 +318,8 @@ public class Constants {
         FILE_DOWNLOAD_TMP_FOLDER("/hoj/file/zip/download"),
 
         CONTEST_AC_SUBMISSION_TMP_FOLDER("/hoj/file/zip/contest_ac"),
+
+        CAPTCHA_FOLDER("/hoj/file/captcha"),
 
         CODE_FOLDER("/hoj/file/code");
 

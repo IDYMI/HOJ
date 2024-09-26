@@ -513,6 +513,7 @@ export const m = {
   Unfollow: 'Unfollow',
   Top_And_Follow: 'Top And Follow',
   Contest_Rank_Search_Placeholder: 'Please enter the user rank name or school name',
+  Enter_Contest_Percents: 'Enter Contest Percents',
   Contest_Rank_Setting: 'Rank Setting',
   Contest_Setting: 'Contest Setting',
   Contains_After_Contest: 'Contains After Contest',

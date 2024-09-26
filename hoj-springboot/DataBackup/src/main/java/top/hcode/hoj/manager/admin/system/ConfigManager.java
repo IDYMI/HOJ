@@ -576,6 +576,15 @@ public class ConfigManager {
                     Constants.RemoteOJ.NEWOJ.getName());
         }
 
+        if (checkListDiff(config.getVjUsernameList(), switchConfig.getVjUsernameList()) ||
+                checkListDiff(config.getVjPasswordList(), switchConfig.getVjPasswordList())) {
+            switchConfig.setVjUsernameList(config.getVjUsernameList());
+            switchConfig.setVjPasswordList(config.getVjPasswordList());
+            changeRemoteJudgeAccount(config.getVjUsernameList(),
+                    config.getVjPasswordList(),
+                    Constants.RemoteOJ.VJ.getName());
+        }
+
         boolean isOk = nacosSwitchConfig.publishSwitchConfig();
         if (!isOk) {
             throw new StatusFailException("修改失败");

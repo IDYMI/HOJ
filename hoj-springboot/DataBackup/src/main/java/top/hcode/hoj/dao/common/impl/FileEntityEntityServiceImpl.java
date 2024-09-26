@@ -7,7 +7,6 @@ import top.hcode.hoj.mapper.FileMapper;
 import top.hcode.hoj.pojo.entity.common.File;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.vo.ACMContestRankVO;
-import top.hcode.hoj.pojo.vo.ACMStatisticContestVO;
 import top.hcode.hoj.pojo.vo.OIContestRankVO;
 import top.hcode.hoj.dao.common.FileEntityService;
 import top.hcode.hoj.dao.contest.ContestEntityService;
@@ -111,7 +110,7 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
     }
 
     @Override
-    public List<List<String>> getStatisticRankExcelHead(List<Long> cidList) {
+    public List<List<String>> getStatisticRankExcelHead(List<String> cidList, Boolean isRoot) {
         List<List<String>> headList = new LinkedList<>();
 
         List<String> head0 = new LinkedList<>();
@@ -124,6 +123,13 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
 
         headList.add(head0);
         headList.add(head1);
+
+        if (isRoot) {
+            List<String> head5 = new LinkedList<>();
+            head5.add("Realname");
+            headList.add(head5);
+        }
+
         headList.add(head2);
 
         List<String> head3 = new LinkedList<>();
@@ -134,10 +140,10 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
         headList.add(head4);
 
         // 添加题目头
-        for (Long cid : cidList) {
+        for (String cid : cidList) {
             List<String> tmp = new LinkedList<>();
             Contest contest = contestEntityService.getById(cid);
-            tmp.add(String.valueOf(cid + "\n" + contest.getTitle()));
+            tmp.add(contest != null ? cid + ":" + contest.getTitle() : cid);
             headList.add(tmp);
         }
 
@@ -241,22 +247,25 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
 
     @Override
     public List<List<Object>> changeStatisticContestRankToExcelRowList(
-            List<ACMStatisticContestVO> acmStatisticContestRankVOList,
-            List<Long> cidList) {
+            List<ACMContestRankVO> acmStatisticContestRankVOList,
+            List<String> cidList, Boolean isRoot) {
         List<List<Object>> allRowDataList = new LinkedList<>();
-        for (ACMStatisticContestVO acmContestRankVo : acmStatisticContestRankVOList) {
+        for (ACMContestRankVO acmContestRankVo : acmStatisticContestRankVOList) {
             List<Object> rowData = new LinkedList<>();
             rowData.add(acmContestRankVo.getRank() == -1 ? "*" : acmContestRankVo.getRank().toString());
             rowData.add(acmContestRankVo.getUsername());
-
+            if (isRoot) {
+                rowData.add(acmContestRankVo.getRealname());
+            }
             rowData.add(acmContestRankVo.getSchool());
             rowData.add(acmContestRankVo.getAc());
             rowData.add(acmContestRankVo.getTotalTime());
-            HashMap<String, HashMap<String, Object>> contestInfos = acmContestRankVo.getContestInfo();
-            for (Long cid : cidList) {
-                HashMap<String, Object> contestInfo = contestInfos.getOrDefault(String.valueOf(cid), null);
+            HashMap<String, HashMap<String, Object>> contestInfos = acmContestRankVo.getSubmissionInfo();
+
+            for (String cid : cidList) {
+                HashMap<String, Object> contestInfo = contestInfos.getOrDefault(cid, null);
                 if (contestInfo != null) {
-                    String info = String.valueOf(contestInfo.getOrDefault("AC", false));
+                    String info = String.valueOf(contestInfo.getOrDefault("ac", 0));
                     rowData.add(info);
                 } else {
                     rowData.add("");
